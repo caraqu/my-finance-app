@@ -1,0 +1,4 @@
+flask
+flask-cors
+plaid-python
+gunicorn

@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💰 我的记账本</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary:   #6C63FF;
+  --mine:      #34C759;
+  --shared:    #FF9F0A;
+  --danger:    #FF3B30;
+  --bg:        #F2F2F7;
+  --card:      #FFFFFF;
+  --text:      #1C1C1E;
+  --text2:     #6C6C70;
+  --border:    #E5E5EA;
+  --shadow:    0 4px 24px rgba(108,99,255,0.10);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══ HEADER ════════════════════════════════════════════ */
+.header {
+  background: var(--primary);
+  color: #fff;
+  padding: 52px 20px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+.sync-btn {
+  background: rgba(255,255,255,0.18);
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background .15s;
+}
+.sync-btn:active { background: rgba(255,255,255,0.28); }
+
+/* ══ TAB BAR ════════════════════════════════════════════ */
+.tabs {
+  display: flex;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 1px 0 var(--border);
+}
+.tab {
+  flex: 1;
+  padding: 14px 4px 12px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  border-bottom: 2.5px solid transparent;
+  transition: all .15s;
+  user-select: none;
+}
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+/* ══ TAB CONTENT ════════════════════════════════════════ */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ══ SWIPE TAB ══════════════════════════════════════════ */
+.swipe-tab {
+  padding: 24px 20px 100px;
+  min-height: calc(100vh - 110px);
+}
+
+.swipe-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.label-shared { color: var(--shared); }
+.label-mine   { color: var(--mine); }
+
+/* Card stack */
+.card-stack {
+  position: relative;
+  height: 260px;
+  margin-bottom: 24px;
+}
+
+.txn-card {
+  position: absolute;
+  inset: 0;
+  background: var(--card);
+  border-radius: 22px;
+  padding: 26px 22px;
+  box-shadow: var(--shadow);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  will-change: transform;
+  transform-origin: center 110%;
+}
+.txn-card:active { cursor: grabbing; }
+
+/* stack peek */
+.txn-card.back1 { transform: scale(0.95) translateY(10px); z-index: 0; }
+.txn-card.back2 { transform: scale(0.90) translateY(20px); z-index: -1; }
+.txn-card.front { z-index: 2; }
+
+/* swipe overlay labels */
+.swipe-label {
+  position: absolute;
+  top: 22px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  opacity: 0;
+  pointer-events: none;
+  border: 2.5px solid;
+  transition: opacity .05s;
+}
+.swipe-label.left  { right: 18px; color: var(--shared); border-color: var(--shared); background: rgba(255,159,10,.08); }
+.swipe-label.right { left:  18px; color: var(--mine);   border-color: var(--mine);   background: rgba(52,199,89,.08); }
+
+.card-merchant { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+.card-amount   { font-size: 38px; font-weight: 800; color: var(--primary); margin-bottom: 14px; letter-spacing: -1px; }
+.card-tags     { display: flex; flex-wrap: wrap; gap: 6px; }
+.card-tag      { background: var(--bg); padding: 4px 10px; border-radius: 8px; font-size: 12px; color: var(--text2); }
+
+/* Action buttons */
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.action-btn {
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 3px 12px rgba(0,0,0,.12);
+}
+.action-btn:active { transform: scale(.92) !important; }
+.btn-shared { width: 64px; height: 64px; background: #FFF3E0; }
+.btn-skip   { width: 52px; height: 52px; background: #F5F5F5; font-size: 22px; }
+.btn-mine   { width: 64px; height: 64px; background: #E8F5E9; }
+.action-btn:hover { transform: scale(1.07); box-shadow: 0 6px 20px rgba(0,0,0,.18); }
+
+/* remaining counter */
+.remaining {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 16px;
+}
+
+/* empty state */
+.empty-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px 20px;
+  text-align: center;
+}
+.empty-state .big-emoji { font-size: 72px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.empty-state p  { font-size: 14px; color: var(--text2); line-height: 1.5; }
+
+/* ══ CATEGORY MODAL ═════════════════════════════════════ */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 50;
+  justify-content: flex-end;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+}
+.overlay.show { display: flex; }
+
+.cat-sheet {
+  background: var(--card);
+  border-radius: 26px 26px 0 0;
+  padding: 22px 20px 36px;
+  animation: slideUp .28s cubic-bezier(.32,0,.67,0) forwards;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.sheet-handle {
+  width: 38px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 18px;
+}
+.sheet-title    { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.sheet-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.cat-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 4px;
+  border-radius: 16px;
+  border: 2px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.cat-btn .em  { font-size: 24px; }
+.cat-btn .nm  { font-size: 11px; color: var(--text2); font-weight: 500; }
+.cat-btn.sel  { border-color: var(--primary); background: rgba(108,99,255,.06); }
+.cat-btn.sel .nm { color: var(--primary); font-weight: 700; }
+.cat-btn.auto-suggested { border-color: var(--shared); background: rgba(255,159,10,.06); position: relative; }
+.cat-btn.auto-suggested::after {
+  content: '🤖';
+  position: absolute;
+  top: -7px; right: -7px;
+  font-size: 13px;
+  background: white;
+  border-radius: 50%;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,.15);
+}
+.cat-btn.auto-suggested.sel { border-color: var(--primary); background: rgba(108,99,255,.06); }
+.auto-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,159,10,.12);
+  color: #B25000;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.confirm-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.confirm-btn:active { opacity: .85; }
+.confirm-btn:disabled { background: var(--border); color: var(--text2); cursor: default; }
+
+/* ══ REPORT TAB ═════════════════════════════════════════ */
+.report-tab { padding: 20px 16px 100px; }
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.mnav-btn {
+  background: var(--card);
+  border: none;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+}
+.month-label { font-size: 17px; font-weight: 700; min-width: 130px; text-align: center; }
+
+/* Summary cards */
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.sum-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.06);
+}
+.sum-card.hero {
+  grid-column: 1 / -1;
+  background: var(--primary);
+  color: #fff;
+}
+.sum-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+.sum-card.hero .sum-label { color: rgba(255,255,255,.75); }
+.sum-value { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+.sum-card.hero .sum-value { color: #fff; font-size: 34px; }
+
+/* Category breakdown list */
+.breakdown-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.06);
+  margin-bottom: 16px;
+}
+.breakdown-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+.brow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.brow:last-child { border-bottom: none; }
+.brow-left  { display: flex; align-items: center; gap: 10px; }
+.brow-emoji { font-size: 22px; }
+.brow-name  { font-size: 14px; font-weight: 600; }
+.brow-right { text-align: right; }
+.brow-amount { font-size: 15px; font-weight: 700; }
+.brow-sub    { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+.report-footer { text-align: center; font-size: 12px; color: var(--text2); padding: 8px 0 24px; }
+
+/* ══ ACCOUNTS TAB ════════════════════════════════════════ */
+.accounts-tab { padding: 20px 16px 100px; }
+
+.account-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.06);
+}
+.acc-icon { font-size: 32px; }
+.acc-name   { font-size: 15px; font-weight: 600; }
+.acc-status { font-size: 12px; color: var(--mine); margin-top: 2px; }
+
+.add-btn {
+  width: 100%;
+  padding: 16px;
+  background: var(--card);
+  color: var(--primary);
+  border: 2px dashed var(--primary);
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background .15s;
+}
+.add-btn:active { background: rgba(108,99,255,.05); }
+
+.plaid-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 14px;
+}
+
+/* ══ TOAST ══════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(28,28,30,.85);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all .25s;
+  pointer-events: none;
+  z-index: 999;
+  white-space: nowrap;
+  max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>💰 我的记账本</h1>
+  <button class="sync-btn" id="syncBtn" onclick="syncTransactions()">
+    <span id="syncIcon">🔄</span> 同步
+  </button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" data-tab="swipe"    onclick="showTab('swipe',this)">💳 分类</div>
+  <div class="tab"        data-tab="report"   onclick="showTab('report',this)">📊 报告</div>
+  <div class="tab"        data-tab="accounts" onclick="showTab('accounts',this)">🏦 账户</div>
+</div>
+
+<!-- ── SWIPE TAB ───────────────────────────────────────── -->
+<div id="tab-swipe" class="tab-content active">
+  <div class="swipe-tab">
+    <div class="swipe-labels">
+      <span class="label-shared">← 👫 共享</span>
+      <span class="label-mine">我的 👤 →</span>
+    </div>
+
+    <div class="card-stack" id="cardStack"></div>
+    <div class="remaining" id="remaining"></div>
+
+    <div class="action-row" id="actionRow" style="margin-top:28px">
+      <button class="action-btn btn-shared" onclick="triggerSwipe('shared')" title="共享">👫</button>
+      <button class="action-btn btn-skip"   onclick="skipCard()"              title="跳过">⏭</button>
+      <button class="action-btn btn-mine"   onclick="triggerSwipe('mine')"   title="我的">👤</button>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <div class="big-emoji">✨</div>
+      <h3>全部分类完毕！</h3>
+      <p>点击右上角同步<br>获取最新交易记录</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── REPORT TAB ──────────────────────────────────────── -->
+<div id="tab-report" class="tab-content">
+  <div class="report-tab">
+    <div class="month-nav">
+      <button class="mnav-btn" onclick="changeMonth(-1)">‹</button>
+      <span class="month-label" id="monthLabel">—</span>
+      <button class="mnav-btn" onclick="changeMonth(1)">›</button>
+    </div>
+    <div id="reportContent">
+      <p style="text-align:center;color:var(--text2);padding:60px 0">加载中…</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACCOUNTS TAB ────────────────────────────────────── -->
+<div id="tab-accounts" class="tab-content">
+  <div class="accounts-tab">
+    <div id="accountList"></div>
+    <button class="add-btn" onclick="connectAccount()">＋ 连接新账户</button>
+    <p class="plaid-note">🔒 由 Plaid 安全连接，Cara 的银行凭据不会经过本 app</p>
+  </div>
+</div>
+
+<!-- ── CATEGORY MODAL ──────────────────────────────────── -->
+<div class="overlay" id="overlay">
+  <div class="cat-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"   id="sheetTitle">这笔交易属于哪类？</div>
+    <div class="sheet-subtitle" id="sheetSub"></div>
+    <div class="cat-grid" id="catGrid"></div>
+    <button class="confirm-btn" id="confirmBtn" onclick="confirmCategory()" disabled>
+      请选择一个类别
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script>
+// ══ DATA ═══════════════════════════════════════════════════════
+const CATEGORIES = [
+  { id:'food',         em:'🍜', nm:'吃饭'   },
+  { id:'grocery',      em:'🛒', nm:'超市'   },
+  { id:'cat',          em:'🐱', nm:'小猫'   },
+  { id:'transport',    em:'🚗', nm:'交通'   },
+  { id:'shopping',     em:'👗', nm:'购物'   },
+  { id:'entertainment',em:'🎮', nm:'娱乐'   },
+  { id:'health',       em:'💊', nm:'医疗'   },
+  { id:'home',         em:'🏠', nm:'家居'   },
+  { id:'travel',       em:'✈️', nm:'旅行'   },
+  { id:'subscription', em:'📱', nm:'订阅'   },
+  { id:'coffee',       em:'☕', nm:'咖啡'   },
+  { id:'parents',      em:'👨‍👩‍👧', nm:'爸妈'   },
+  { id:'photo',        em:'📷', nm:'摄影'   },
+  { id:'other',        em:'💳', nm:'其他'   },
+];
+const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+
+let transactions   = [];
+let cardIndex      = 0;
+let pendingId      = null;
+let pendingSplit   = null;
+let selectedCat    = null;
+let currentMonth   = new Date().toISOString().slice(0,7);
+let dragging       = false;
+let startX         = 0;
+let deltaX         = 0;
+
+// ══ TOAST ══════════════════════════════════════════════════════
+function toast(msg, dur=2400) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ══ TABS ═══════════════════════════════════════════════════════
+function showTab(name, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'report')   loadReport();
+  if (name === 'accounts') loadAccounts();
+}
+
+// ══ SWIPE VIEW ═════════════════════════════════════════════════
+async function loadTransactions() {
+  try {
+    const r = await fetch('/api/transactions');
+    transactions = await r.json();
+    cardIndex = 0;
+    renderStack();
+  } catch(e) { toast('⚠️ 无法连接服务器'); }
+}
+
+function renderStack() {
+  const stack   = document.getElementById('cardStack');
+  const empty   = document.getElementById('emptyState');
+  const actions = document.getElementById('actionRow');
+  const labels  = document.querySelector('.swipe-labels');
+  const rem     = document.getElementById('remaining');
+  const remaining = transactions.slice(cardIndex);
+
+  if (remaining.length === 0) {
+    stack.style.display   = 'none';
+    actions.style.display = 'none';
+    labels.style.display  = 'none';
+    rem.style.display     = 'none';
+    empty.style.display   = 'flex';
+    return;
+  }
+
+  stack.style.display   = 'block';
+  actions.style.display = 'flex';
+  labels.style.display  = 'flex';
+  rem.style.display     = 'block';
+  empty.style.display   = 'none';
+
+  rem.textContent = `还剩 ${remaining.length} 笔待分类`;
+
+  stack.innerHTML = '';
+  const visible = remaining.slice(0, 3);
+
+  // render back-to-front so front card is last DOM child (highest z)
+  visible.slice().reverse().forEach((txn, revIdx) => {
+    const idx = visible.length - 1 - revIdx; // 0 = front
+    const card = buildCard(txn);
+    if (idx === 0) card.classList.add('front');
+    else if (idx === 1) card.classList.add('back1');
+    else card.classList.add('back2');
+    stack.appendChild(card);
+  });
+
+  setupDrag(stack.lastElementChild);
+}
+
+function buildCard(txn) {
+  const card = document.createElement('div');
+  card.className = 'txn-card';
+  card.dataset.id = txn.id;
+  const date = new Date(txn.date + 'T12:00:00').toLocaleDateString('zh-CN', { month:'long', day:'numeric' });
+  const topCat = txn.plaid_category && txn.plaid_category[0] ? `<span class="card-tag">${txn.plaid_category[0]}</span>` : '';
+  card.innerHTML = `
+    <div class="swipe-label left">👫 共享</div>
+    <div class="swipe-label right">👤 我的</div>
+    <div class="card-merchant">${escHtml(txn.name)}</div>
+    <div class="card-amount">$${txn.amount.toFixed(2)}</div>
+    <div class="card-tags">
+      <span class="card-tag">📅 ${date}</span>
+      <span class="card-tag">💳 ${escHtml(txn.account)}</span>
+      ${topCat}
+    </div>`;
+  return card;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Drag / Swipe ────────────────────────────────────────────
+function setupDrag(card) {
+  if (!card) return;
+  card.addEventListener('pointerdown', onDown, { passive: true });
+}
+
+function onDown(e) {
+  if (e.button !== undefined && e.button !== 0) return;
+  dragging = true;
+  startX   = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
+  deltaX   = 0;
+  const card = e.currentTarget;
+  card.setPointerCapture(e.pointerId);
+  card.addEventListener('pointermove', onMove);
+  card.addEventListener('pointerup',   onUp);
+  card.addEventListener('pointercancel', onUp);
+}
+
+function onMove(e) {
+  if (!dragging) return;
+  deltaX = (e.clientX ?? 0) - startX;
+  const card   = e.currentTarget;
+  const rotate = deltaX * 0.07;
+  card.style.transition = 'none';
+  card.style.transform  = `translateX(${deltaX}px) rotate(${rotate}deg)`;
+
+  const lbl  = card.querySelector('.swipe-label.left');
+  const rbl  = card.querySelector('.swipe-label.right');
+  const THRESH = 55;
+  if (deltaX < -THRESH) {
+    lbl.style.opacity = Math.min(1, (-deltaX - THRESH) / 70);
+    rbl.style.opacity = 0;
+  } else if (deltaX > THRESH) {
+    rbl.style.opacity = Math.min(1, (deltaX - THRESH) / 70);
+    lbl.style.opacity = 0;
+  } else {
+    lbl.style.opacity = rbl.style.opacity = 0;
+  }
+}
+
+function onUp(e) {
+  if (!dragging) return;
+  dragging = false;
+  const card = e.currentTarget;
+  card.removeEventListener('pointermove', onMove);
+  card.removeEventListener('pointerup',   onUp);
+  card.removeEventListener('pointercancel', onUp);
+
+  const THRESH = 90;
+  if (deltaX < -THRESH)      flyOff(card, 'shared');
+  else if (deltaX > THRESH)  flyOff(card, 'mine');
+  else {
+    card.style.transition = 'transform .3s cubic-bezier(.175,.885,.32,1.275)';
+    card.style.transform  = '';
+    card.querySelector('.swipe-label.left').style.opacity  = 0;
+    card.querySelector('.swipe-label.right').style.opacity = 0;
+    setTimeout(() => { card.style.transition = ''; }, 320);
+  }
+}
+
+function flyOff(card, split) {
+  const dir = split === 'shared' ? -1 : 1;
+  card.style.transition = 'transform .35s ease, opacity .35s ease';
+  card.style.transform  = `translateX(${dir * 520}px) rotate(${dir * 22}deg)`;
+  card.style.opacity    = '0';
+  card.style.pointerEvents = 'none';
+  setTimeout(() => openCategorySheet(card.dataset.id, split), 220);
+}
+
+function triggerSwipe(split) {
+  const stack = document.getElementById('cardStack');
+  const front = stack.querySelector('.txn-card.front') || stack.lastElementChild;
+  if (front && front.classList.contains('txn-card')) flyOff(front, split);
+}
+
+function skipCard() {
+  cardIndex++;
+  renderStack();
+  toast('跳过 ⏭');
+}
+
+// ══ CATEGORY SHEET ═════════════════════════════════════════════
+function openCategorySheet(txnId, split) {
+  pendingId    = txnId;
+  pendingSplit = split;
+
+  const txn     = transactions.find(t => t.id === txnId);
+  const autoCat = txn.auto_category || null;
+  selectedCat   = autoCat;   // 预先设定自动识别的类别
+
+  document.getElementById('sheetTitle').textContent =
+    split === 'mine' ? '👤 我自己的花费' : '👫 我们俩共享的花费';
+  document.getElementById('sheetSub').textContent =
+    `${txn.name}  ·  $${txn.amount.toFixed(2)}`;
+
+  // 自动识别提示
+  const autoBadge = autoCat
+    ? `<div class="auto-badge">🤖 已自动识别为「${CAT_MAP[autoCat]?.nm || autoCat}」，可直接确认或重新选择</div>`
+    : `<div style="font-size:13px;color:var(--text2);margin-bottom:14px;">请选择一个类别</div>`;
+
+  document.getElementById('catGrid').innerHTML =
+    autoBadge +
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">` +
+    CATEGORIES.map(c => {
+      const isAuto = c.id === autoCat;
+      return `<button class="cat-btn${isAuto ? ' auto-suggested sel' : ''}"
+                onclick="selectCat('${c.id}',this)">
+        <span class="em">${c.em}</span>
+        <span class="nm">${c.nm}</span>
+      </button>`;
+    }).join('') +
+    `</div>`;
+
+  const btn = document.getElementById('confirmBtn');
+  if (autoCat) {
+    const c = CAT_MAP[autoCat];
+    btn.disabled    = false;
+    btn.textContent = `确认 — ${c.em} ${c.nm}`;
+  } else {
+    btn.disabled    = true;
+    btn.textContent = '请选择一个类别';
+  }
+
+  document.getElementById('overlay').classList.add('show');
+}
+
+function selectCat(id, el) {
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.remove('sel');
+    // 保留 auto-suggested 样式，只移除 sel
+  });
+  el.classList.add('sel');
+  selectedCat = id;
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = false;
+  btn.textContent = `确认 — ${CAT_MAP[id].em} ${CAT_MAP[id].nm}`;
+}
+
+async function confirmCategory() {
+  if (!selectedCat) return;
+  document.getElementById('overlay').classList.remove('show');
+
+  try {
+    await fetch('/api/categorize', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ id: pendingId, split: pendingSplit, category: selectedCat })
+    });
+    const c = CAT_MAP[selectedCat];
+    toast(`已记录 ${c.em} ${c.nm}`);
+    cardIndex++;
+    renderStack();
+  } catch(e) { toast('❌ 保存失败，请重试'); }
+}
+
+// Close overlay by tapping backdrop
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('overlay')) {
+    document.getElementById('overlay').classList.remove('show');
+    renderStack(); // snap back
+  }
+});
+
+// ══ SYNC ═══════════════════════════════════════════════════════
+async function syncTransactions() {
+  const icon = document.getElementById('syncIcon');
+  icon.textContent = '⏳';
+  try {
+    const r    = await fetch('/api/sync', { method:'POST' });
+    const data = await r.json();
+    toast(`✅ 同步完成！新增 ${data.new_transactions} 笔`);
+    await loadTransactions();
+  } catch(e) { toast('❌ 同步失败'); }
+  finally    { icon.textContent = '🔄'; }
+}
+
+// ══ REPORT ═════════════════════════════════════════════════════
+function changeMonth(d) {
+  const dt = new Date(currentMonth + '-01');
+  dt.setMonth(dt.getMonth() + d);
+  currentMonth = dt.toISOString().slice(0,7);
+  loadReport();
+}
+
+async function loadReport() {
+  const label = new Date(currentMonth + '-01').toLocaleDateString('zh-CN', { year:'numeric', month:'long' });
+  document.getElementById('monthLabel').textContent = label;
+
+  try {
+    const r    = await fetch(`/api/report?month=${currentMonth}`);
+    const data = await r.json();
+    renderReport(data);
+  } catch(e) {
+    document.getElementById('reportContent').innerHTML =
+      '<p style="text-align:center;color:var(--text2);padding:40px">加载失败</p>';
+  }
+}
+
+function renderReport(data) {
+  const rows = Object.entries(data.by_category)
+    .map(([id, v]) => {
+      const c   = CAT_MAP[id] || { em:'💳', nm:id };
+      const myT = v.mine + v.shared * 0.5;
+      return { ...c, mine:v.mine, shared:v.shared, myT };
+    })
+    .sort((a,b) => b.myT - a.myT);
+
+  const rowsHtml = rows.length
+    ? rows.map(r => `
+      <div class="brow">
+        <div class="brow-left">
+          <span class="brow-emoji">${r.em}</span>
+          <span class="brow-name">${r.nm}</span>
+        </div>
+        <div class="brow-right">
+          <div class="brow-amount">$${r.myT.toFixed(2)}</div>
+          <div class="brow-sub">
+            ${r.mine   ? `我 $${r.mine.toFixed(2)}`   : ''}
+            ${r.shared ? ` + 共 $${r.shared.toFixed(2)}` : ''}
+          </div>
+        </div>
+      </div>`).join('')
+    : '<p style="text-align:center;color:var(--text2);padding:20px">本月暂无已分类记录</p>';
+
+  document.getElementById('reportContent').innerHTML = `
+    <div class="summary-grid">
+      <div class="sum-card hero">
+        <div class="sum-label">本月我的总花费</div>
+        <div class="sum-value">$${data.grand_total.toFixed(2)}</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">👤 纯我自己</div>
+        <div class="sum-value">$${data.mine_total.toFixed(2)}</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">👫 共享（我的一半）</div>
+        <div class="sum-value">$${data.my_share_of_shared.toFixed(2)}</div>
+      </div>
+    </div>
+
+    <div class="breakdown-card">
+      <h3>按类别明细</h3>
+      ${rowsHtml}
+    </div>
+    <div class="report-footer">共 ${data.transaction_count} 笔已分类</div>`;
+}
+
+// ══ ACCOUNTS ═══════════════════════════════════════════════════
+async function loadAccounts() {
+  try {
+    const r   = await fetch('/api/accounts');
+    const acc = await r.json();
+    const el  = document.getElementById('accountList');
+    el.innerHTML = acc.length
+      ? acc.map(a => `
+        <div class="account-card">
+          <span class="acc-icon">🏦</span>
+          <div>
+            <div class="acc-name">${escHtml(a.name)}</div>
+            <div class="acc-status">✓ 已连接</div>
+          </div>
+        </div>`).join('')
+      : '<p style="text-align:center;color:var(--text2);padding:30px 0">还没有连接任何账户</p>';
+  } catch(e) { toast('加载账户失败'); }
+}
+
+async function connectAccount() {
+  try {
+    const r    = await fetch('/api/create_link_token', { method:'POST' });
+    const data = await r.json();
+    if (data.error) { toast('❌ 无法创建连接：' + (data.error.error_message || '')); return; }
+
+    const handler = Plaid.create({
+      token: data.link_token,
+      onSuccess: async (public_token, meta) => {
+        const name = meta.institution?.name || '我的账户';
+        await fetch('/api/exchange_token', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ public_token, account_name: name })
+        });
+        toast(`✅ ${name} 连接成功！正在同步…`);
+        loadAccounts();
+        syncTransactions();
+      },
+      onExit: err => { if (err) toast('连接取消'); }
+    });
+    handler.open();
+  } catch(e) { toast('❌ 连接失败'); }
+}
+
+// ══ INIT ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  loadTransactions();
+  loadReport();
+});
+</script>
+</body>
+</html>
