@@ -13,6 +13,7 @@ import os
 import sqlite3
 from datetime import datetime
 from contextlib import contextmanager
+from typing import Optional, List
 
 app = Flask(__name__, static_folder='.')
 CORS(app)
@@ -22,7 +23,7 @@ PLAID_CLIENT_ID = "6a139ca06fec6d000d3d83a3"
 PLAID_SECRET    = os.environ.get("PLAID_SECRET", "21d24cef5f1f77e0f83049aaffba65")
 
 configuration = plaid.Configuration(
-    host=plaid.Environment.Development,
+    host="https://development.plaid.com",
     api_key={
         'clientId': PLAID_CLIENT_ID,
         'secret':   PLAID_SECRET,
@@ -122,7 +123,7 @@ PLAID_CATEGORY_MAP = {
     'camera':                       'photo',
 }
 
-def auto_classify(plaid_categories: list) -> str | None:
+def auto_classify(plaid_categories: List[str]) -> Optional[str]:
     for raw in reversed(plaid_categories):
         key = raw.lower().strip()
         if key in PLAID_CATEGORY_MAP:
