@@ -9,534 +9,325 @@
 <title>💑 Finance with Fiancée</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --primary:   #6C63FF;
-  --mine:      #34C759;
-  --shared:    #FF9F0A;
-  --danger:    #FF3B30;
-  --bg:        #F2F2F7;
-  --card:      #FFFFFF;
-  --text:      #1C1C1E;
-  --text2:     #6C6C70;
-  --border:    #E5E5EA;
-  --shadow:    0 4px 24px rgba(108,99,255,0.10);
+  --primary: #6C63FF; --mine: #34C759; --shared: #FF9F0A;
+  --danger: #FF3B30; --bg: #F2F2F7; --card: #FFFFFF;
+  --text: #1C1C1E; --text2: #6C6C70; --border: #E5E5EA;
+  --shadow: 0 4px 24px rgba(108,99,255,0.10);
 }
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
-  background: var(--bg);
-  min-height: 100vh;
-  max-width: 430px;
-  margin: 0 auto;
-  overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
+  background: var(--bg); min-height: 100vh; max-width: 430px;
+  margin: 0 auto; overflow-x: hidden; -webkit-tap-highlight-color: transparent;
 }
 
-/* ══ HEADER ════════════════════════════════════════════ */
+/* ── HEADER ── */
 .header {
-  background: var(--primary);
-  color: #fff;
+  background: var(--primary); color: #fff;
   padding: 52px 20px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex; justify-content: space-between; align-items: center;
 }
 .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
 .sync-btn {
-  background: rgba(255,255,255,0.18);
-  border: none;
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background .15s;
+  background: rgba(255,255,255,0.18); border: none; color: #fff;
+  padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
 }
 .sync-btn:active { background: rgba(255,255,255,0.28); }
 
-/* ══ TAB BAR ════════════════════════════════════════════ */
+/* ── TABS ── */
 .tabs {
-  display: flex;
-  background: var(--card);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  box-shadow: 0 1px 0 var(--border);
+  display: flex; background: var(--card); border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20;
 }
 .tab {
-  flex: 1;
-  padding: 14px 4px 12px;
-  text-align: center;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text2);
-  border-bottom: 2.5px solid transparent;
-  transition: all .15s;
-  user-select: none;
+  flex: 1; padding: 14px 4px 12px; text-align: center; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--text2);
+  border-bottom: 2.5px solid transparent; transition: all .15s; user-select: none;
 }
 .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
-
-/* ══ TAB CONTENT ════════════════════════════════════════ */
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* ══ SWIPE TAB ══════════════════════════════════════════ */
-.swipe-tab {
-  padding: 24px 20px 100px;
-  min-height: calc(100vh - 110px);
-}
+/* ══════════════════════════════════════════════
+   MONTH LIST (SwipeWipe 风格)
+══════════════════════════════════════════════ */
+#monthListView { padding-bottom: 60px; }
 
+.recents-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 26px; height: 112px; cursor: pointer; user-select: none;
+  background: linear-gradient(135deg, #00C9A7 0%, #00A8E8 100%);
+  transition: opacity .12s;
+}
+.recents-row:active { opacity: .85; }
+.recents-row-text {
+  font-size: 54px; font-weight: 900; color: white;
+  letter-spacing: -2px; line-height: 1;
+}
+.recents-badge {
+  background: rgba(0,0,0,.22); color: white;
+  font-size: 15px; font-weight: 800;
+  padding: 5px 14px; border-radius: 20px;
+}
+.recents-ff { font-size: 22px; color: rgba(255,255,255,.85); margin-left: 10px; }
+
+.month-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 26px; height: 98px; cursor: pointer; user-select: none;
+  transition: opacity .12s;
+}
+.month-row:active { opacity: .85; }
+.month-row-text {
+  font-size: 44px; font-weight: 900; color: white;
+  letter-spacing: -1.5px; line-height: 1;
+}
+.month-row-text.done { text-decoration: line-through; opacity: .85; }
+.month-row-right { display: flex; align-items: center; gap: 10px; }
+.month-row-badge {
+  background: rgba(0,0,0,.2); color: white;
+  font-size: 13px; font-weight: 800;
+  padding: 4px 12px; border-radius: 16px;
+}
+.month-row-done {
+  background: rgba(255,255,255,.25); color: white;
+  font-size: 13px; font-weight: 800;
+  padding: 4px 12px; border-radius: 16px;
+}
+.month-ff { font-size: 20px; color: rgba(255,255,255,.8); }
+
+/* Month row color palette (cycles) */
+.mc0  { background: linear-gradient(135deg, #F72585, #7209B7); }
+.mc1  { background: linear-gradient(135deg, #4361EE, #3A0CA3); }
+.mc2  { background: linear-gradient(135deg, #F77F00, #D62828); }
+.mc3  { background: linear-gradient(135deg, #06D6A0, #118AB2); }
+.mc4  { background: linear-gradient(135deg, #FFBE0B, #FB5607); }
+.mc5  { background: linear-gradient(135deg, #8338EC, #3A86FF); }
+.mc6  { background: linear-gradient(135deg, #FF006E, #FFBE0B); }
+.mc7  { background: linear-gradient(135deg, #2D6A4F, #52B788); }
+.mc8  { background: linear-gradient(135deg, #E63946, #A8DADC); }
+.mc9  { background: linear-gradient(135deg, #6A0572, #AB83A1); }
+.mc10 { background: linear-gradient(135deg, #0D3B66, #FAF0CA); }
+.mc11 { background: linear-gradient(135deg, #CB4335, #F1948A); }
+
+/* ══════════════════════════════════════════════
+   SWIPE CARD VIEW
+══════════════════════════════════════════════ */
+#swipeCardView { display: none; }
+
+.swipe-mode-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 10px; background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 49px; z-index: 10;
+}
+.back-btn {
+  background: none; border: none; color: var(--primary);
+  font-size: 15px; font-weight: 700; cursor: pointer;
+  padding: 6px 10px 6px 0;
+  display: flex; align-items: center; gap: 4px;
+}
+.swipe-mode-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.undo-btn {
+  background: none; border: none; color: var(--text2);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  padding: 6px 0 6px 10px;
+  display: flex; align-items: center; gap: 4px;
+}
+.undo-btn:active { color: var(--primary); }
+.undo-btn.has-undo { color: var(--primary); }
+
+.swipe-tab { padding: 20px 20px 100px; min-height: calc(100vh - 160px); }
 .swipe-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 18px;
-  font-size: 13px;
-  font-weight: 700;
+  display: flex; justify-content: space-between;
+  margin-bottom: 16px; font-size: 13px; font-weight: 700;
 }
 .label-shared { color: var(--shared); }
 .label-mine   { color: var(--mine); }
 
 /* Card stack */
-.card-stack {
-  position: relative;
-  height: 280px;
-  margin-bottom: 24px;
-}
-
+.card-stack { position: relative; height: 270px; margin-bottom: 20px; }
 .txn-card {
-  position: absolute;
-  inset: 0;
-  background: var(--card);
-  border-radius: 22px;
-  padding: 24px 22px 18px;
-  box-shadow: var(--shadow);
-  cursor: grab;
-  user-select: none;
-  touch-action: none;
-  will-change: transform;
+  position: absolute; inset: 0; background: var(--card);
+  border-radius: 22px; padding: 22px 22px 16px;
+  box-shadow: var(--shadow); cursor: grab;
+  user-select: none; touch-action: none; will-change: transform;
   transform-origin: center 110%;
 }
 .txn-card:active { cursor: grabbing; }
-
-/* stack peek */
 .txn-card.back1 { transform: scale(0.95) translateY(10px); z-index: 0; }
 .txn-card.back2 { transform: scale(0.90) translateY(20px); z-index: -1; }
 .txn-card.front { z-index: 2; }
 
-/* swipe overlay labels */
 .swipe-label {
-  position: absolute;
-  top: 22px;
-  padding: 6px 14px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  opacity: 0;
-  pointer-events: none;
-  border: 2.5px solid;
-  transition: opacity .05s;
+  position: absolute; top: 20px; padding: 6px 14px; border-radius: 10px;
+  font-size: 15px; font-weight: 800; opacity: 0; pointer-events: none;
+  border: 2.5px solid; transition: opacity .05s;
 }
-.swipe-label.left  { right: 18px; color: var(--shared); border-color: var(--shared); background: rgba(255,159,10,.08); }
-.swipe-label.right { left:  18px; color: var(--mine);   border-color: var(--mine);   background: rgba(52,199,89,.08); }
+.swipe-label.left  { right:18px; color:var(--shared); border-color:var(--shared); background:rgba(255,159,10,.08); }
+.swipe-label.right { left: 18px; color:var(--mine);   border-color:var(--mine);   background:rgba(52,199,89,.08); }
 
-.card-merchant { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
-.card-amount   { font-size: 36px; font-weight: 800; color: var(--primary); margin-bottom: 12px; letter-spacing: -1px; }
-.card-tags     { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-.card-tag      { background: var(--bg); padding: 4px 10px; border-radius: 8px; font-size: 12px; color: var(--text2); }
+.card-merchant { font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 7px; line-height: 1.3; }
+.card-amount   { font-size: 34px; font-weight: 800; color: var(--primary); margin-bottom: 10px; letter-spacing: -1px; }
+.card-tags     { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+.card-tag      { background: var(--bg); padding: 3px 9px; border-radius: 7px; font-size: 11px; color: var(--text2); }
 
-/* 自动分类 badge 在卡片上 */
 .card-cat-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 11px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 11px; border-radius: 10px; font-size: 12px; font-weight: 700;
 }
-.card-cat-badge.confirmed {
-  background: rgba(108,99,255,.1);
-  color: var(--primary);
-}
-.card-cat-badge.auto {
-  background: rgba(255,159,10,.12);
-  color: #9A5700;
-}
-.card-cat-badge.unknown {
-  background: rgba(255,59,48,.08);
-  color: var(--danger);
-}
-
-/* tap hint */
-.card-tap-hint {
-  position: absolute;
-  bottom: 14px;
-  right: 18px;
-  font-size: 11px;
-  color: var(--text2);
-  opacity: 0.7;
-}
+.card-cat-badge.confirmed { background: rgba(108,99,255,.1); color: var(--primary); }
+.card-cat-badge.auto      { background: rgba(255,159,10,.12); color: #9A5700; }
+.card-cat-badge.unknown   { background: rgba(255,59,48,.08);  color: var(--danger); }
+.card-tap-hint { position: absolute; bottom: 12px; right: 16px; font-size: 10px; color: var(--text2); opacity: .6; }
 
 /* Action buttons */
 .action-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 20px;
 }
 .action-btn {
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  transition: transform .15s, box-shadow .15s;
+  border: none; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; transition: transform .15s, box-shadow .15s;
   box-shadow: 0 3px 12px rgba(0,0,0,.12);
 }
 .action-btn:active { transform: scale(.92) !important; }
 .btn-shared { width: 64px; height: 64px; background: #FFF3E0; }
-.btn-skip   { width: 52px; height: 52px; background: #F5F5F5; font-size: 22px; }
+.btn-undo   { width: 52px; height: 52px; background: #F5F5F5; font-size: 22px; }
 .btn-mine   { width: 64px; height: 64px; background: #E8F5E9; }
 .action-btn:hover { transform: scale(1.07); box-shadow: 0 6px 20px rgba(0,0,0,.18); }
 
-/* remaining counter */
-.remaining {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text2);
-  margin-top: 16px;
-}
+.remaining { text-align: center; font-size: 12px; color: var(--text2); margin-top: 14px; }
 
-/* empty state */
 .empty-state {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  padding: 60px 20px 20px;
-  text-align: center;
+  display: none; flex-direction: column; align-items: center;
+  padding: 60px 20px 20px; text-align: center;
 }
 .empty-state .big-emoji { font-size: 72px; margin-bottom: 16px; }
 .empty-state h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
 .empty-state p  { font-size: 14px; color: var(--text2); line-height: 1.5; }
 
-/* ══ CATEGORY MODAL ═════════════════════════════════════ */
+/* ── CATEGORY MODAL ── */
 .overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.45);
-  z-index: 50;
-  justify-content: flex-end;
-  flex-direction: column;
-  max-width: 430px;
-  margin: 0 auto;
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  z-index: 50; justify-content: flex-end; flex-direction: column;
+  max-width: 430px; margin: 0 auto;
 }
 .overlay.show { display: flex; }
-
 .cat-sheet {
-  background: var(--card);
-  border-radius: 26px 26px 0 0;
+  background: var(--card); border-radius: 26px 26px 0 0;
   padding: 22px 20px 36px;
   animation: slideUp .28s cubic-bezier(.32,0,.67,0) forwards;
 }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-.sheet-handle {
-  width: 38px; height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  margin: 0 auto 18px;
-}
+.sheet-handle { width:38px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 18px; }
 .sheet-title    { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
-.sheet-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 14px; }
-
-.cat-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 18px;
-}
+.sheet-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+.cat-grid { margin-bottom: 18px; }
 .cat-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  padding: 12px 4px;
-  border-radius: 16px;
-  border: 2px solid var(--border);
-  background: var(--card);
-  cursor: pointer;
-  transition: border-color .15s, background .15s;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 12px 4px; border-radius: 16px; border: 2px solid var(--border);
+  background: var(--card); cursor: pointer; transition: border-color .15s, background .15s;
 }
-.cat-btn .em  { font-size: 24px; }
-.cat-btn .nm  { font-size: 11px; color: var(--text2); font-weight: 500; }
-.cat-btn.sel  { border-color: var(--primary); background: rgba(108,99,255,.06); }
+.cat-btn .em { font-size: 24px; }
+.cat-btn .nm { font-size: 11px; color: var(--text2); font-weight: 500; }
+.cat-btn.sel { border-color: var(--primary); background: rgba(108,99,255,.06); }
 .cat-btn.sel .nm { color: var(--primary); font-weight: 700; }
 .cat-btn.auto-suggested { border-color: var(--shared); background: rgba(255,159,10,.06); position: relative; }
 .cat-btn.auto-suggested::after {
-  content: '🤖';
-  position: absolute;
-  top: -7px; right: -7px;
-  font-size: 13px;
-  background: white;
-  border-radius: 50%;
-  width: 20px; height: 20px;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  content: '🤖'; position: absolute; top:-7px; right:-7px; font-size:13px;
+  background:white; border-radius:50%; width:20px; height:20px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.15);
 }
 .cat-btn.auto-suggested.sel { border-color: var(--primary); background: rgba(108,99,255,.06); }
 .auto-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(255,159,10,.12);
-  color: #9A5700;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 8px;
-  margin-bottom: 14px;
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(255,159,10,.12); color: #9A5700;
+  font-size: 12px; font-weight: 600; padding: 4px 10px;
+  border-radius: 8px; margin-bottom: 12px;
 }
-.pre-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(108,99,255,.10);
-  color: var(--primary);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 8px;
-  margin-bottom: 14px;
-}
-
 .confirm-btn {
-  width: 100%;
-  padding: 16px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 16px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: opacity .15s;
+  width: 100%; padding: 16px; background: var(--primary); color: #fff;
+  border: none; border-radius: 16px; font-size: 16px; font-weight: 700;
+  cursor: pointer; transition: opacity .15s;
 }
 .confirm-btn:active { opacity: .85; }
 .confirm-btn:disabled { background: var(--border); color: var(--text2); cursor: default; }
 
-/* ══ REPORT TAB ═════════════════════════════════════════ */
+/* ── REPORT TAB ── */
 .report-tab { padding: 20px 16px 100px; }
-
 .month-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; margin-bottom: 10px;
 }
 .mnav-btn {
-  background: var(--card);
-  border: none;
-  width: 36px; height: 36px;
-  border-radius: 50%;
-  font-size: 20px;
-  cursor: pointer;
-  color: var(--primary);
-  display: flex; align-items: center; justify-content: center;
+  background: var(--card); border: none; width:36px; height:36px;
+  border-radius:50%; font-size:20px; cursor:pointer; color:var(--primary);
+  display:flex; align-items:center; justify-content:center;
   box-shadow: 0 1px 4px rgba(0,0,0,.08);
 }
 .month-label { font-size: 17px; font-weight: 700; min-width: 110px; text-align: center; }
 .today-btn {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--primary);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 5px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background .15s;
+  background: var(--bg); border: 1px solid var(--border); color: var(--primary);
+  font-size: 12px; font-weight: 700; padding: 5px 12px;
+  border-radius: 12px; cursor: pointer;
 }
 .today-btn:active { background: rgba(108,99,255,.08); }
 
-/* Progress bars (月度进度) */
-.progress-card {
-  background: var(--card);
-  border-radius: 18px;
-  padding: 16px;
-  margin-bottom: 14px;
-  box-shadow: 0 1px 6px rgba(0,0,0,.06);
-}
-.progress-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text2); }
+.progress-card { background:var(--card); border-radius:18px; padding:16px; margin-bottom:14px; box-shadow:0 1px 6px rgba(0,0,0,.06); }
+.progress-card h3 { font-size:14px; font-weight:700; margin-bottom:12px; color:var(--text2); }
 .progress-row { margin-bottom: 10px; }
 .progress-row:last-child { margin-bottom: 0; }
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 5px;
-}
-.progress-header .pending-badge {
-  font-size: 11px;
-  background: rgba(255,59,48,.1);
-  color: var(--danger);
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-weight: 700;
-}
-.progress-header .done-badge {
-  font-size: 11px;
-  background: rgba(52,199,89,.12);
-  color: var(--mine);
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-weight: 700;
-}
-.progress-bar-bg {
-  background: var(--border);
-  border-radius: 4px;
-  height: 8px;
-  overflow: hidden;
-}
-.progress-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width .6s cubic-bezier(.34,1.56,.64,1);
-}
+.progress-header { display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:600; margin-bottom:5px; }
+.pending-badge { font-size:11px; background:rgba(255,59,48,.1); color:var(--danger); padding:2px 8px; border-radius:8px; font-weight:700; }
+.done-badge    { font-size:11px; background:rgba(52,199,89,.12); color:var(--mine); padding:2px 8px; border-radius:8px; font-weight:700; }
+.progress-bar-bg { background:var(--border); border-radius:4px; height:8px; overflow:hidden; }
+.progress-bar-fill { height:100%; border-radius:4px; transition:width .6s cubic-bezier(.34,1.56,.64,1); }
 
-/* Summary cards */
-.summary-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-.sum-card {
-  background: var(--card);
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 1px 6px rgba(0,0,0,.06);
-}
-.sum-card.hero {
-  grid-column: 1 / -1;
-  background: var(--primary);
-  color: #fff;
-}
-.sum-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
-.sum-card.hero .sum-label { color: rgba(255,255,255,.75); }
-.sum-value { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
-.sum-card.hero .sum-value { color: #fff; font-size: 34px; }
+.summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.sum-card { background:var(--card); border-radius:18px; padding:16px; box-shadow:0 1px 6px rgba(0,0,0,.06); }
+.sum-card.hero { grid-column:1/-1; }
+.sum-label { font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; }
+.sum-card.hero .sum-label { color:rgba(255,255,255,.75); }
+.sum-value { font-size:26px; font-weight:800; color:var(--text); letter-spacing:-0.5px; }
+.sum-card.hero .sum-value { color:#fff; font-size:34px; }
+.breakdown-card { background:var(--card); border-radius:18px; padding:16px; box-shadow:0 1px 6px rgba(0,0,0,.06); margin-bottom:16px; }
+.breakdown-card h3 { font-size:15px; font-weight:700; margin-bottom:12px; }
+.brow { display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--border); }
+.brow:last-child { border-bottom:none; }
+.brow-left { display:flex; align-items:center; gap:10px; }
+.brow-emoji { font-size:22px; }
+.brow-name  { font-size:14px; font-weight:600; }
+.brow-right { text-align:right; }
+.brow-amount { font-size:15px; font-weight:700; }
+.brow-sub    { font-size:11px; color:var(--text2); margin-top:2px; }
+.report-footer { text-align:center; font-size:12px; color:var(--text2); padding:8px 0 24px; }
 
-/* Category breakdown list */
-.breakdown-card {
-  background: var(--card);
-  border-radius: 18px;
-  padding: 16px;
-  box-shadow: 0 1px 6px rgba(0,0,0,.06);
-  margin-bottom: 16px;
-}
-.breakdown-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
-.brow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--border);
-}
-.brow:last-child { border-bottom: none; }
-.brow-left  { display: flex; align-items: center; gap: 10px; }
-.brow-emoji { font-size: 22px; }
-.brow-name  { font-size: 14px; font-weight: 600; }
-.brow-right { text-align: right; }
-.brow-amount { font-size: 15px; font-weight: 700; }
-.brow-sub    { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-.report-footer { text-align: center; font-size: 12px; color: var(--text2); padding: 8px 0 24px; }
-
-/* ══ ACCOUNTS TAB ════════════════════════════════════════ */
+/* ── ACCOUNTS ── */
 .accounts-tab { padding: 20px 16px 100px; }
+.account-card { background:var(--card); border-radius:16px; padding:16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; box-shadow:0 1px 6px rgba(0,0,0,.06); }
+.acc-icon { font-size:32px; }
+.acc-name   { font-size:15px; font-weight:600; }
+.acc-status { font-size:12px; color:var(--mine); margin-top:2px; }
+.add-btn { width:100%; padding:16px; background:var(--card); color:var(--primary); border:2px dashed var(--primary); border-radius:16px; font-size:15px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+.add-btn:active { background:rgba(108,99,255,.05); }
+.plaid-note { text-align:center; font-size:12px; color:var(--text2); margin-top:14px; }
 
-.account-card {
-  background: var(--card);
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: 0 1px 6px rgba(0,0,0,.06);
-}
-.acc-icon { font-size: 32px; }
-.acc-name   { font-size: 15px; font-weight: 600; }
-.acc-status { font-size: 12px; color: var(--mine); margin-top: 2px; }
-
-.add-btn {
-  width: 100%;
-  padding: 16px;
-  background: var(--card);
-  color: var(--primary);
-  border: 2px dashed var(--primary);
-  border-radius: 16px;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: background .15s;
-}
-.add-btn:active { background: rgba(108,99,255,.05); }
-
-.plaid-note {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text2);
-  margin-top: 14px;
-}
-
-/* ══ TOAST ══════════════════════════════════════════════ */
+/* ── TOAST ── */
 .toast {
-  position: fixed;
-  bottom: 88px;
-  left: 50%;
-  transform: translateX(-50%) translateY(12px);
-  background: rgba(28,28,30,.85);
-  backdrop-filter: blur(8px);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 22px;
-  font-size: 14px;
-  font-weight: 500;
-  opacity: 0;
-  transition: all .25s;
-  pointer-events: none;
-  z-index: 999;
-  white-space: normal;
-  max-width: 85vw;
-  text-align: center;
-  word-break: break-word;
-  line-height: 1.4;
+  position:fixed; bottom:88px; left:50%;
+  transform:translateX(-50%) translateY(12px);
+  background:rgba(28,28,30,.85); backdrop-filter:blur(8px); color:#fff;
+  padding:10px 20px; border-radius:22px; font-size:14px; font-weight:500;
+  opacity:0; transition:all .25s; pointer-events:none; z-index:999;
+  max-width:85vw; text-align:center; word-break:break-word; line-height:1.4;
 }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <h1>💑 Finance with Fiancée</h1>
   <button class="sync-btn" id="syncBtn" onclick="syncTransactions()">
@@ -544,39 +335,49 @@ body {
   </button>
 </div>
 
-<!-- TABS -->
 <div class="tabs">
   <div class="tab active" data-tab="swipe"    onclick="showTab('swipe',this)">💳 分类</div>
   <div class="tab"        data-tab="report"   onclick="showTab('report',this)">📊 报告</div>
   <div class="tab"        data-tab="accounts" onclick="showTab('accounts',this)">🏦 账户</div>
 </div>
 
-<!-- ── SWIPE TAB ───────────────────────────────────────── -->
+<!-- ── SWIPE TAB ── -->
 <div id="tab-swipe" class="tab-content active">
-  <div class="swipe-tab">
-    <div class="swipe-labels">
-      <span class="label-shared">← 👩‍❤️‍👩 共享</span>
-      <span class="label-mine">我的 👤 →</span>
+
+  <!-- 月份列表 (默认显示) -->
+  <div id="monthListView">
+    <div id="monthListRows"></div>
+  </div>
+
+  <!-- 刷卡界面 (点进月份后显示) -->
+  <div id="swipeCardView">
+    <div class="swipe-mode-header">
+      <button class="back-btn" onclick="exitSwipeMode()">‹ 返回</button>
+      <span class="swipe-mode-title" id="swipeModeTitle">记账</span>
+      <button class="undo-btn" id="undoBtnHeader" onclick="undoLast()">↩ 撤回</button>
     </div>
-
-    <div class="card-stack" id="cardStack"></div>
-    <div class="remaining" id="remaining"></div>
-
-    <div class="action-row" id="actionRow" style="margin-top:28px">
-      <button class="action-btn btn-shared" onclick="triggerSwipe('shared')" title="共享">👩‍❤️‍👩</button>
-      <button class="action-btn btn-skip"   onclick="skipCard()"              title="跳过">⏭</button>
-      <button class="action-btn btn-mine"   onclick="triggerSwipe('mine')"   title="我的">👤</button>
-    </div>
-
-    <div class="empty-state" id="emptyState">
-      <div class="big-emoji">✨</div>
-      <h3>全部分类完毕！</h3>
-      <p>点击右上角同步<br>获取最新交易记录</p>
+    <div class="swipe-tab">
+      <div class="swipe-labels">
+        <span class="label-shared">← 👩‍❤️‍👩 共享</span>
+        <span class="label-mine">我的 👤 →</span>
+      </div>
+      <div class="card-stack" id="cardStack"></div>
+      <div class="remaining" id="remaining"></div>
+      <div class="action-row" id="actionRow" style="margin-top:24px">
+        <button class="action-btn btn-shared" onclick="triggerSwipe('shared')" title="共享">👩‍❤️‍👩</button>
+        <button class="action-btn btn-undo"   onclick="undoLast()"             title="撤回">↩</button>
+        <button class="action-btn btn-mine"   onclick="triggerSwipe('mine')"   title="我的">👤</button>
+      </div>
+      <div class="empty-state" id="emptyState">
+        <div class="big-emoji">🎉</div>
+        <h3>本月全部记完！</h3>
+        <p>返回查看其他月份<br>或去报告页查看汇总</p>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ── REPORT TAB ──────────────────────────────────────── -->
+<!-- ── REPORT TAB ── -->
 <div id="tab-report" class="tab-content">
   <div class="report-tab">
     <div class="month-nav">
@@ -587,29 +388,35 @@ body {
     <div style="text-align:center;margin-bottom:14px">
       <button class="today-btn" onclick="goToCurrentMonth()">📅 跳到本月</button>
     </div>
-    <!-- view toggle -->
     <div style="display:flex;background:var(--border);border-radius:12px;padding:3px;margin-bottom:16px">
       <button id="toggleMe"       onclick="setView('me')"       style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:white;transition:all .2s">👤 我的</button>
       <button id="togglePartner"  onclick="setView('partner')"  style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">🙋 Ta的</button>
       <button id="toggleCombined" onclick="setView('combined')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">👫 合计</button>
     </div>
     <div id="progressSection"></div>
-    <div id="reportContent">
-      <p style="text-align:center;color:var(--text2);padding:60px 0">加载中…</p>
-    </div>
+    <div id="reportContent"><p style="text-align:center;color:var(--text2);padding:60px 0">加载中…</p></div>
   </div>
 </div>
 
-<!-- ── ACCOUNTS TAB ────────────────────────────────────── -->
+<!-- ── ACCOUNTS TAB ── -->
 <div id="tab-accounts" class="tab-content">
   <div class="accounts-tab">
     <div id="accountList"></div>
     <button class="add-btn" onclick="connectAccount()">＋ 连接新账户</button>
     <p class="plaid-note">🔒 由 Plaid 安全连接 👩‍❤️‍👩</p>
+
+    <!-- 如果交易数量异常少，点这里重新拉取全部历史 -->
+    <div style="margin-top:24px;padding:16px;background:var(--card);border-radius:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">📥 交易数量比实际少？</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.5">Plaid 首次连接后需要几分钟完成历史数据准备。如果你刚连接就同步，可能只拿到了部分数据。<br><br>✅ <b>已分类的账单不受影响</b>，只会补充之前漏掉的历史交易。</div>
+      <button onclick="resetAndResync()" style="width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer">
+        📥 补全漏掉的历史交易
+      </button>
+    </div>
   </div>
 </div>
 
-<!-- ── OWNER MODAL ────────────────────────────────────── -->
+<!-- OWNER MODAL -->
 <div class="overlay" id="ownerOverlay">
   <div class="cat-sheet">
     <div class="sheet-handle"></div>
@@ -627,7 +434,7 @@ body {
   </div>
 </div>
 
-<!-- ── CATEGORY MODAL ──────────────────────────────────── -->
+<!-- CATEGORY MODAL (只在没有自动分类时弹出) -->
 <div class="overlay" id="overlay">
   <div class="cat-sheet">
     <div class="sheet-handle"></div>
@@ -635,85 +442,66 @@ body {
     <div class="sheet-subtitle" id="sheetSub"></div>
     <div id="sheetBadge"></div>
     <div class="cat-grid" id="catGrid"></div>
-    <button class="confirm-btn" id="confirmBtn" onclick="confirmCategory()" disabled>
-      请选择一个类别
-    </button>
+    <button class="confirm-btn" id="confirmBtn" onclick="confirmCategory()" disabled>请选择一个类别</button>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script>
-// ══ OAuth REDIRECT 处理 ════════════════════════════════════════
+// ══ OAuth ══
 async function handleOAuthRedirect() {
   if (!window.location.href.includes('oauth_state_id')) return;
   try {
     const r = await fetch('/api/get_link_token');
     const data = await r.json();
     if (!data.link_token) return;
-    const handler = Plaid.create({
-      token: data.link_token,
-      onSuccess: (public_token, meta) => {
-        pendingPublicToken = public_token;
-        pendingInstName    = meta.institution?.name || '账户';
-        pendingOwner       = null;
-        document.getElementById('ownerSubtitle').textContent = pendingInstName;
-        document.getElementById('btnMe').classList.remove('sel');
-        document.getElementById('btnPartner').classList.remove('sel');
-        document.getElementById('ownerConfirmBtn').disabled = true;
-        document.getElementById('ownerConfirmBtn').textContent = '请选择';
-        document.getElementById('ownerOverlay').classList.add('show');
-      },
-      onExit: (err) => { if (err) toast('❌ ' + (err.error_code || '') + ': ' + (err.error_message || '连接取消')); }
-    });
-    handler.open();
-  } catch(e) { console.error('OAuth redirect error:', e); }
+    Plaid.create({ token: data.link_token, onSuccess: openOwnerModal,
+      onExit: (err) => { if(err) toast('❌ ' + (err.error_message||'连接取消')); }
+    }).open();
+  } catch(e) {}
 }
 
-// ══ DATA ═══════════════════════════════════════════════════════
-// 注意：已移除"咖啡"，新增"Amazon"
+// ══ DATA ══
 const CATEGORIES = [
-  { id:'food',         em:'🍜', nm:'吃饭'   },
-  { id:'grocery',      em:'🛒', nm:'超市'   },
-  { id:'amazon',       em:'📦', nm:'Amazon' },
-  { id:'cat',          em:'🐱', nm:'小猫'   },
-  { id:'transport',    em:'🚗', nm:'交通'   },
-  { id:'shopping',     em:'👗', nm:'购物'   },
-  { id:'entertainment',em:'🎮', nm:'娱乐'   },
-  { id:'health',       em:'💊', nm:'医疗'   },
-  { id:'home',         em:'🏠', nm:'家居'   },
-  { id:'travel',       em:'✈️', nm:'旅行'   },
-  { id:'subscription', em:'📱', nm:'订阅'   },
-  { id:'parents',      em:'👨‍👩‍👧', nm:'爸妈'   },
-  { id:'photo',        em:'📷', nm:'摄影'   },
-  { id:'other',        em:'💳', nm:'其他'   },
+  { id:'food',          em:'🍜', nm:'吃饭'   },
+  { id:'grocery',       em:'🛒', nm:'超市'   },
+  { id:'amazon',        em:'📦', nm:'Amazon' },
+  { id:'cat',           em:'🐱', nm:'小猫'   },
+  { id:'transport',     em:'🚗', nm:'交通'   },
+  { id:'shopping',      em:'👗', nm:'购物'   },
+  { id:'entertainment', em:'🎮', nm:'娱乐'   },
+  { id:'health',        em:'💊', nm:'医疗'   },
+  { id:'home',          em:'🏠', nm:'家居'   },
+  { id:'travel',        em:'✈️', nm:'旅行'   },
+  { id:'subscription',  em:'📱', nm:'订阅'   },
+  { id:'parents',       em:'👨‍👩‍👧', nm:'爸妈'   },
+  { id:'photo',         em:'📷', nm:'摄影'   },
+  { id:'other',         em:'💳', nm:'其他'   },
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+
+const MONTH_LABELS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
 let transactions   = [];
 let cardIndex      = 0;
 let pendingId      = null;
-let pendingSplit   = null;   // null = 预选模式（还没滑动）
+let pendingSplit   = null;
 let selectedCat    = null;
-let currentMonth   = new Date().toISOString().slice(0,7);
+let currentSwipeMonth = null; // null = all recents, 'YYYY-MM' = specific month
+let currentMonth   = new Date().toISOString().slice(0,7); // for report tab
 let reportView     = 'me';
 let reportData     = null;
 let progressData   = null;
 let pendingOwner   = null;
 let pendingPublicToken = null;
 let pendingInstName    = null;
-let dragging       = false;
-let startX         = 0;
-let startY         = 0;
-let deltaX         = 0;
-let deltaY         = 0;
+let dragging = false, startX = 0, startY = 0, deltaX = 0, deltaY = 0;
+const preCatMap = new Map();  // txnId → categoryId (点击预选的)
+const undoStack = [];         // [{id, name, amount, split, category, ...full txn}]
 
-// 记录每张卡片用户预先选择的分类（点击卡片后选的，尚未滑动确认）
-const preCatMap = new Map(); // txnId → categoryId
-
-// ══ TOAST ══════════════════════════════════════════════════════
+// ══ TOAST ══
 function toast(msg, dur=2400) {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -721,7 +509,7 @@ function toast(msg, dur=2400) {
   setTimeout(() => el.classList.remove('show'), dur);
 }
 
-// ══ TABS ═══════════════════════════════════════════════════════
+// ══ TABS ══
 function showTab(name, el) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -731,16 +519,81 @@ function showTab(name, el) {
   if (name === 'accounts') loadAccounts();
 }
 
-// ══ SWIPE VIEW ═════════════════════════════════════════════════
-async function loadTransactions() {
+// ══ MONTH LIST ══════════════════════════════════════════════
+function formatMonthLabel(monthStr) {
+  const d = new Date(monthStr + '-01T12:00:00');
+  return `${MONTH_LABELS[d.getMonth()]} '${String(d.getFullYear()).slice(2)}`;
+}
+
+async function loadMonthList() {
   try {
-    const r = await fetch('/api/transactions');
+    const r    = await fetch('/api/months');
+    const data = await r.json();
+    renderMonthList(data.months || [], data.total_pending || 0);
+  } catch(e) { toast('⚠️ 无法连接服务器'); }
+}
+
+function renderMonthList(months, totalPending) {
+  const container = document.getElementById('monthListRows');
+
+  // Recents row (all uncategorized)
+  const recentsBadge = totalPending > 0
+    ? `<span class="recents-badge">${totalPending}</span><span class="recents-ff">▶▶</span>`
+    : `<span class="recents-badge">✓ 全部完成</span>`;
+
+  let html = `
+    <div class="recents-row" onclick="enterSwipeMode(null)">
+      <span class="recents-row-text">recents</span>
+      <div style="display:flex;align-items:center;gap:8px">${recentsBadge}</div>
+    </div>`;
+
+  months.forEach((m, i) => {
+    const isDone  = m.pending === 0 && m.total > 0;
+    const label   = formatMonthLabel(m.month);
+    const badge   = isDone
+      ? `<span class="month-row-done">✓ 完成</span>`
+      : `<span class="month-row-badge">${m.pending} 笔</span>`;
+    html += `
+      <div class="month-row mc${i % 12}" onclick="enterSwipeMode('${m.month}')">
+        <span class="month-row-text${isDone ? ' done' : ''}">${label}</span>
+        <div class="month-row-right">${badge}<span class="month-ff">▶▶</span></div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+// ══ ENTER / EXIT SWIPE MODE ══════════════════════════════════
+async function enterSwipeMode(month) {
+  currentSwipeMonth = month;
+  document.getElementById('monthListView').style.display  = 'none';
+  document.getElementById('swipeCardView').style.display  = 'block';
+  const title = month ? formatMonthLabel(month) : 'recents';
+  document.getElementById('swipeModeTitle').textContent = title;
+  undoStack.length = 0;
+  updateUndoBtn();
+  await loadTransactionsForMode();
+}
+
+function exitSwipeMode() {
+  document.getElementById('swipeCardView').style.display  = 'none';
+  document.getElementById('monthListView').style.display  = 'block';
+  loadMonthList(); // refresh counts
+}
+
+async function loadTransactionsForMode() {
+  try {
+    const url = currentSwipeMonth
+      ? `/api/transactions?month=${currentSwipeMonth}`
+      : '/api/transactions';
+    const r = await fetch(url);
     transactions = await r.json();
     cardIndex = 0;
     renderStack();
   } catch(e) { toast('⚠️ 无法连接服务器'); }
 }
 
+// ══ CARD STACK ══════════════════════════════════════════════
 function renderStack() {
   const stack   = document.getElementById('cardStack');
   const empty   = document.getElementById('emptyState');
@@ -750,15 +603,11 @@ function renderStack() {
   const remaining = transactions.slice(cardIndex);
 
   if (remaining.length === 0) {
-    stack.style.display   = 'none';
-    actions.style.display = 'none';
-    labels.style.display  = 'none';
-    rem.style.display     = 'none';
-    empty.style.display   = 'flex';
+    stack.style.display = actions.style.display = labels.style.display = rem.style.display = 'none';
+    empty.style.display = 'flex';
     return;
   }
-
-  stack.style.display   = 'block';
+  stack.style.display = 'block';
   actions.style.display = 'flex';
   labels.style.display  = 'flex';
   rem.style.display     = 'block';
@@ -768,17 +617,14 @@ function renderStack() {
   rem.textContent = `还剩 ${remaining.length} 笔 · 已识别 ${autoCount} 笔`;
 
   stack.innerHTML = '';
-  const visible = remaining.slice(0, 3);
-
-  visible.slice().reverse().forEach((txn, revIdx) => {
-    const idx = visible.length - 1 - revIdx;
+  remaining.slice(0, 3).slice().reverse().forEach((txn, revIdx) => {
+    const idx = Math.min(remaining.length,3) - 1 - revIdx;
     const card = buildCard(txn);
     if (idx === 0) card.classList.add('front');
     else if (idx === 1) card.classList.add('back1');
     else card.classList.add('back2');
     stack.appendChild(card);
   });
-
   setupDrag(stack.lastElementChild);
 }
 
@@ -787,10 +633,9 @@ function buildCard(txn) {
   card.className = 'txn-card';
   card.dataset.id = txn.id;
   const date = new Date(txn.date + 'T12:00:00').toLocaleDateString('zh-CN', { month:'long', day:'numeric' });
-  const topCat = txn.plaid_category && txn.plaid_category[0]
+  const topCat = txn.plaid_category?.[0]
     ? `<span class="card-tag">${txn.plaid_category[0]}</span>` : '';
 
-  // 分类徽章：优先显示用户预选 > 自动识别 > 未知
   const preCat  = preCatMap.get(txn.id);
   const autoCat = txn.auto_category;
   let catBadge;
@@ -799,7 +644,7 @@ function buildCard(txn) {
   } else if (autoCat && CAT_MAP[autoCat]) {
     catBadge = `<span class="card-cat-badge auto">🤖 ${CAT_MAP[autoCat].em} ${CAT_MAP[autoCat].nm}</span>`;
   } else {
-    catBadge = `<span class="card-cat-badge unknown">❓ 待分类</span>`;
+    catBadge = `<span class="card-cat-badge unknown">❓ 点击选分类</span>`;
   }
 
   card.innerHTML = `
@@ -813,7 +658,7 @@ function buildCard(txn) {
       ${topCat}
     </div>
     ${catBadge}
-    <div class="card-tap-hint">点击修改分类</div>`;
+    <div class="card-tap-hint">点击改分类</div>`;
   return card;
 }
 
@@ -821,49 +666,37 @@ function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ── Drag / Swipe ────────────────────────────────────────────
+// ── Drag ──
 function setupDrag(card) {
   if (!card) return;
   card.addEventListener('pointerdown', onDown, { passive: true });
 }
-
 function onDown(e) {
-  if (e.button !== undefined && e.button !== 0) return;
+  if (e.button && e.button !== 0) return;
   dragging = true;
-  startX   = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
-  startY   = e.clientY ?? e.touches?.[0]?.clientY ?? 0;
-  deltaX   = 0;
-  deltaY   = 0;
+  startX = e.clientX ?? 0;
+  startY = e.clientY ?? 0;
+  deltaX = deltaY = 0;
   const card = e.currentTarget;
   card.setPointerCapture(e.pointerId);
   card.addEventListener('pointermove', onMove);
   card.addEventListener('pointerup',   onUp);
   card.addEventListener('pointercancel', onUp);
 }
-
 function onMove(e) {
   if (!dragging) return;
   deltaX = (e.clientX ?? 0) - startX;
   deltaY = (e.clientY ?? 0) - startY;
-  const card   = e.currentTarget;
-  const rotate = deltaX * 0.07;
+  const card = e.currentTarget;
   card.style.transition = 'none';
-  card.style.transform  = `translateX(${deltaX}px) rotate(${rotate}deg)`;
-
-  const lbl  = card.querySelector('.swipe-label.left');
-  const rbl  = card.querySelector('.swipe-label.right');
-  const THRESH = 55;
-  if (deltaX < -THRESH) {
-    lbl.style.opacity = Math.min(1, (-deltaX - THRESH) / 70);
-    rbl.style.opacity = 0;
-  } else if (deltaX > THRESH) {
-    rbl.style.opacity = Math.min(1, (deltaX - THRESH) / 70);
-    lbl.style.opacity = 0;
-  } else {
-    lbl.style.opacity = rbl.style.opacity = 0;
-  }
+  card.style.transform  = `translateX(${deltaX}px) rotate(${deltaX * 0.07}deg)`;
+  const lbl = card.querySelector('.swipe-label.left');
+  const rbl = card.querySelector('.swipe-label.right');
+  const T = 55;
+  if (deltaX < -T) { lbl.style.opacity = Math.min(1,(-deltaX-T)/70); rbl.style.opacity=0; }
+  else if (deltaX > T) { rbl.style.opacity = Math.min(1,(deltaX-T)/70); lbl.style.opacity=0; }
+  else { lbl.style.opacity = rbl.style.opacity = 0; }
 }
-
 function onUp(e) {
   if (!dragging) return;
   dragging = false;
@@ -872,17 +705,16 @@ function onUp(e) {
   card.removeEventListener('pointerup',   onUp);
   card.removeEventListener('pointercancel', onUp);
 
-  // 轻触（移动距离 < 10px）→ 打开预选分类弹窗
+  // 轻触 → 打开分类选择器
   if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) {
     card.style.transition = 'transform .2s ease';
     card.style.transform  = '';
-    openPreCategorySheet(card.dataset.id);
+    openCategorySheet(card.dataset.id, null); // null = 预选模式
     return;
   }
 
-  const THRESH = 90;
-  if (deltaX < -THRESH)      flyOff(card, 'shared');
-  else if (deltaX > THRESH)  flyOff(card, 'mine');
+  if (deltaX < -90)      flyOff(card, 'shared');
+  else if (deltaX > 90)  flyOff(card, 'mine');
   else {
     card.style.transition = 'transform .3s cubic-bezier(.175,.885,.32,1.275)';
     card.style.transform  = '';
@@ -893,103 +725,123 @@ function onUp(e) {
 }
 
 function flyOff(card, split) {
+  const txnId = card.dataset.id;
+  const txn   = transactions.find(t => t.id === txnId);
+  const cat   = preCatMap.get(txnId) || txn?.auto_category;
+
   const dir = split === 'shared' ? -1 : 1;
   card.style.transition = 'transform .35s ease, opacity .35s ease';
   card.style.transform  = `translateX(${dir * 520}px) rotate(${dir * 22}deg)`;
   card.style.opacity    = '0';
   card.style.pointerEvents = 'none';
-  setTimeout(() => openCategorySheet(card.dataset.id, split), 220);
+
+  if (cat && CAT_MAP[cat]) {
+    // ✅ 已知分类：直接保存，不弹框
+    setTimeout(() => saveTransaction(txnId, split, cat), 220);
+  } else {
+    // ❓ 未知分类：弹框让用户选
+    setTimeout(() => openCategorySheet(txnId, split), 220);
+  }
 }
 
 function triggerSwipe(split) {
   const stack = document.getElementById('cardStack');
   const front = stack.querySelector('.txn-card.front') || stack.lastElementChild;
-  if (front && front.classList.contains('txn-card')) flyOff(front, split);
+  if (front?.classList.contains('txn-card')) flyOff(front, split);
 }
 
-function skipCard() {
-  cardIndex++;
-  renderStack();
-  toast('跳过 ⏭');
+// ══ SAVE / UNDO ══════════════════════════════════════════════
+async function saveTransaction(txnId, split, category) {
+  const txn = transactions.find(t => t.id === txnId);
+  try {
+    await fetch('/api/categorize', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ id: txnId, split, category })
+    });
+    if (txn) undoStack.push({ ...txn, _split: split, _category: category });
+    updateUndoBtn();
+    const c = CAT_MAP[category] || { em:'', nm: category };
+    const icon = split === 'mine' ? '👤' : '👫';
+    toast(`${icon} ${c.em} ${c.nm}`);
+    preCatMap.delete(txnId);
+    cardIndex++;
+    renderStack();
+  } catch(e) { toast('❌ 保存失败，请重试'); }
 }
 
-// ══ 预选分类（点击卡片，滑动前先改分类） ═══════════════════════
-function openPreCategorySheet(txnId) {
+async function undoLast() {
+  if (!undoStack.length) { toast('没有可撤回的记录 ↩'); return; }
+  const last = undoStack.pop();
+  updateUndoBtn();
+  try {
+    await fetch('/api/uncategorize', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ id: last.id })
+    });
+    // 把交易对象放回队列前端
+    last.categorized = false;
+    const idx = transactions.findIndex(t => t.id === last.id);
+    if (idx === -1) transactions.splice(cardIndex, 0, last);
+    cardIndex = Math.max(0, cardIndex - 1);
+    renderStack();
+    toast('↩ 已撤回上一笔');
+  } catch(e) { toast('撤回失败'); }
+}
+
+function updateUndoBtn() {
+  const btn = document.getElementById('undoBtnHeader');
+  if (!btn) return;
+  btn.classList.toggle('has-undo', undoStack.length > 0);
+  btn.style.opacity = undoStack.length > 0 ? '1' : '0.4';
+}
+
+// ══ CATEGORY SHEET ══════════════════════════════════════════
+function openCategorySheet(txnId, split) {
   pendingId    = txnId;
-  pendingSplit = null; // 预选模式，还没决定 mine / shared
+  pendingSplit = split; // null = 预选模式
 
   const txn    = transactions.find(t => t.id === txnId);
-  const curCat = preCatMap.get(txnId) || txn.auto_category || null;
+  const curCat = preCatMap.get(txnId) || txn?.auto_category || null;
   selectedCat  = curCat;
 
-  document.getElementById('sheetTitle').textContent = '🏷️ 修改分类';
-  document.getElementById('sheetSub').textContent   = `${txn.name}  ·  $${txn.amount.toFixed(2)}`;
+  if (split === null) {
+    document.getElementById('sheetTitle').textContent = '🏷️ 选择分类';
+    document.getElementById('sheetBadge').innerHTML   =
+      curCat
+        ? `<div class="auto-badge">当前：${CAT_MAP[curCat]?.em||''} ${CAT_MAP[curCat]?.nm||curCat} · 可直接确认或重选</div>`
+        : `<div style="font-size:13px;color:var(--text2);margin-bottom:12px">选好分类后再左滑(共享)/右滑(我的)</div>`;
+  } else {
+    document.getElementById('sheetTitle').textContent =
+      split === 'mine' ? '👤 我自己的花费' : '👫 我们俩共享的花费';
+    document.getElementById('sheetBadge').innerHTML =
+      `<div style="font-size:13px;color:var(--text2);margin-bottom:12px">请选一个类别</div>`;
+  }
 
-  const badge = curCat
-    ? `<div class="pre-badge">当前：${CAT_MAP[curCat]?.em || ''} ${CAT_MAP[curCat]?.nm || curCat} · 可直接确认或重选</div>`
-    : `<div style="font-size:13px;color:var(--text2);margin-bottom:12px">选好分类后再左滑/右滑</div>`;
-  document.getElementById('sheetBadge').innerHTML = badge;
+  document.getElementById('sheetSub').textContent = `${txn?.name}  ·  $${txn?.amount.toFixed(2)}`;
 
-  renderCatGrid(curCat);
+  document.getElementById('catGrid').innerHTML =
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">` +
+    CATEGORIES.map(c => {
+      const isHighlight = c.id === curCat;
+      return `<button class="cat-btn${isHighlight ? ' auto-suggested sel' : ''}"
+        onclick="selectCat('${c.id}',this)">
+        <span class="em">${c.em}</span><span class="nm">${c.nm}</span>
+      </button>`;
+    }).join('') + `</div>`;
 
   const btn = document.getElementById('confirmBtn');
   if (curCat && CAT_MAP[curCat]) {
     btn.disabled    = false;
-    btn.textContent = `确认分类 — ${CAT_MAP[curCat].em} ${CAT_MAP[curCat].nm}`;
+    btn.textContent = split === null
+      ? `确认分类 — ${CAT_MAP[curCat].em} ${CAT_MAP[curCat].nm}`
+      : `确认 — ${CAT_MAP[curCat].em} ${CAT_MAP[curCat].nm}`;
   } else {
     btn.disabled    = true;
     btn.textContent = '请选择一个类别';
   }
-
   document.getElementById('overlay').classList.add('show');
-}
-
-// ══ CATEGORY SHEET（滑动后确认类别+归属） ══════════════════════
-function openCategorySheet(txnId, split) {
-  pendingId    = txnId;
-  pendingSplit = split;
-
-  const txn    = transactions.find(t => t.id === txnId);
-  // 优先使用用户预选的，再用自动识别的
-  const autoCat = preCatMap.get(txnId) || txn.auto_category || null;
-  selectedCat   = autoCat;
-
-  document.getElementById('sheetTitle').textContent =
-    split === 'mine' ? '👤 我自己的花费' : '👫 我们俩共享的花费';
-  document.getElementById('sheetSub').textContent =
-    `${txn.name}  ·  $${txn.amount.toFixed(2)}`;
-
-  const badge = autoCat
-    ? `<div class="auto-badge">🤖 已自动识别为「${CAT_MAP[autoCat]?.nm || autoCat}」，可直接确认或重新选择</div>`
-    : `<div style="font-size:13px;color:var(--text2);margin-bottom:12px">请选择一个类别</div>`;
-  document.getElementById('sheetBadge').innerHTML = badge;
-
-  renderCatGrid(autoCat);
-
-  const btn = document.getElementById('confirmBtn');
-  if (autoCat && CAT_MAP[autoCat]) {
-    btn.disabled    = false;
-    btn.textContent = `确认 — ${CAT_MAP[autoCat].em} ${CAT_MAP[autoCat].nm}`;
-  } else {
-    btn.disabled    = true;
-    btn.textContent = '请选择一个类别';
-  }
-
-  document.getElementById('overlay').classList.add('show');
-}
-
-function renderCatGrid(highlightId) {
-  document.getElementById('catGrid').innerHTML =
-    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">` +
-    CATEGORIES.map(c => {
-      const isAuto = c.id === highlightId;
-      return `<button class="cat-btn${isAuto ? ' auto-suggested sel' : ''}"
-                onclick="selectCat('${c.id}',this)">
-        <span class="em">${c.em}</span>
-        <span class="nm">${c.nm}</span>
-      </button>`;
-    }).join('') +
-    `</div>`;
 }
 
 function selectCat(id, el) {
@@ -997,7 +849,7 @@ function selectCat(id, el) {
   el.classList.add('sel');
   selectedCat = id;
   const btn = document.getElementById('confirmBtn');
-  btn.disabled = false;
+  btn.disabled    = false;
   const label = pendingSplit === null ? '确认分类' : '确认';
   btn.textContent = `${label} — ${CAT_MAP[id].em} ${CAT_MAP[id].nm}`;
 }
@@ -1006,31 +858,19 @@ async function confirmCategory() {
   if (!selectedCat) return;
   document.getElementById('overlay').classList.remove('show');
 
-  // 预选模式：仅保存到本地，等用户滑动
   if (pendingSplit === null) {
+    // 预选模式：只保存到本地，等用户滑动
     preCatMap.set(pendingId, selectedCat);
     const c = CAT_MAP[selectedCat];
-    toast(`已选 ${c.em} ${c.nm}，左滑共享 / 右滑我的`);
-    renderStack(); // 更新卡片上的分类徽章
+    toast(`已选 ${c.em} ${c.nm} · 左滑共享 / 右滑我的`);
+    renderStack();
     return;
   }
 
-  // 正常模式：滑动后保存到服务器
-  try {
-    await fetch('/api/categorize', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ id: pendingId, split: pendingSplit, category: selectedCat })
-    });
-    const c = CAT_MAP[selectedCat];
-    toast(`已记录 ${c.em} ${c.nm}`);
-    preCatMap.delete(pendingId);
-    cardIndex++;
-    renderStack();
-  } catch(e) { toast('❌ 保存失败，请重试'); }
+  // 后置选择模式（滑动后没有预设分类）：直接保存
+  await saveTransaction(pendingId, pendingSplit, selectedCat);
 }
 
-// 点击遮罩关闭
 document.getElementById('overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('overlay')) {
     document.getElementById('overlay').classList.remove('show');
@@ -1038,56 +878,54 @@ document.getElementById('overlay').addEventListener('click', e => {
   }
 });
 
-// ══ SYNC ═══════════════════════════════════════════════════════
+// ══ SYNC ══
 async function syncTransactions() {
   const icon = document.getElementById('syncIcon');
   icon.textContent = '⏳';
   try {
-    const r    = await fetch('/api/sync', { method:'POST' });
+    const r = await fetch('/api/sync', { method:'POST' });
     const data = await r.json();
-    // 同步后自动重分类，把新商家名匹配规则应用到所有未分类交易
     await fetch('/api/reclassify', { method:'POST' });
     toast(`✅ 同步完成！新增 ${data.new_transactions} 笔`);
-    await loadTransactions();
+    loadMonthList();
+    if (document.getElementById('swipeCardView').style.display !== 'none') {
+      await loadTransactionsForMode();
+    }
   } catch(e) { toast('❌ 同步失败'); }
-  finally    { icon.textContent = '🔄'; }
+  finally { icon.textContent = '🔄'; }
 }
 
-// ══ REPORT ═════════════════════════════════════════════════════
+// ══ REPORT ══
 function goToCurrentMonth() {
   currentMonth = new Date().toISOString().slice(0,7);
   loadReport();
 }
-
 function changeMonth(d) {
   const dt = new Date(currentMonth + '-01');
   dt.setMonth(dt.getMonth() + d);
   currentMonth = dt.toISOString().slice(0,7);
   loadReport();
 }
-
 function setView(v) {
   reportView = v;
   ['me','partner','combined'].forEach(id => {
-    const key = 'toggle' + id.charAt(0).toUpperCase() + id.slice(1);
-    const btn = document.getElementById(key);
+    const btn = document.getElementById('toggle' + id.charAt(0).toUpperCase() + id.slice(1));
     if (!btn) return;
     btn.style.background = id === v ? 'var(--primary)' : 'transparent';
     btn.style.color      = id === v ? 'white' : 'var(--text2)';
   });
   if (reportData) renderReport(reportData);
 }
-
 async function loadReport() {
   const label = new Date(currentMonth + '-01').toLocaleDateString('zh-CN', { year:'numeric', month:'long' });
   document.getElementById('monthLabel').textContent = label;
   try {
-    const [rReport, rProgress] = await Promise.all([
+    const [rr, rp] = await Promise.all([
       fetch(`/api/report?month=${currentMonth}`),
       fetch(`/api/progress?month=${currentMonth}`)
     ]);
-    reportData   = await rReport.json();
-    progressData = await rProgress.json();
+    reportData   = await rr.json();
+    progressData = await rp.json();
     renderProgress(progressData);
     renderReport(reportData);
   } catch(e) {
@@ -1095,261 +933,173 @@ async function loadReport() {
       '<p style="text-align:center;color:var(--text2);padding:40px">加载失败</p>';
   }
 }
-
-// 初始化报告：自动跳到最新有数据的月份
-async function initReport() {
-  try {
-    const r = await fetch('/api/months');
-    const months = await r.json();
-    if (months.length > 0) {
-      const thisMonth = new Date().toISOString().slice(0,7);
-      // 如果当月有数据就用当月，否则用最新有数据的月份
-      currentMonth = months.includes(thisMonth) ? thisMonth : months[0];
-    }
-  } catch(e) { /* 用默认值 */ }
-  loadReport();
-}
-
-// 渲染进度条
 function renderProgress(prog) {
   if (!prog) { document.getElementById('progressSection').innerHTML = ''; return; }
-
-  const me = prog.me, partner = prog.partner;
-  const mePct      = me.total      > 0 ? Math.round(me.done      / me.total      * 100) : 0;
-  const partnerPct = partner.total > 0 ? Math.round(partner.done / partner.total * 100) : 0;
-
-  const meBadge = me.pending === 0 && me.total > 0
-    ? `<span class="done-badge">✓ 全部完成</span>`
-    : me.pending > 0
-      ? `<span class="pending-badge">${me.pending} 笔待分类</span>`
+  const me = prog.me, pa = prog.partner;
+  const mePct = me.total > 0 ? Math.round(me.done / me.total * 100) : 0;
+  const paPct = pa.total > 0 ? Math.round(pa.done / pa.total * 100) : 0;
+  const badge = (p) => p.pending===0 && p.total>0
+    ? `<span class="done-badge">✓ 完成</span>`
+    : p.pending>0
+      ? `<span class="pending-badge">${p.pending} 笔待分类</span>`
       : `<span style="font-size:11px;color:var(--text2)">暂无记录</span>`;
-
-  const partnerBadge = partner.pending === 0 && partner.total > 0
-    ? `<span class="done-badge">✓ 全部完成</span>`
-    : partner.pending > 0
-      ? `<span class="pending-badge">${partner.pending} 笔待分类</span>`
-      : `<span style="font-size:11px;color:var(--text2)">暂无记录</span>`;
-
   document.getElementById('progressSection').innerHTML = `
     <div class="progress-card">
       <h3>📋 本月记账进度</h3>
       <div class="progress-row">
-        <div class="progress-header">
-          <span>👤 我（${me.done}/${me.total} 笔）</span>
-          ${meBadge}
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" style="width:${mePct}%;background:var(--mine)"></div>
-        </div>
+        <div class="progress-header"><span>👤 我（${me.done}/${me.total} 笔）</span>${badge(me)}</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${mePct}%;background:var(--mine)"></div></div>
       </div>
       <div class="progress-row">
-        <div class="progress-header">
-          <span>🙋 Ta（${partner.done}/${partner.total} 笔）</span>
-          ${partnerBadge}
-        </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" style="width:${partnerPct}%;background:var(--primary)"></div>
-        </div>
+        <div class="progress-header"><span>🙋 Ta（${pa.done}/${pa.total} 笔）</span>${badge(pa)}</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${paPct}%;background:var(--primary)"></div></div>
       </div>
       ${prog.both_cleared
-        ? `<div style="margin-top:12px;text-align:center;font-size:13px;font-weight:700;color:var(--mine)">🎉 两人本月账单均已记完！</div>`
-        : `<div style="margin-top:10px;text-align:center;font-size:12px;color:var(--text2)">两人都记完才能结清本月</div>`
-      }
+        ? `<div style="margin-top:12px;text-align:center;font-size:13px;font-weight:700;color:var(--mine)">🎉 两人本月均已记完！</div>`
+        : `<div style="margin-top:10px;text-align:center;font-size:12px;color:var(--text2)">两人都记完才能结清</div>`}
     </div>`;
 }
-
 function renderReport(data) {
-  // 只有两人都记完（both_cleared）才显示绿色两清
-  const cleared = progressData && progressData.both_cleared;
+  const cleared = progressData?.both_cleared;
   const net = data.net_balance || 0;
-
   let netCard;
   if (!cleared) {
-    // 还有待分类的，先不显示结清状态
     netCard = `<div class="sum-card hero" style="background:#8E8E93">
       <div class="sum-label" style="color:rgba(255,255,255,.8)">⏳ 账单记录中…</div>
-      <div class="sum-value" style="color:white;font-size:18px">等两人都记完再结算</div>
-    </div>`;
+      <div class="sum-value" style="color:white;font-size:18px">等两人都记完再结算</div></div>`;
   } else if (net === 0) {
     netCard = `<div class="sum-card hero" style="background:#34C759">
       <div class="sum-label" style="color:rgba(255,255,255,.8)">🎉 本月两清了！</div>
-      <div class="sum-value" style="color:white;font-size:22px">互不相欠 👩‍❤️‍👩</div>
-    </div>`;
+      <div class="sum-value" style="color:white;font-size:22px">互不相欠 👩‍❤️‍👩</div></div>`;
   } else if (net > 0) {
     netCard = `<div class="sum-card hero" style="background:var(--shared)">
       <div class="sum-label" style="color:rgba(255,255,255,.8)">Ta 欠你 💸</div>
-      <div class="sum-value" style="color:white">$${Math.abs(net).toFixed(2)}</div>
-    </div>`;
+      <div class="sum-value" style="color:white">$${Math.abs(net).toFixed(2)}</div></div>`;
   } else {
     netCard = `<div class="sum-card hero" style="background:var(--danger)">
       <div class="sum-label" style="color:rgba(255,255,255,.8)">你欠 Ta 💸</div>
-      <div class="sum-value" style="color:white">$${Math.abs(net).toFixed(2)}</div>
-    </div>`;
+      <div class="sum-value" style="color:white">$${Math.abs(net).toFixed(2)}</div></div>`;
   }
-
   let summaryCards = '';
   if (reportView === 'me') {
-    summaryCards = `
-      ${netCard}
-      <div class="sum-card">
-        <div class="sum-label">👩 我自己的</div>
-        <div class="sum-value">$${(data.me_own||0).toFixed(2)}</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-label">👩‍❤️‍👩 共享（我的一半）</div>
-        <div class="sum-value">$${((data.total_shared||0)*0.5).toFixed(2)}</div>
-      </div>
+    summaryCards = `${netCard}
+      <div class="sum-card"><div class="sum-label">👤 我自己的</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">👩‍❤️‍👩 共享（我的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
       <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
         <div class="sum-label" style="color:rgba(255,255,255,.8)">我本月应付总计</div>
-        <div class="sum-value" style="color:white;font-size:32px">$${((data.me_own||0)+(data.total_shared||0)*0.5).toFixed(2)}</div>
-      </div>`;
+        <div class="sum-value" style="color:white;font-size:32px">$${((data.me_own||0)+(data.total_shared||0)*.5).toFixed(2)}</div></div>`;
   } else if (reportView === 'partner') {
-    summaryCards = `
-      ${netCard}
-      <div class="sum-card">
-        <div class="sum-label">🙋 Ta自己的</div>
-        <div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-label">👩‍❤️‍👩 共享（Ta的一半）</div>
-        <div class="sum-value">$${((data.total_shared||0)*0.5).toFixed(2)}</div>
-      </div>
+    summaryCards = `${netCard}
+      <div class="sum-card"><div class="sum-label">🙋 Ta自己的</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">👩‍❤️‍👩 共享（Ta的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
       <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
         <div class="sum-label" style="color:rgba(255,255,255,.8)">Ta本月应付总计</div>
-        <div class="sum-value" style="color:white;font-size:32px">$${((data.partner_own||0)+(data.total_shared||0)*0.5).toFixed(2)}</div>
-      </div>`;
+        <div class="sum-value" style="color:white;font-size:32px">$${((data.partner_own||0)+(data.total_shared||0)*.5).toFixed(2)}</div></div>`;
   } else {
-    summaryCards = `
-      ${netCard}
-      <div class="sum-card">
-        <div class="sum-label">👤 我的花费</div>
-        <div class="sum-value">$${(data.me_own||0).toFixed(2)}</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-label">🙋 Ta的花费</div>
-        <div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-label">👩‍❤️‍👩 共享总额</div>
-        <div class="sum-value">$${(data.total_shared||0).toFixed(2)}</div>
-      </div>
-      <div class="sum-card" style="background:var(--primary)">
-        <div class="sum-label" style="color:rgba(255,255,255,.8)">两人合计</div>
-        <div class="sum-value" style="color:white">$${(data.combined_total||0).toFixed(2)}</div>
-      </div>`;
+    summaryCards = `${netCard}
+      <div class="sum-card"><div class="sum-label">👤 我的花费</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">🙋 Ta的花费</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">👩‍❤️‍👩 共享总额</div><div class="sum-value">$${(data.total_shared||0).toFixed(2)}</div></div>
+      <div class="sum-card" style="background:var(--primary)"><div class="sum-label" style="color:rgba(255,255,255,.8)">两人合计</div><div class="sum-value" style="color:white">$${(data.combined_total||0).toFixed(2)}</div></div>`;
   }
-
-  const rows = Object.entries(data.by_category||{})
-    .map(([id, v]) => {
-      const c = CAT_MAP[id] || { em:'💳', nm:id };
-      let amount = 0;
-      if (reportView==='me')      amount = (v.me||0) + (v.shared||0)*0.5;
-      else if (reportView==='partner') amount = (v.partner||0) + (v.shared||0)*0.5;
-      else amount = (v.me||0) + (v.partner||0) + (v.shared||0);
-      return { ...c, amount, me:v.me||0, partner:v.partner||0, shared:v.shared||0 };
-    })
-    .filter(r => r.amount > 0)
-    .sort((a,b) => b.amount - a.amount);
-
+  const rows = Object.entries(data.by_category||{}).map(([id,v]) => {
+    const c = CAT_MAP[id] || {em:'💳', nm:id};
+    let amount = reportView==='me' ? (v.me||0)+(v.shared||0)*.5
+               : reportView==='partner' ? (v.partner||0)+(v.shared||0)*.5
+               : (v.me||0)+(v.partner||0)+(v.shared||0);
+    return {...c, amount, me:v.me||0, partner:v.partner||0, shared:v.shared||0};
+  }).filter(r=>r.amount>0).sort((a,b)=>b.amount-a.amount);
   const rowsHtml = rows.length
-    ? rows.map(r => `
-      <div class="brow">
-        <div class="brow-left">
-          <span class="brow-emoji">${r.em}</span>
-          <span class="brow-name">${r.nm}</span>
-        </div>
+    ? rows.map(r=>`<div class="brow">
+        <div class="brow-left"><span class="brow-emoji">${r.em}</span><span class="brow-name">${r.nm}</span></div>
         <div class="brow-right">
           <div class="brow-amount">$${r.amount.toFixed(2)}</div>
-          <div class="brow-sub">${[
-            r.me      ? `我 $${r.me.toFixed(2)}` : '',
-            r.partner ? `Ta $${r.partner.toFixed(2)}` : '',
-            r.shared  ? `共 $${r.shared.toFixed(2)}` : ''
-          ].filter(Boolean).join(' · ')}</div>
-        </div>
-      </div>`).join('')
+          <div class="brow-sub">${[r.me?`我 $${r.me.toFixed(2)}`:'',r.partner?`Ta $${r.partner.toFixed(2)}`:'',r.shared?`共 $${r.shared.toFixed(2)}`:''].filter(Boolean).join(' · ')}</div>
+        </div></div>`).join('')
     : '<p style="text-align:center;color:var(--text2);padding:20px">本月暂无已分类记录</p>';
-
   document.getElementById('reportContent').innerHTML = `
     <div class="summary-grid">${summaryCards}</div>
     <div class="breakdown-card"><h3>按类别明细</h3>${rowsHtml}</div>
     <div class="report-footer">共 ${data.transaction_count} 笔已分类</div>`;
 }
 
-// ══ ACCOUNTS ═══════════════════════════════════════════════════
+// ══ ACCOUNTS ══
 async function loadAccounts() {
   try {
-    const r   = await fetch('/api/accounts');
-    const acc = await r.json();
-    const el  = document.getElementById('accountList');
-    el.innerHTML = acc.length
-      ? acc.map(a => `
-        <div class="account-card">
-          <span class="acc-icon">${a.owner === 'me' ? '🙋‍♀️' : '🙋'}</span>
-          <div>
-            <div class="acc-name">${escHtml(a.name)}</div>
-            <div class="acc-status">${a.owner === 'me' ? '我的账户' : "Ta的账户"} · ✓ 已连接</div>
-          </div>
+    const acc = await (await fetch('/api/accounts')).json();
+    document.getElementById('accountList').innerHTML = acc.length
+      ? acc.map(a=>`<div class="account-card">
+          <span class="acc-icon">${a.owner==='me'?'🙋‍♀️':'🙋'}</span>
+          <div><div class="acc-name">${escHtml(a.name)}</div>
+          <div class="acc-status">${a.owner==='me'?'我的账户':'Ta的账户'} · ✓ 已连接</div></div>
         </div>`).join('')
       : '<p style="text-align:center;color:var(--text2);padding:30px 0">还没有连接任何账户</p>';
   } catch(e) { toast('加载账户失败'); }
 }
-
+function openOwnerModal(public_token, meta) {
+  pendingPublicToken = public_token;
+  pendingInstName    = meta?.institution?.name || '账户';
+  pendingOwner       = null;
+  document.getElementById('ownerSubtitle').textContent = pendingInstName;
+  document.getElementById('btnMe').classList.remove('sel');
+  document.getElementById('btnPartner').classList.remove('sel');
+  document.getElementById('ownerConfirmBtn').disabled = true;
+  document.getElementById('ownerConfirmBtn').textContent = '请选择';
+  document.getElementById('ownerOverlay').classList.add('show');
+}
 function selectOwner(owner) {
   pendingOwner = owner;
-  document.getElementById('btnMe').classList.toggle('sel', owner === 'me');
-  document.getElementById('btnPartner').classList.toggle('sel', owner === 'partner');
+  document.getElementById('btnMe').classList.toggle('sel', owner==='me');
+  document.getElementById('btnPartner').classList.toggle('sel', owner==='partner');
   document.getElementById('ownerConfirmBtn').disabled = false;
   document.getElementById('ownerConfirmBtn').textContent =
-    owner === 'me' ? '确认 — 这是我的账户 🙋‍♀️' : '确认 — 这是Ta的账户 🙋';
+    owner==='me' ? '确认 — 这是我的账户 🙋‍♀️' : '确认 — 这是Ta的账户 🙋';
 }
-
 async function confirmOwner() {
   document.getElementById('ownerOverlay').classList.remove('show');
-  const name = pendingInstName || '账户';
   try {
-    await fetch('/api/exchange_token', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ public_token: pendingPublicToken, account_name: name, owner: pendingOwner })
+    await fetch('/api/exchange_token', { method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({public_token:pendingPublicToken, account_name:pendingInstName||'账户', owner:pendingOwner})
     });
-    toast(`✅ ${name} 连接成功！正在同步…`);
+    toast(`✅ ${pendingInstName} 连接成功！正在同步…`);
     loadAccounts();
     syncTransactions();
   } catch(e) { toast('❌ 连接失败'); }
 }
+async function resetAndResync() {
+  if (!confirm('将补全漏掉的历史交易。\n\n✅ 已分类的账单完全不受影响，放心操作。')) return;
+  try {
+    toast('⏳ 正在重置…');
+    await fetch('/api/reset_cursors', { method: 'POST' });
+    const r    = await fetch('/api/sync', { method: 'POST' });
+    const data = await r.json();
+    await fetch('/api/reclassify', { method: 'POST' });
+    toast(`✅ 完成！共同步 ${data.new_transactions} 笔新交易`);
+    loadMonthList();
+  } catch(e) { toast('❌ 操作失败，请重试'); }
+}
 
 async function connectAccount() {
   try {
-    const r    = await fetch('/api/create_link_token', { method:'POST' });
-    const data = await r.json();
-    if (data.error) { toast('❌ 无法创建连接：' + (data.error.error_message || '')); return; }
-
-    const handler = Plaid.create({
+    const data = await (await fetch('/api/create_link_token',{method:'POST'})).json();
+    if (data.error) { toast('❌ 无法创建连接：' + (data.error.error_message||'')); return; }
+    Plaid.create({
       token: data.link_token,
-      onSuccess: (public_token, meta) => {
-        pendingPublicToken = public_token;
-        pendingInstName    = meta.institution?.name || '账户';
-        pendingOwner       = null;
-        document.getElementById('ownerSubtitle').textContent = pendingInstName;
-        document.getElementById('btnMe').classList.remove('sel');
-        document.getElementById('btnPartner').classList.remove('sel');
-        document.getElementById('ownerConfirmBtn').disabled = true;
-        document.getElementById('ownerConfirmBtn').textContent = '请选择';
-        document.getElementById('ownerOverlay').classList.add('show');
-      },
-      onExit: (err) => { if (err) toast('❌ ' + (err.error_code || '') + ': ' + (err.error_message || '连接取消')); }
-    });
-    handler.open();
+      onSuccess: openOwnerModal,
+      onExit: (err) => { if(err) toast('❌ ' + (err.error_message||'连接取消')); }
+    }).open();
   } catch(e) { toast('❌ 连接失败'); }
 }
 
-// ══ INIT ═══════════════════════════════════════════════════════
+// ══ INIT ══
 document.addEventListener('DOMContentLoaded', async () => {
   handleOAuthRedirect();
-  // 启动时重新分类一次（应用最新的商家名匹配规则）
-  fetch('/api/reclassify', { method:'POST' }).catch(() => {});
-  await loadTransactions();
-  initReport(); // 自动跳到最新有数据的月份
+  fetch('/api/reclassify', {method:'POST'}).catch(()=>{});
+  await loadMonthList();
+  currentMonth = new Date().toISOString().slice(0,7);
+  loadReport();
+  updateUndoBtn();
 });
 </script>
 </body>

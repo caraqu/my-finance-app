@@ -29,6 +29,9 @@ api_client = plaid.ApiClient(configuration)
 client      = plaid_api.PlaidApi(api_client)
 
 # ── SQLite ─────────────────────────────────────────────────
+# DATA_DIR 优先使用环境变量（Railway Volume 挂载路径），保证 redeploy 不丢数据
+# 在 Railway 上：Settings → Volumes → Mount Path 设为 /data
+# 然后设环境变量 DATA_DIR=/data
 DATA_DIR = os.environ.get("DATA_DIR", os.path.dirname(os.path.abspath(__file__)))
 DB_PATH  = os.path.join(DATA_DIR, "finance.db")
 
@@ -49,7 +52,7 @@ def init_db():
                 item_id      TEXT PRIMARY KEY,
                 access_token TEXT NOT NULL,
                 name         TEXT NOT NULL,
-                owner        TEXT NOT NULL DEFAULT 'me',  -- 'me' | 'partner'
+                owner        TEXT NOT NULL DEFAULT 'me',
                 cursor       TEXT
             );
             CREATE TABLE IF NOT EXISTS transactions (
@@ -58,15 +61,14 @@ def init_db():
                 name           TEXT NOT NULL,
                 amount         REAL NOT NULL,
                 account        TEXT NOT NULL,
-                payer          TEXT NOT NULL DEFAULT 'me', -- 'me' | 'partner'
+                payer          TEXT NOT NULL DEFAULT 'me',
                 plaid_category TEXT,
                 auto_category  TEXT,
                 category       TEXT,
-                split          TEXT,      -- 'mine' | 'shared' | 'partner'
+                split          TEXT,
                 categorized    INTEGER DEFAULT 0
             );
         """)
-        # migrate: add owner/payer columns if upgrading from old schema
         for col, tbl, default in [
             ('owner', 'accounts', "'me'"),
             ('payer', 'transactions', "'me'"),
@@ -76,10 +78,8 @@ def init_db():
             except Exception:
                 pass
 
-# ── Merchant Name → Category (优先于 Plaid 类别，更准确) ─────
-# 按长度从长到短匹配，避免 "uber" 匹配到 "uber eats"
+# ── 商家名 → 分类（长优先匹配，比 Plaid 类别更准） ─────────
 MERCHANT_NAME_MAP = [
-    # Amazon 生态
     ('amazon prime video', 'subscription'),
     ('amazon prime',       'subscription'),
     ('amazon music',       'subscription'),
@@ -88,14 +88,12 @@ MERCHANT_NAME_MAP = [
     ('amazon',             'amazon'),
     ('amzn mktp',          'amazon'),
     ('amzn',               'amazon'),
-    # 外卖/送餐（需在 uber/lyft 前面）
     ('uber eats',          'food'),
     ('ubereats',           'food'),
     ('doordash',           'food'),
     ('grubhub',            'food'),
     ('postmates',          'food'),
     ('instacart',          'grocery'),
-    # 超市/购物
     ('whole foods',        'grocery'),
     ('trader joe',         'grocery'),
     ('safeway',            'grocery'),
@@ -113,7 +111,6 @@ MERCHANT_NAME_MAP = [
     ('costco',             'grocery'),
     ('walmart',            'grocery'),
     ('target',             'grocery'),
-    # 餐厅/快餐（Starbucks 归入吃饭，因为咖啡类别已移除）
     ('starbucks',          'food'),
     ('dunkin',             'food'),
     ('dutch bros',         'food'),
@@ -147,22 +144,17 @@ MERCHANT_NAME_MAP = [
     ('cava',               'food'),
     ('jersey mike',        'food'),
     ('jimmy john',         'food'),
-    # 交通（需在 lyft/uber 前面已处理 uber eats）
     ('uber',               'transport'),
     ('lyft',               'transport'),
     ('didi',               'transport'),
     ('bird scooter',       'transport'),
     ('lime',               'transport'),
     ('caltrain',           'transport'),
-    ('bart ',              'transport'),
-    ('mta ',               'transport'),
-    ('metro transit',      'transport'),
     ('zipcar',             'transport'),
     ('enterprise rent',    'transport'),
     ('hertz',              'transport'),
     ('avis',               'transport'),
     ('budget car',         'transport'),
-    # 旅行（航空公司 + 酒店）
     ('united airlines',    'travel'),
     ('american airlines',  'travel'),
     ('alaska airlines',    'travel'),
@@ -171,9 +163,6 @@ MERCHANT_NAME_MAP = [
     ('southwest airlines', 'travel'),
     ('jetblue',            'travel'),
     ('delta air',          'travel'),
-    ('delta ',             'travel'),
-    ('united ',            'travel'),
-    ('american air',       'travel'),
     ('southwest',          'travel'),
     ('airbnb',             'travel'),
     ('marriott',           'travel'),
@@ -185,9 +174,7 @@ MERCHANT_NAME_MAP = [
     ('expedia',            'travel'),
     ('booking.com',        'travel'),
     ('hotels.com',         'travel'),
-    ('kayak',              'travel'),
     ('amtrak',             'travel'),
-    # 家居
     ('home depot',         'home'),
     ("lowe's",             'home'),
     ('lowes',              'home'),
@@ -195,10 +182,8 @@ MERCHANT_NAME_MAP = [
     ('wayfair',            'home'),
     ('bed bath',           'home'),
     ('williams-sonoma',    'home'),
-    ('williams sonoma',    'home'),
     ('crate and barrel',   'home'),
     ('west elm',           'home'),
-    # 购物
     ('apple store',        'shopping'),
     ('apple.com',          'shopping'),
     ('best buy',           'shopping'),
@@ -207,18 +192,13 @@ MERCHANT_NAME_MAP = [
     ('macys',              'shopping'),
     ('zara',               'shopping'),
     ('h&m',                'shopping'),
-    ('gap ',               'shopping'),
     ('old navy',           'shopping'),
     ('banana republic',    'shopping'),
     ('tj maxx',            'shopping'),
-    ('tjmaxx',             'shopping'),
     ('marshalls',          'shopping'),
-    ('ross store',         'shopping'),
     ('nike',               'shopping'),
     ('adidas',             'shopping'),
     ('uniqlo',             'shopping'),
-    ('zara',               'shopping'),
-    # 订阅/流媒体
     ('netflix',            'subscription'),
     ('spotify',            'subscription'),
     ('hulu',               'subscription'),
@@ -231,7 +211,6 @@ MERCHANT_NAME_MAP = [
     ('hbo',                'subscription'),
     ('peacock',            'subscription'),
     ('paramount+',         'subscription'),
-    ('paramount plus',     'subscription'),
     ('twitch',             'subscription'),
     ('adobe',              'subscription'),
     ('microsoft 365',      'subscription'),
@@ -244,84 +223,73 @@ MERCHANT_NAME_MAP = [
     ('comcast',            'subscription'),
     ('xfinity',            'subscription'),
     ('spectrum',           'subscription'),
-    # 医疗/健康
     ('cvs',                'health'),
     ('walgreens',          'health'),
     ('rite aid',           'health'),
     ('one medical',        'health'),
     ('kaiser',             'health'),
-    ('cvs pharmacy',       'health'),
-    # 摄影
     ('adorama',            'photo'),
     ('b&h photo',          'photo'),
     ('bhphotovideo',       'photo'),
-    ('moment ',            'photo'),
-    ('adobe lightroom',    'photo'),
 ]
 
-# ── Plaid category fallback (coffee shop → food since coffee removed) ────
 PLAID_CATEGORY_MAP = {
-    'restaurants':                   'food',
-    'fast food':                     'food',
-    'food and drink':                'food',
-    'dining':                        'food',
-    'coffee shop':                   'food',   # coffee 类别已移除 → 归入吃饭
-    'coffee':                        'food',
-    'groceries':                     'grocery',
-    'supermarkets and groceries':    'grocery',
-    'grocery':                       'grocery',
-    'veterinarians':                 'cat',
-    'pets':                          'cat',
-    'pet supplies':                  'cat',
-    'transportation':                'transport',
-    'taxi':                          'transport',
-    'ride share':                    'transport',
-    'car service':                   'transport',
-    'public transportation':         'transport',
-    'gas stations':                  'transport',
-    'parking':                       'transport',
-    'airlines and aviation':         'travel',
-    'travel':                        'travel',
-    'hotels and motels':             'travel',
-    'lodging':                       'travel',
-    'shops':                         'shopping',
-    'shopping':                      'shopping',
-    'clothing and accessories':      'shopping',
-    'electronics':                   'shopping',
-    'department stores':             'shopping',
-    'arts and entertainment':        'entertainment',
-    'recreation':                    'entertainment',
-    'gyms and fitness centers':      'entertainment',
-    'sport':                         'entertainment',
-    'games':                         'entertainment',
-    'movies and dvds':               'entertainment',
-    'healthcare':                    'health',
-    'pharmacies':                    'health',
-    'hospitals':                     'health',
-    'dentists':                      'health',
-    'doctors':                       'health',
-    'home improvement':              'home',
-    'furniture':                     'home',
-    'utilities':                     'home',
-    'subscription':                  'subscription',
-    'digital purchase':              'subscription',
-    'software':                      'subscription',
-    'cable':                         'subscription',
-    'internet services':             'subscription',
-    'photography':                   'photo',
-    'camera':                        'photo',
+    'restaurants':                'food',
+    'fast food':                  'food',
+    'food and drink':             'food',
+    'dining':                     'food',
+    'coffee shop':                'food',
+    'coffee':                     'food',
+    'groceries':                  'grocery',
+    'supermarkets and groceries': 'grocery',
+    'grocery':                    'grocery',
+    'veterinarians':              'cat',
+    'pets':                       'cat',
+    'pet supplies':               'cat',
+    'transportation':             'transport',
+    'taxi':                       'transport',
+    'ride share':                 'transport',
+    'car service':                'transport',
+    'public transportation':      'transport',
+    'gas stations':               'transport',
+    'parking':                    'transport',
+    'airlines and aviation':      'travel',
+    'travel':                     'travel',
+    'hotels and motels':          'travel',
+    'lodging':                    'travel',
+    'shops':                      'shopping',
+    'shopping':                   'shopping',
+    'clothing and accessories':   'shopping',
+    'electronics':                'shopping',
+    'department stores':          'shopping',
+    'arts and entertainment':     'entertainment',
+    'recreation':                 'entertainment',
+    'gyms and fitness centers':   'entertainment',
+    'sport':                      'entertainment',
+    'games':                      'entertainment',
+    'movies and dvds':            'entertainment',
+    'healthcare':                 'health',
+    'pharmacies':                 'health',
+    'hospitals':                  'health',
+    'dentists':                   'health',
+    'doctors':                    'health',
+    'home improvement':           'home',
+    'furniture':                  'home',
+    'utilities':                  'home',
+    'subscription':               'subscription',
+    'digital purchase':           'subscription',
+    'software':                   'subscription',
+    'cable':                      'subscription',
+    'internet services':          'subscription',
+    'photography':                'photo',
+    'camera':                     'photo',
 }
 
 def auto_classify(plaid_categories: List[str], merchant_name: str = '') -> Optional[str]:
-    """先用商家名精确匹配（更准），再用 Plaid 类别兜底。"""
     name_lower = merchant_name.lower()
-
-    # 1. 商家名匹配（按列表顺序，越长越优先）
     for pattern, cat in MERCHANT_NAME_MAP:
         if pattern in name_lower:
             return cat
-
-    # 2. Plaid 类别兜底
     for raw in reversed(plaid_categories):
         key = raw.lower().strip()
         if key in PLAID_CATEGORY_MAP:
@@ -414,7 +382,7 @@ def sync_transactions():
                         amount = txn['amount']
                         if amount <= 0:
                             continue
-                        plaid_cats = txn.get('category') or []
+                        plaid_cats    = txn.get('category') or []
                         merchant_name = txn['name']
                         if not db.execute("SELECT id FROM transactions WHERE id=?",
                                           (txn['transaction_id'],)).fetchone():
@@ -437,9 +405,17 @@ def sync_transactions():
                 errors.append(str(e))
     return jsonify({'new_transactions': new_count, 'errors': errors})
 
+@app.route('/api/reset_cursors', methods=['POST'])
+def reset_cursors():
+    """重置所有账户的同步游标，下次同步将重新拉取全部历史交易。
+    如果发现交易数量异常少（只有100多条），执行此操作后再同步即可。"""
+    with get_db() as db:
+        db.execute("UPDATE accounts SET cursor=NULL")
+    return jsonify({'success': True, 'message': '游标已重置，请重新同步以获取完整历史记录'})
+
 @app.route('/api/reclassify', methods=['POST'])
 def reclassify_all():
-    """重新对所有未分类交易运行智能分类（在商家名匹配升级后调用一次）。"""
+    """对所有未分类交易重新运行自动分类（升级规则后调用）。"""
     with get_db() as db:
         rows = db.execute(
             "SELECT id, name, plaid_category FROM transactions WHERE categorized=0"
@@ -448,10 +424,8 @@ def reclassify_all():
         for row in rows:
             plaid_cats = json.loads(row['plaid_category'] or '[]')
             new_cat = auto_classify(plaid_cats, row['name'])
-            db.execute(
-                "UPDATE transactions SET auto_category=? WHERE id=?",
-                (new_cat, row['id'])
-            )
+            db.execute("UPDATE transactions SET auto_category=? WHERE id=?",
+                       (new_cat, row['id']))
             if new_cat:
                 count += 1
     return jsonify({'updated': count})
@@ -459,9 +433,17 @@ def reclassify_all():
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
     show_all = request.args.get('all', 'false') == 'true'
+    month    = request.args.get('month')   # e.g. '2026-05'
     with get_db() as db:
-        q = "SELECT * FROM transactions" + ("" if show_all else " WHERE categorized=0")
-        rows = db.execute(q + " ORDER BY date DESC").fetchall()
+        conditions = []
+        if not show_all:
+            conditions.append("categorized=0")
+        if month:
+            conditions.append(f"date LIKE '{month}%'")
+        where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+        rows = db.execute(
+            f"SELECT * FROM transactions {where} ORDER BY date DESC"
+        ).fetchall()
     return jsonify([row_to_dict(r) for r in rows])
 
 @app.route('/api/categorize', methods=['POST'])
@@ -474,18 +456,40 @@ def categorize():
         ).rowcount
     return jsonify({'success': True}) if updated else (jsonify({'error': 'Not found'}), 404)
 
+@app.route('/api/uncategorize', methods=['POST'])
+def uncategorize():
+    """撤回上一笔：把已分类的交易恢复为未分类状态。"""
+    txn_id = request.json.get('id')
+    with get_db() as db:
+        db.execute(
+            "UPDATE transactions SET split=NULL, category=NULL, categorized=0 WHERE id=?",
+            (txn_id,)
+        )
+    return jsonify({'success': True})
+
 @app.route('/api/months', methods=['GET'])
 def get_months():
-    """返回有交易记录的月份列表（降序），用于报告页默认跳转到最新月份。"""
+    """返回有交易记录的月份列表，包含每月的完成/待办统计。"""
     with get_db() as db:
-        rows = db.execute(
-            "SELECT DISTINCT substr(date,1,7) as month FROM transactions ORDER BY month DESC"
-        ).fetchall()
-    return jsonify([r['month'] for r in rows])
+        rows = db.execute("""
+            SELECT
+                substr(date,1,7)    AS month,
+                COUNT(*)            AS total,
+                SUM(categorized)    AS done,
+                COUNT(*) - SUM(categorized) AS pending
+            FROM transactions
+            GROUP BY month
+            ORDER BY month DESC
+        """).fetchall()
+        # 全部待分类数量（用于 recents 行）
+        total_pending = db.execute(
+            "SELECT COUNT(*) FROM transactions WHERE categorized=0"
+        ).fetchone()[0]
+    months = [dict(r) for r in rows]
+    return jsonify({'months': months, 'total_pending': total_pending})
 
 @app.route('/api/progress', methods=['GET'])
 def progress():
-    """返回指定月份每人的记账进度，用于报告页显示进度条和"两清"状态。"""
     month = request.args.get('month', datetime.now().strftime('%Y-%m'))
     with get_db() as db:
         rows = db.execute(
@@ -494,76 +498,54 @@ def progress():
                GROUP BY payer, categorized""",
             (month + '%',)
         ).fetchall()
-
     me_done = me_pending = partner_done = partner_pending = 0
     for row in rows:
         if row['payer'] == 'me':
-            if row['categorized']:
-                me_done += row['cnt']
-            else:
-                me_pending += row['cnt']
+            if row['categorized']: me_done    += row['cnt']
+            else:                  me_pending += row['cnt']
         else:
-            if row['categorized']:
-                partner_done += row['cnt']
-            else:
-                partner_pending += row['cnt']
-
+            if row['categorized']: partner_done    += row['cnt']
+            else:                  partner_pending += row['cnt']
     me_total      = me_done + me_pending
     partner_total = partner_done + partner_pending
-    both_cleared  = (me_pending == 0 and partner_pending == 0
-                     and (me_total + partner_total) > 0)
-
     return jsonify({
         'month': month,
         'me':      {'done': me_done,      'pending': me_pending,      'total': me_total},
         'partner': {'done': partner_done, 'pending': partner_pending, 'total': partner_total},
-        'both_cleared': both_cleared,
+        'both_cleared': (me_pending == 0 and partner_pending == 0
+                         and (me_total + partner_total) > 0),
     })
 
 @app.route('/api/report', methods=['GET'])
 def report():
     month       = request.args.get('month', datetime.now().strftime('%Y-%m'))
     split_ratio = float(request.args.get('ratio', 0.5))
-
     with get_db() as db:
         rows = db.execute(
             "SELECT * FROM transactions WHERE categorized=1 AND date LIKE ?",
             (month + '%',)
         ).fetchall()
-
     txns = [row_to_dict(r) for r in rows]
-
     me_own              = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='mine')
     partner_own         = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='mine')
     me_shared_paid      = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='shared')
     partner_shared_paid = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='shared')
     total_shared        = me_shared_paid + partner_shared_paid
-
-    net_balance = (me_shared_paid - partner_shared_paid) * split_ratio
-
+    net_balance         = (me_shared_paid - partner_shared_paid) * split_ratio
     by_category: dict = {}
     for t in txns:
         cat = t.get('category') or 'other'
         if cat not in by_category:
             by_category[cat] = {'me': 0.0, 'partner': 0.0, 'shared': 0.0}
-        if t['split'] == 'mine' and t['payer'] == 'me':
-            by_category[cat]['me']      += t['amount']
-        elif t['split'] == 'mine' and t['payer'] == 'partner':
-            by_category[cat]['partner'] += t['amount']
-        else:
-            by_category[cat]['shared']  += t['amount']
-
+        if   t['split'] == 'mine' and t['payer'] == 'me':      by_category[cat]['me']      += t['amount']
+        elif t['split'] == 'mine' and t['payer'] == 'partner': by_category[cat]['partner'] += t['amount']
+        else:                                                   by_category[cat]['shared']  += t['amount']
     return jsonify({
-        'month':               month,
-        'me_own':              round(me_own, 2),
-        'partner_own':         round(partner_own, 2),
-        'me_shared_paid':      round(me_shared_paid, 2),
-        'partner_shared_paid': round(partner_shared_paid, 2),
-        'total_shared':        round(total_shared, 2),
-        'net_balance':         round(net_balance, 2),
-        'combined_total':      round(me_own + partner_own + total_shared, 2),
-        'by_category':         by_category,
-        'transaction_count':   len(txns),
+        'month': month, 'me_own': round(me_own,2), 'partner_own': round(partner_own,2),
+        'me_shared_paid': round(me_shared_paid,2), 'partner_shared_paid': round(partner_shared_paid,2),
+        'total_shared': round(total_shared,2), 'net_balance': round(net_balance,2),
+        'combined_total': round(me_own+partner_own+total_shared,2),
+        'by_category': by_category, 'transaction_count': len(txns),
     })
 
 if __name__ == '__main__':
@@ -571,4 +553,5 @@ if __name__ == '__main__':
     init_db()
     port = int(os.environ.get("PORT", 5000))
     print(f"\n💑  Finance with Fiancée — http://localhost:{port}\n")
+    print(f"    数据库位置: {DB_PATH}\n")
     app.run(host='0.0.0.0', port=port, debug=False)
