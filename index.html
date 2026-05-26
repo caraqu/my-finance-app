@@ -547,7 +547,7 @@ function renderMonthList(months, totalPending) {
 
   let html = `
     <div class="recents-row" onclick="enterSwipeMode(null)">
-      <span class="recents-row-text">全部未分类</span>
+      <span class="recents-row-text">All</span>
       <div style="display:flex;align-items:center;gap:8px">${recentsBadge}</div>
     </div>`;
 
@@ -954,7 +954,7 @@ function renderProgress(prog) {
       : `<span style="font-size:11px;color:var(--text2)">暂无记录</span>`;
   document.getElementById('progressSection').innerHTML = `
     <div class="progress-card">
-      <h3>📋 ${formatMonthLabel(prog.month)} 记账进度</h3>
+      <h3>📋 ${MONTH_LABELS[Number(currentMonth.split('-')[1])-1]} '${currentMonth.slice(2,4)} 记账进度</h3>
       <div class="progress-row">
         <div class="progress-header"><span>${ME.em} ${ME.name}（${me.done}/${me.total} 笔）</span>${badge(me)}</div>
         <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${mePct}%;background:var(--mine)"></div></div>
