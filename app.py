@@ -121,6 +121,10 @@ def row_to_dict(row):
 def index():
     return send_from_directory('.', 'index.html')
 
+@app.route('/apple-touch-icon.png')
+def apple_icon():
+    return send_from_directory('.', 'apple-touch-icon.png')
+
 @app.route('/api/create_link_token', methods=['POST'])
 def create_link_token():
     try:
