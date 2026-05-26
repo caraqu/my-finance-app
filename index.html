@@ -554,7 +554,7 @@ async function handleOAuthRedirect() {
         document.getElementById('ownerConfirmBtn').textContent = '请选择';
         document.getElementById('ownerOverlay').classList.add('show');
       },
-      onExit: err => { if (err) toast('连接取消'); }
+      onExit: (err, meta) => { if (err) toast('❌ ' + (err.error_code || '') + ': ' + (err.error_message || '连接取消')); }
     });
     handler.open();
   } catch(e) { console.error('OAuth redirect error:', e); }
@@ -1062,7 +1062,7 @@ async function connectAccount() {
         document.getElementById('ownerConfirmBtn').textContent = '请选择';
         document.getElementById('ownerOverlay').classList.add('show');
       },
-      onExit: err => { if (err) toast('连接取消'); }
+      onExit: (err, meta) => { if (err) toast('❌ ' + (err.error_code || '') + ': ' + (err.error_message || '连接取消')); }
     });
     handler.open();
   } catch(e) { toast('❌ 连接失败'); }
