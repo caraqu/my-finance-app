@@ -22,7 +22,7 @@ PLAID_CLIENT_ID = "6a139ca06fec6d000d3d83a3"
 PLAID_SECRET    = os.environ.get("PLAID_SECRET", "21d24cef5f1f77e0f83049aaffba65")
 
 configuration = plaid.Configuration(
-    host="https://sandbox.plaid.com",
+    host="https://production.plaid.com",
     api_key={'clientId': PLAID_CLIENT_ID, 'secret': PLAID_SECRET}
 )
 api_client = plaid.ApiClient(configuration)
