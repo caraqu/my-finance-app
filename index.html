@@ -359,14 +359,14 @@ body {
     <div class="swipe-tab">
       <div class="swipe-labels">
         <span class="label-shared">← 👩‍❤️‍👩 共享</span>
-        <span class="label-mine">我的 👤 →</span>
+        <span class="label-mine">恐龙公主 🦕 →</span>
       </div>
       <div class="card-stack" id="cardStack"></div>
       <div class="remaining" id="remaining"></div>
       <div class="action-row" id="actionRow" style="margin-top:24px">
-        <button class="action-btn btn-shared" onclick="triggerSwipe('shared')" title="共享">👩‍❤️‍👩</button>
+        <button class="action-btn btn-shared" onclick="triggerSwipe('shared')" title="共享">💑</button>
         <button class="action-btn btn-undo"   onclick="undoLast()"             title="撤回">↩</button>
-        <button class="action-btn btn-mine"   onclick="triggerSwipe('mine')"   title="我的">👤</button>
+        <button class="action-btn btn-mine"   onclick="triggerSwipe('mine')"   title="我的">🦕</button>
       </div>
       <div class="empty-state" id="emptyState">
         <div class="big-emoji">🎉</div>
@@ -389,9 +389,9 @@ body {
       <button class="today-btn" onclick="goToCurrentMonth()">📅 跳到本月</button>
     </div>
     <div style="display:flex;background:var(--border);border-radius:12px;padding:3px;margin-bottom:16px">
-      <button id="toggleMe"       onclick="setView('me')"       style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:white;transition:all .2s">👤 我的</button>
-      <button id="togglePartner"  onclick="setView('partner')"  style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">🙋 Ta的</button>
-      <button id="toggleCombined" onclick="setView('combined')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">👫 合计</button>
+      <button id="toggleMe"       onclick="setView('me')"       style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:white;transition:all .2s">🦕 恐龙公主</button>
+      <button id="togglePartner"  onclick="setView('partner')"  style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">🐗 野猪公主</button>
+      <button id="toggleCombined" onclick="setView('combined')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">💑 合计</button>
     </div>
     <div id="progressSection"></div>
     <div id="reportContent"><p style="text-align:center;color:var(--text2);padding:60px 0">加载中…</p></div>
@@ -424,10 +424,10 @@ body {
     <div class="sheet-subtitle" id="ownerSubtitle"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0">
       <button class="cat-btn" id="btnMe" onclick="selectOwner('me')" style="padding:20px">
-        <span class="em">👩</span><span class="nm">我的</span>
+        <span class="em">👩</span><span class="nm">恐龙公主</span>
       </button>
       <button class="cat-btn" id="btnPartner" onclick="selectOwner('partner')" style="padding:20px">
-        <span class="em">👩</span><span class="nm">Ta的</span>
+        <span class="em">👩</span><span class="nm">野猪公主</span>
       </button>
     </div>
     <button class="confirm-btn" id="ownerConfirmBtn" onclick="confirmOwner()" disabled>请选择</button>
@@ -481,6 +481,10 @@ const CATEGORIES = [
   { id:'other',         em:'💳', nm:'其他'   },
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
+
+// 人物设定（改名字改这里就够了）
+const ME      = { name: '恐龙公主', em: '🦕' };
+const PARTNER = { name: '野猪公主', em: '🐗' };
 
 const MONTH_LABELS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
@@ -543,7 +547,7 @@ function renderMonthList(months, totalPending) {
 
   let html = `
     <div class="recents-row" onclick="enterSwipeMode(null)">
-      <span class="recents-row-text">recents</span>
+      <span class="recents-row-text">全部未分类</span>
       <div style="display:flex;align-items:center;gap:8px">${recentsBadge}</div>
     </div>`;
 
@@ -649,7 +653,7 @@ function buildCard(txn) {
 
   card.innerHTML = `
     <div class="swipe-label left">👩‍❤️‍👩 共享</div>
-    <div class="swipe-label right">👤 我的</div>
+    <div class="swipe-label right">🦕 我的</div>
     <div class="card-merchant">${escHtml(txn.name)}</div>
     <div class="card-amount">$${txn.amount.toFixed(2)}</div>
     <div class="card-tags">
@@ -762,7 +766,7 @@ async function saveTransaction(txnId, split, category) {
     if (txn) undoStack.push({ ...txn, _split: split, _category: category });
     updateUndoBtn();
     const c = CAT_MAP[category] || { em:'', nm: category };
-    const icon = split === 'mine' ? '👤' : '👫';
+    const icon = split === 'mine' ? ME.em : '💑';
     toast(`${icon} ${c.em} ${c.nm}`);
     preCatMap.delete(txnId);
     cardIndex++;
@@ -814,7 +818,7 @@ function openCategorySheet(txnId, split) {
         : `<div style="font-size:13px;color:var(--text2);margin-bottom:12px">选好分类后再左滑(共享)/右滑(我的)</div>`;
   } else {
     document.getElementById('sheetTitle').textContent =
-      split === 'mine' ? '👤 我自己的花费' : '👫 我们俩共享的花费';
+      split === 'mine' ? `🦕 ${ME.name}的花费` : `💑 共同花费`;
     document.getElementById('sheetBadge').innerHTML =
       `<div style="font-size:13px;color:var(--text2);margin-bottom:12px">请选一个类别</div>`;
   }
@@ -897,13 +901,18 @@ async function syncTransactions() {
 
 // ══ REPORT ══
 function goToCurrentMonth() {
-  currentMonth = new Date().toISOString().slice(0,7);
+  const now = new Date();
+  // 用本地时间避免时区偏移
+  currentMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   loadReport();
 }
 function changeMonth(d) {
-  const dt = new Date(currentMonth + '-01');
-  dt.setMonth(dt.getMonth() + d);
-  currentMonth = dt.toISOString().slice(0,7);
+  // 直接操作年月数字，完全避免 Date 时区问题
+  let [y, m] = currentMonth.split('-').map(Number);
+  m += d;
+  if (m > 12) { y++; m = 1; }
+  if (m < 1)  { y--; m = 12; }
+  currentMonth = `${y}-${String(m).padStart(2,'0')}`;
   loadReport();
 }
 function setView(v) {
@@ -945,13 +954,13 @@ function renderProgress(prog) {
       : `<span style="font-size:11px;color:var(--text2)">暂无记录</span>`;
   document.getElementById('progressSection').innerHTML = `
     <div class="progress-card">
-      <h3>📋 本月记账进度</h3>
+      <h3>📋 ${formatMonthLabel(prog.month)} 记账进度</h3>
       <div class="progress-row">
-        <div class="progress-header"><span>👤 我（${me.done}/${me.total} 笔）</span>${badge(me)}</div>
+        <div class="progress-header"><span>${ME.em} ${ME.name}（${me.done}/${me.total} 笔）</span>${badge(me)}</div>
         <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${mePct}%;background:var(--mine)"></div></div>
       </div>
       <div class="progress-row">
-        <div class="progress-header"><span>🙋 Ta（${pa.done}/${pa.total} 笔）</span>${badge(pa)}</div>
+        <div class="progress-header"><span>${PARTNER.em} ${PARTNER.name}（${pa.done}/${pa.total} 笔）</span>${badge(pa)}</div>
         <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${paPct}%;background:var(--primary)"></div></div>
       </div>
       ${prog.both_cleared
@@ -970,35 +979,35 @@ function renderReport(data) {
   } else if (net === 0) {
     netCard = `<div class="sum-card hero" style="background:#34C759">
       <div class="sum-label" style="color:rgba(255,255,255,.8)">🎉 本月两清了！</div>
-      <div class="sum-value" style="color:white;font-size:22px">互不相欠 👩‍❤️‍👩</div></div>`;
+      <div class="sum-value" style="color:white;font-size:22px">互不相欠 💑</div></div>`;
   } else if (net > 0) {
     netCard = `<div class="sum-card hero" style="background:var(--shared)">
-      <div class="sum-label" style="color:rgba(255,255,255,.8)">Ta 欠你 💸</div>
+      <div class="sum-label" style="color:rgba(255,255,255,.8)">${PARTNER.name} 欠你 💸</div>
       <div class="sum-value" style="color:white">$${Math.abs(net).toFixed(2)}</div></div>`;
   } else {
     netCard = `<div class="sum-card hero" style="background:var(--danger)">
-      <div class="sum-label" style="color:rgba(255,255,255,.8)">你欠 Ta 💸</div>
+      <div class="sum-label" style="color:rgba(255,255,255,.8)">你欠 ${PARTNER.name} 💸</div>
       <div class="sum-value" style="color:white">$${Math.abs(net).toFixed(2)}</div></div>`;
   }
   let summaryCards = '';
   if (reportView === 'me') {
     summaryCards = `${netCard}
-      <div class="sum-card"><div class="sum-label">👤 我自己的</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">👩‍❤️‍👩 共享（我的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">${ME.em} ${ME.name}自己的</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">💑 共享（我的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
       <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
-        <div class="sum-label" style="color:rgba(255,255,255,.8)">我本月应付总计</div>
+        <div class="sum-label" style="color:rgba(255,255,255,.8)">${ME.name}本月应付总计</div>
         <div class="sum-value" style="color:white;font-size:32px">$${((data.me_own||0)+(data.total_shared||0)*.5).toFixed(2)}</div></div>`;
   } else if (reportView === 'partner') {
     summaryCards = `${netCard}
-      <div class="sum-card"><div class="sum-label">🙋 Ta自己的</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">👩‍❤️‍👩 共享（Ta的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">${PARTNER.em} ${PARTNER.name}自己的</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">💑 共享（Ta的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
       <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
-        <div class="sum-label" style="color:rgba(255,255,255,.8)">Ta本月应付总计</div>
+        <div class="sum-label" style="color:rgba(255,255,255,.8)">${PARTNER.name}本月应付总计</div>
         <div class="sum-value" style="color:white;font-size:32px">$${((data.partner_own||0)+(data.total_shared||0)*.5).toFixed(2)}</div></div>`;
   } else {
     summaryCards = `${netCard}
-      <div class="sum-card"><div class="sum-label">👤 我的花费</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">🙋 Ta的花费</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">${ME.em} ${ME.name}的花费</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">${PARTNER.em} ${PARTNER.name}的花费</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
       <div class="sum-card"><div class="sum-label">👩‍❤️‍👩 共享总额</div><div class="sum-value">$${(data.total_shared||0).toFixed(2)}</div></div>
       <div class="sum-card" style="background:var(--primary)"><div class="sum-label" style="color:rgba(255,255,255,.8)">两人合计</div><div class="sum-value" style="color:white">$${(data.combined_total||0).toFixed(2)}</div></div>`;
   }
@@ -1029,9 +1038,9 @@ async function loadAccounts() {
     const acc = await (await fetch('/api/accounts')).json();
     document.getElementById('accountList').innerHTML = acc.length
       ? acc.map(a=>`<div class="account-card">
-          <span class="acc-icon">${a.owner==='me'?'🙋‍♀️':'🙋'}</span>
+          <span class="acc-icon">${a.owner==='me'?'🦕':'🐗'}</span>
           <div><div class="acc-name">${escHtml(a.name)}</div>
-          <div class="acc-status">${a.owner==='me'?'我的账户':'Ta的账户'} · ✓ 已连接</div></div>
+          <div class="acc-status">${a.owner==='me'?'恐龙公主账户':'野猪公主账户'} · ✓ 已连接</div></div>
         </div>`).join('')
       : '<p style="text-align:center;color:var(--text2);padding:30px 0">还没有连接任何账户</p>';
   } catch(e) { toast('加载账户失败'); }
@@ -1053,7 +1062,7 @@ function selectOwner(owner) {
   document.getElementById('btnPartner').classList.toggle('sel', owner==='partner');
   document.getElementById('ownerConfirmBtn').disabled = false;
   document.getElementById('ownerConfirmBtn').textContent =
-    owner==='me' ? '确认 — 这是我的账户 🙋‍♀️' : '确认 — 这是Ta的账户 🙋';
+    owner==='me' ? '确认 — 恐龙公主的账户 🦕' : '确认 — 野猪公主的账户 🐗';
 }
 async function confirmOwner() {
   document.getElementById('ownerOverlay').classList.remove('show');
@@ -1097,7 +1106,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   handleOAuthRedirect();
   fetch('/api/reclassify', {method:'POST'}).catch(()=>{});
   await loadMonthList();
-  currentMonth = new Date().toISOString().slice(0,7);
+  const _now = new Date();
+  currentMonth = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}`;
   loadReport();
   updateUndoBtn();
 });
