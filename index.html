@@ -534,6 +534,29 @@ body {
 
 <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script>
+// ══ OAuth REDIRECT 处理 ════════════════════════════════════════
+function handleOAuthRedirect() {
+  if (!window.location.href.includes('oauth_state_id')) return;
+  const token = localStorage.getItem('plaid_link_token');
+  if (!token) return;
+  const handler = Plaid.create({
+    token: token,
+    onSuccess: (public_token, meta) => {
+      pendingPublicToken = public_token;
+      pendingInstName    = meta.institution?.name || '账户';
+      pendingOwner       = null;
+      document.getElementById('ownerSubtitle').textContent = pendingInstName;
+      document.getElementById('btnMe').classList.remove('sel');
+      document.getElementById('btnPartner').classList.remove('sel');
+      document.getElementById('ownerConfirmBtn').disabled = true;
+      document.getElementById('ownerConfirmBtn').textContent = '请选择';
+      document.getElementById('ownerOverlay').classList.add('show');
+    },
+    onExit: err => { if (err) toast('连接取消'); }
+  });
+  handler.open();
+}
+
 // ══ DATA ═══════════════════════════════════════════════════════
 const CATEGORIES = [
   { id:'food',         em:'🍜', nm:'吃饭'   },
@@ -1023,6 +1046,7 @@ async function connectAccount() {
     const data = await r.json();
     if (data.error) { toast('❌ 无法创建连接：' + (data.error.error_message || '')); return; }
 
+    localStorage.setItem('plaid_link_token', data.link_token);
     const handler = Plaid.create({
       token: data.link_token,
       onSuccess: (public_token, meta) => {
@@ -1044,6 +1068,7 @@ async function connectAccount() {
 
 // ══ INIT ═══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  handleOAuthRedirect();
   loadTransactions();
   loadReport();
 });
