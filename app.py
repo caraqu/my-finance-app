@@ -22,7 +22,7 @@ PLAID_CLIENT_ID = "6a139ca06fec6d000d3d83a3"
 PLAID_SECRET    = os.environ.get("PLAID_SECRET", "21d24cef5f1f77e0f83049aaffba65")
 
 configuration = plaid.Configuration(
-    host="https://production.plaid.com",
+    host="https://development.plaid.com",
     api_key={'clientId': PLAID_CLIENT_ID, 'secret': PLAID_SECRET}
 )
 api_client = plaid.ApiClient(configuration)
@@ -136,9 +136,22 @@ def create_link_token():
             user=LinkTokenCreateRequestUser(client_user_id='user-1'),
             redirect_uri="https://my-finance-app-production-39aa.up.railway.app"
         )
-        return jsonify({'link_token': client.link_token_create(req)['link_token']})
+        token = client.link_token_create(req)['link_token']
+        # 保存 token 供 OAuth redirect 回调使用
+        with open(os.path.join(DATA_DIR, 'link_token.txt'), 'w') as f:
+            f.write(token)
+        return jsonify({'link_token': token})
     except plaid.ApiException as e:
         return jsonify({'error': json.loads(e.body)}), 400
+
+@app.route('/api/get_link_token', methods=['GET'])
+def get_link_token():
+    try:
+        with open(os.path.join(DATA_DIR, 'link_token.txt'), 'r') as f:
+            token = f.read().strip()
+        return jsonify({'link_token': token})
+    except Exception:
+        return jsonify({'error': 'No token found'}), 404
 
 @app.route('/api/exchange_token', methods=['POST'])
 def exchange_token():
