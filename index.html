@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>💰 我的记账本</title>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Finance with Fiancée">
+<title>💑 Finance with Fiancée</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -428,7 +431,7 @@ body {
 
 <!-- HEADER -->
 <div class="header">
-  <h1>💰 我的记账本</h1>
+  <h1>💑 Finance with Fiancée</h1>
   <button class="sync-btn" id="syncBtn" onclick="syncTransactions()">
     <span id="syncIcon">🔄</span> 同步
   </button>
@@ -445,7 +448,7 @@ body {
 <div id="tab-swipe" class="tab-content active">
   <div class="swipe-tab">
     <div class="swipe-labels">
-      <span class="label-shared">← 👫 共享</span>
+      <span class="label-shared">← 👩‍❤️‍👩 共享</span>
       <span class="label-mine">我的 👤 →</span>
     </div>
 
@@ -453,7 +456,7 @@ body {
     <div class="remaining" id="remaining"></div>
 
     <div class="action-row" id="actionRow" style="margin-top:28px">
-      <button class="action-btn btn-shared" onclick="triggerSwipe('shared')" title="共享">👫</button>
+      <button class="action-btn btn-shared" onclick="triggerSwipe('shared')" title="共享">👩‍❤️‍👩</button>
       <button class="action-btn btn-skip"   onclick="skipCard()"              title="跳过">⏭</button>
       <button class="action-btn btn-mine"   onclick="triggerSwipe('mine')"   title="我的">👤</button>
     </div>
@@ -474,6 +477,12 @@ body {
       <span class="month-label" id="monthLabel">—</span>
       <button class="mnav-btn" onclick="changeMonth(1)">›</button>
     </div>
+    <!-- view toggle -->
+    <div style="display:flex;background:var(--border);border-radius:12px;padding:3px;margin-bottom:16px">
+      <button id="toggleMe"       onclick="setView('me')"       style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:white;transition:all .2s">👤 我的</button>
+      <button id="togglePartner"  onclick="setView('partner')"  style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">🙋 Ta的</button>
+      <button id="toggleCombined" onclick="setView('combined')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">👫 合计</button>
+    </div>
     <div id="reportContent">
       <p style="text-align:center;color:var(--text2);padding:60px 0">加载中…</p>
     </div>
@@ -485,7 +494,25 @@ body {
   <div class="accounts-tab">
     <div id="accountList"></div>
     <button class="add-btn" onclick="connectAccount()">＋ 连接新账户</button>
-    <p class="plaid-note">🔒 由 Plaid 安全连接，Cara 的银行凭据不会经过本 app</p>
+    <p class="plaid-note">🔒 由 Plaid 安全连接 👩‍❤️‍👩</p>
+  </div>
+</div>
+
+<!-- ── OWNER MODAL ────────────────────────────────────── -->
+<div class="overlay" id="ownerOverlay">
+  <div class="cat-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">这是谁的账户？</div>
+    <div class="sheet-subtitle" id="ownerSubtitle"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0">
+      <button class="cat-btn" id="btnMe" onclick="selectOwner('me')" style="padding:20px">
+        <span class="em">👩</span><span class="nm">我的</span>
+      </button>
+      <button class="cat-btn" id="btnPartner" onclick="selectOwner('partner')" style="padding:20px">
+        <span class="em">👩</span><span class="nm">Ta的</span>
+      </button>
+    </div>
+    <button class="confirm-btn" id="ownerConfirmBtn" onclick="confirmOwner()" disabled>请选择</button>
   </div>
 </div>
 
@@ -532,6 +559,11 @@ let pendingId      = null;
 let pendingSplit   = null;
 let selectedCat    = null;
 let currentMonth   = new Date().toISOString().slice(0,7);
+let reportView     = 'me';      // 'me' | 'partner' | 'combined'
+let reportData     = null;
+let pendingOwner   = null;
+let pendingPublicToken = null;
+let pendingInstName    = null;
 let dragging       = false;
 let startX         = 0;
 let deltaX         = 0;
@@ -612,7 +644,7 @@ function buildCard(txn) {
   const date = new Date(txn.date + 'T12:00:00').toLocaleDateString('zh-CN', { month:'long', day:'numeric' });
   const topCat = txn.plaid_category && txn.plaid_category[0] ? `<span class="card-tag">${txn.plaid_category[0]}</span>` : '';
   card.innerHTML = `
-    <div class="swipe-label left">👫 共享</div>
+    <div class="swipe-label left">👩‍❤️‍👩 共享</div>
     <div class="swipe-label right">👤 我的</div>
     <div class="card-merchant">${escHtml(txn.name)}</div>
     <div class="card-amount">$${txn.amount.toFixed(2)}</div>
@@ -812,14 +844,25 @@ function changeMonth(d) {
   loadReport();
 }
 
+function setView(v) {
+  reportView = v;
+  ['me','partner','combined'].forEach(id => {
+    const key = 'toggle' + id.charAt(0).toUpperCase() + id.slice(1);
+    const btn = document.getElementById(key);
+    if (!btn) return;
+    btn.style.background = id === v ? 'var(--primary)' : 'transparent';
+    btn.style.color      = id === v ? 'white' : 'var(--text2)';
+  });
+  if (reportData) renderReport(reportData);
+}
+
 async function loadReport() {
   const label = new Date(currentMonth + '-01').toLocaleDateString('zh-CN', { year:'numeric', month:'long' });
   document.getElementById('monthLabel').textContent = label;
-
   try {
-    const r    = await fetch(`/api/report?month=${currentMonth}`);
-    const data = await r.json();
-    renderReport(data);
+    const r = await fetch(`/api/report?month=${currentMonth}`);
+    reportData = await r.json();
+    renderReport(reportData);
   } catch(e) {
     document.getElementById('reportContent').innerHTML =
       '<p style="text-align:center;color:var(--text2);padding:40px">加载失败</p>';
@@ -827,13 +870,85 @@ async function loadReport() {
 }
 
 function renderReport(data) {
-  const rows = Object.entries(data.by_category)
+  const net = data.net_balance || 0;
+  const netCard = net === 0
+    ? `<div class="sum-card hero" style="background:#34C759">
+         <div class="sum-label" style="color:rgba(255,255,255,.8)">🎉 本月两清了！</div>
+         <div class="sum-value" style="color:white;font-size:22px">互不相欠 👩‍❤️‍👩</div>
+       </div>`
+    : net > 0
+    ? `<div class="sum-card hero" style="background:var(--shared)">
+         <div class="sum-label" style="color:rgba(255,255,255,.8)">Ta 欠你 💸</div>
+         <div class="sum-value" style="color:white">$${Math.abs(net).toFixed(2)}</div>
+       </div>`
+    : `<div class="sum-card hero" style="background:var(--danger)">
+         <div class="sum-label" style="color:rgba(255,255,255,.8)">你欠 Ta 💸</div>
+         <div class="sum-value" style="color:white">$${Math.abs(net).toFixed(2)}</div>
+       </div>`;
+
+  let summaryCards = '';
+  if (reportView === 'me') {
+    summaryCards = `
+      ${netCard}
+      <div class="sum-card">
+        <div class="sum-label">👩 我自己的</div>
+        <div class="sum-value">$${(data.me_own||0).toFixed(2)}</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">👩‍❤️‍👩 共享（我的一半）</div>
+        <div class="sum-value">$${((data.total_shared||0)*0.5).toFixed(2)}</div>
+      </div>
+      <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
+        <div class="sum-label" style="color:rgba(255,255,255,.8)">我本月应付总计</div>
+        <div class="sum-value" style="color:white;font-size:32px">$${((data.me_own||0)+(data.total_shared||0)*0.5).toFixed(2)}</div>
+      </div>`;
+  } else if (reportView === 'partner') {
+    summaryCards = `
+      ${netCard}
+      <div class="sum-card">
+        <div class="sum-label">👩 Ta自己的</div>
+        <div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">👩‍❤️‍👩 共享（Ta的一半）</div>
+        <div class="sum-value">$${((data.total_shared||0)*0.5).toFixed(2)}</div>
+      </div>
+      <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
+        <div class="sum-label" style="color:rgba(255,255,255,.8)">Ta本月应付总计</div>
+        <div class="sum-value" style="color:white;font-size:32px">$${((data.partner_own||0)+(data.total_shared||0)*0.5).toFixed(2)}</div>
+      </div>`;
+  } else {
+    summaryCards = `
+      ${netCard}
+      <div class="sum-card">
+        <div class="sum-label">👩 我的花费</div>
+        <div class="sum-value">$${(data.me_own||0).toFixed(2)}</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">👩 Ta的花费</div>
+        <div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div>
+      </div>
+      <div class="sum-card">
+        <div class="sum-label">👩‍❤️‍👩 共享总额</div>
+        <div class="sum-value">$${(data.total_shared||0).toFixed(2)}</div>
+      </div>
+      <div class="sum-card" style="background:var(--primary)">
+        <div class="sum-label" style="color:rgba(255,255,255,.8)">两人合计</div>
+        <div class="sum-value" style="color:white">$${(data.combined_total||0).toFixed(2)}</div>
+      </div>`;
+  }
+
+  const rows = Object.entries(data.by_category||{})
     .map(([id, v]) => {
-      const c   = CAT_MAP[id] || { em:'💳', nm:id };
-      const myT = v.mine + v.shared * 0.5;
-      return { ...c, mine:v.mine, shared:v.shared, myT };
+      const c = CAT_MAP[id] || { em:'💳', nm:id };
+      let amount = 0;
+      if (reportView==='me')      amount = (v.me||0) + (v.shared||0)*0.5;
+      else if (reportView==='partner') amount = (v.partner||0) + (v.shared||0)*0.5;
+      else amount = (v.me||0) + (v.partner||0) + (v.shared||0);
+      return { ...c, amount, me:v.me||0, partner:v.partner||0, shared:v.shared||0 };
     })
-    .sort((a,b) => b.myT - a.myT);
+    .filter(r => r.amount > 0)
+    .sort((a,b) => b.amount - a.amount);
 
   const rowsHtml = rows.length
     ? rows.map(r => `
@@ -843,35 +958,19 @@ function renderReport(data) {
           <span class="brow-name">${r.nm}</span>
         </div>
         <div class="brow-right">
-          <div class="brow-amount">$${r.myT.toFixed(2)}</div>
-          <div class="brow-sub">
-            ${r.mine   ? `我 $${r.mine.toFixed(2)}`   : ''}
-            ${r.shared ? ` + 共 $${r.shared.toFixed(2)}` : ''}
-          </div>
+          <div class="brow-amount">$${r.amount.toFixed(2)}</div>
+          <div class="brow-sub">${[
+            r.me      ? `我 $${r.me.toFixed(2)}` : '',
+            r.partner ? `Ta $${r.partner.toFixed(2)}` : '',
+            r.shared  ? `共 $${r.shared.toFixed(2)}` : ''
+          ].filter(Boolean).join(' · ')}</div>
         </div>
       </div>`).join('')
     : '<p style="text-align:center;color:var(--text2);padding:20px">本月暂无已分类记录</p>';
 
   document.getElementById('reportContent').innerHTML = `
-    <div class="summary-grid">
-      <div class="sum-card hero">
-        <div class="sum-label">本月我的总花费</div>
-        <div class="sum-value">$${data.grand_total.toFixed(2)}</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-label">👤 纯我自己</div>
-        <div class="sum-value">$${data.mine_total.toFixed(2)}</div>
-      </div>
-      <div class="sum-card">
-        <div class="sum-label">👫 共享（我的一半）</div>
-        <div class="sum-value">$${data.my_share_of_shared.toFixed(2)}</div>
-      </div>
-    </div>
-
-    <div class="breakdown-card">
-      <h3>按类别明细</h3>
-      ${rowsHtml}
-    </div>
+    <div class="summary-grid">${summaryCards}</div>
+    <div class="breakdown-card"><h3>按类别明细</h3>${rowsHtml}</div>
     <div class="report-footer">共 ${data.transaction_count} 笔已分类</div>`;
 }
 
@@ -884,14 +983,38 @@ async function loadAccounts() {
     el.innerHTML = acc.length
       ? acc.map(a => `
         <div class="account-card">
-          <span class="acc-icon">🏦</span>
+          <span class="acc-icon">${a.owner === 'me' ? '🙋‍♀️' : '🙋'}</span>
           <div>
             <div class="acc-name">${escHtml(a.name)}</div>
-            <div class="acc-status">✓ 已连接</div>
+            <div class="acc-status">${a.owner === 'me' ? '我的账户' : "Ta的账户"} · ✓ 已连接</div>
           </div>
         </div>`).join('')
       : '<p style="text-align:center;color:var(--text2);padding:30px 0">还没有连接任何账户</p>';
   } catch(e) { toast('加载账户失败'); }
+}
+
+function selectOwner(owner) {
+  pendingOwner = owner;
+  document.getElementById('btnMe').classList.toggle('sel', owner === 'me');
+  document.getElementById('btnPartner').classList.toggle('sel', owner === 'partner');
+  document.getElementById('ownerConfirmBtn').disabled = false;
+  document.getElementById('ownerConfirmBtn').textContent =
+    owner === 'me' ? '确认 — 这是我的账户 🙋‍♀️' : '确认 — 这是Ta的账户 🙋';
+}
+
+async function confirmOwner() {
+  document.getElementById('ownerOverlay').classList.remove('show');
+  const name = pendingInstName || '账户';
+  try {
+    await fetch('/api/exchange_token', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ public_token: pendingPublicToken, account_name: name, owner: pendingOwner })
+    });
+    toast(`✅ ${name} 连接成功！正在同步…`);
+    loadAccounts();
+    syncTransactions();
+  } catch(e) { toast('❌ 连接失败'); }
 }
 
 async function connectAccount() {
@@ -902,16 +1025,16 @@ async function connectAccount() {
 
     const handler = Plaid.create({
       token: data.link_token,
-      onSuccess: async (public_token, meta) => {
-        const name = meta.institution?.name || '我的账户';
-        await fetch('/api/exchange_token', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ public_token, account_name: name })
-        });
-        toast(`✅ ${name} 连接成功！正在同步…`);
-        loadAccounts();
-        syncTransactions();
+      onSuccess: (public_token, meta) => {
+        pendingPublicToken = public_token;
+        pendingInstName    = meta.institution?.name || '账户';
+        pendingOwner       = null;
+        document.getElementById('ownerSubtitle').textContent = pendingInstName;
+        document.getElementById('btnMe').classList.remove('sel');
+        document.getElementById('btnPartner').classList.remove('sel');
+        document.getElementById('ownerConfirmBtn').disabled = true;
+        document.getElementById('ownerConfirmBtn').textContent = '请选择';
+        document.getElementById('ownerOverlay').classList.add('show');
       },
       onExit: err => { if (err) toast('连接取消'); }
     });
