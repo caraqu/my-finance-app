@@ -133,7 +133,7 @@ def create_link_token():
             client_name="Finance with Fiancée",
             country_codes=[CountryCode('US')],
             language='en',
-            user=LinkTokenCreateRequestUser(client_user_id='user-1')
+            user=LinkTokenCreateRequestUser(client_user_id='user-1'),
             redirect_uri="https://my-finance-app-production-39aa.up.railway.app"
         )
         return jsonify({'link_token': client.link_token_create(req)['link_token']})
