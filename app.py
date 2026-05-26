@@ -76,31 +76,252 @@ def init_db():
             except Exception:
                 pass
 
-# ── Auto-classify ──────────────────────────────────────────
+# ── Merchant Name → Category (优先于 Plaid 类别，更准确) ─────
+# 按长度从长到短匹配，避免 "uber" 匹配到 "uber eats"
+MERCHANT_NAME_MAP = [
+    # Amazon 生态
+    ('amazon prime video', 'subscription'),
+    ('amazon prime',       'subscription'),
+    ('amazon music',       'subscription'),
+    ('amazon web service', 'subscription'),
+    ('amazon.com',         'amazon'),
+    ('amazon',             'amazon'),
+    ('amzn mktp',          'amazon'),
+    ('amzn',               'amazon'),
+    # 外卖/送餐（需在 uber/lyft 前面）
+    ('uber eats',          'food'),
+    ('ubereats',           'food'),
+    ('doordash',           'food'),
+    ('grubhub',            'food'),
+    ('postmates',          'food'),
+    ('instacart',          'grocery'),
+    # 超市/购物
+    ('whole foods',        'grocery'),
+    ('trader joe',         'grocery'),
+    ('safeway',            'grocery'),
+    ('albertsons',         'grocery'),
+    ('kroger',             'grocery'),
+    ('publix',             'grocery'),
+    ('sprouts',            'grocery'),
+    ('aldi',               'grocery'),
+    ('ralphs',             'grocery'),
+    ('vons',               'grocery'),
+    ('wegmans',            'grocery'),
+    ('stop & shop',        'grocery'),
+    ('fred meyer',         'grocery'),
+    ('heb',                'grocery'),
+    ('costco',             'grocery'),
+    ('walmart',            'grocery'),
+    ('target',             'grocery'),
+    # 餐厅/快餐（Starbucks 归入吃饭，因为咖啡类别已移除）
+    ('starbucks',          'food'),
+    ('dunkin',             'food'),
+    ('dutch bros',         'food'),
+    ("peet's",             'food'),
+    ('mcdonald',           'food'),
+    ('burger king',        'food'),
+    ('wendy',              'food'),
+    ('subway',             'food'),
+    ('chipotle',           'food'),
+    ('taco bell',          'food'),
+    ('chick-fil-a',        'food'),
+    ('chick fil a',        'food'),
+    ('chickfila',          'food'),
+    ('domino',             'food'),
+    ('pizza hut',          'food'),
+    ('panera',             'food'),
+    ('five guys',          'food'),
+    ('shake shack',        'food'),
+    ('in-n-out',           'food'),
+    ('in n out',           'food'),
+    ('popeyes',            'food'),
+    ('kfc',                'food'),
+    ('panda express',      'food'),
+    ('olive garden',       'food'),
+    ('applebee',           'food'),
+    ("denny's",            'food'),
+    ('dennys',             'food'),
+    ('ihop',               'food'),
+    ('cheesecake factory', 'food'),
+    ('sweetgreen',         'food'),
+    ('cava',               'food'),
+    ('jersey mike',        'food'),
+    ('jimmy john',         'food'),
+    # 交通（需在 lyft/uber 前面已处理 uber eats）
+    ('uber',               'transport'),
+    ('lyft',               'transport'),
+    ('didi',               'transport'),
+    ('bird scooter',       'transport'),
+    ('lime',               'transport'),
+    ('caltrain',           'transport'),
+    ('bart ',              'transport'),
+    ('mta ',               'transport'),
+    ('metro transit',      'transport'),
+    ('zipcar',             'transport'),
+    ('enterprise rent',    'transport'),
+    ('hertz',              'transport'),
+    ('avis',               'transport'),
+    ('budget car',         'transport'),
+    # 旅行（航空公司 + 酒店）
+    ('united airlines',    'travel'),
+    ('american airlines',  'travel'),
+    ('alaska airlines',    'travel'),
+    ('spirit airlines',    'travel'),
+    ('frontier airlines',  'travel'),
+    ('southwest airlines', 'travel'),
+    ('jetblue',            'travel'),
+    ('delta air',          'travel'),
+    ('delta ',             'travel'),
+    ('united ',            'travel'),
+    ('american air',       'travel'),
+    ('southwest',          'travel'),
+    ('airbnb',             'travel'),
+    ('marriott',           'travel'),
+    ('hilton',             'travel'),
+    ('hyatt',              'travel'),
+    ('sheraton',           'travel'),
+    ('westin',             'travel'),
+    ('holiday inn',        'travel'),
+    ('expedia',            'travel'),
+    ('booking.com',        'travel'),
+    ('hotels.com',         'travel'),
+    ('kayak',              'travel'),
+    ('amtrak',             'travel'),
+    # 家居
+    ('home depot',         'home'),
+    ("lowe's",             'home'),
+    ('lowes',              'home'),
+    ('ikea',               'home'),
+    ('wayfair',            'home'),
+    ('bed bath',           'home'),
+    ('williams-sonoma',    'home'),
+    ('williams sonoma',    'home'),
+    ('crate and barrel',   'home'),
+    ('west elm',           'home'),
+    # 购物
+    ('apple store',        'shopping'),
+    ('apple.com',          'shopping'),
+    ('best buy',           'shopping'),
+    ('nordstrom',          'shopping'),
+    ("macy's",             'shopping'),
+    ('macys',              'shopping'),
+    ('zara',               'shopping'),
+    ('h&m',                'shopping'),
+    ('gap ',               'shopping'),
+    ('old navy',           'shopping'),
+    ('banana republic',    'shopping'),
+    ('tj maxx',            'shopping'),
+    ('tjmaxx',             'shopping'),
+    ('marshalls',          'shopping'),
+    ('ross store',         'shopping'),
+    ('nike',               'shopping'),
+    ('adidas',             'shopping'),
+    ('uniqlo',             'shopping'),
+    ('zara',               'shopping'),
+    # 订阅/流媒体
+    ('netflix',            'subscription'),
+    ('spotify',            'subscription'),
+    ('hulu',               'subscription'),
+    ('disney+',            'subscription'),
+    ('disney plus',        'subscription'),
+    ('disneyplus',         'subscription'),
+    ('apple music',        'subscription'),
+    ('youtube premium',    'subscription'),
+    ('hbo max',            'subscription'),
+    ('hbo',                'subscription'),
+    ('peacock',            'subscription'),
+    ('paramount+',         'subscription'),
+    ('paramount plus',     'subscription'),
+    ('twitch',             'subscription'),
+    ('adobe',              'subscription'),
+    ('microsoft 365',      'subscription'),
+    ('google one',         'subscription'),
+    ('icloud',             'subscription'),
+    ('dropbox',            'subscription'),
+    ('at&t',               'subscription'),
+    ('verizon',            'subscription'),
+    ('t-mobile',           'subscription'),
+    ('comcast',            'subscription'),
+    ('xfinity',            'subscription'),
+    ('spectrum',           'subscription'),
+    # 医疗/健康
+    ('cvs',                'health'),
+    ('walgreens',          'health'),
+    ('rite aid',           'health'),
+    ('one medical',        'health'),
+    ('kaiser',             'health'),
+    ('cvs pharmacy',       'health'),
+    # 摄影
+    ('adorama',            'photo'),
+    ('b&h photo',          'photo'),
+    ('bhphotovideo',       'photo'),
+    ('moment ',            'photo'),
+    ('adobe lightroom',    'photo'),
+]
+
+# ── Plaid category fallback (coffee shop → food since coffee removed) ────
 PLAID_CATEGORY_MAP = {
-    'restaurants':'food','fast food':'food','food and drink':'food','dining':'food',
-    'coffee shop':'coffee','coffee':'coffee',
-    'groceries':'grocery','supermarkets and groceries':'grocery','grocery':'grocery',
-    'veterinarians':'cat','pets':'cat','pet supplies':'cat',
-    'transportation':'transport','taxi':'transport','ride share':'transport',
-    'car service':'transport','public transportation':'transport',
-    'gas stations':'transport','parking':'transport',
-    'airlines and aviation':'travel','travel':'travel',
-    'hotels and motels':'travel','lodging':'travel',
-    'shops':'shopping','shopping':'shopping','clothing and accessories':'shopping',
-    'electronics':'shopping','department stores':'shopping',
-    'arts and entertainment':'entertainment','recreation':'entertainment',
-    'gyms and fitness centers':'entertainment','sport':'entertainment',
-    'games':'entertainment','movies and dvds':'entertainment',
-    'healthcare':'health','pharmacies':'health','hospitals':'health',
-    'dentists':'health','doctors':'health',
-    'home improvement':'home','furniture':'home','utilities':'home',
-    'subscription':'subscription','digital purchase':'subscription',
-    'software':'subscription','cable':'subscription','internet services':'subscription',
-    'photography':'photo','camera':'photo',
+    'restaurants':                   'food',
+    'fast food':                     'food',
+    'food and drink':                'food',
+    'dining':                        'food',
+    'coffee shop':                   'food',   # coffee 类别已移除 → 归入吃饭
+    'coffee':                        'food',
+    'groceries':                     'grocery',
+    'supermarkets and groceries':    'grocery',
+    'grocery':                       'grocery',
+    'veterinarians':                 'cat',
+    'pets':                          'cat',
+    'pet supplies':                  'cat',
+    'transportation':                'transport',
+    'taxi':                          'transport',
+    'ride share':                    'transport',
+    'car service':                   'transport',
+    'public transportation':         'transport',
+    'gas stations':                  'transport',
+    'parking':                       'transport',
+    'airlines and aviation':         'travel',
+    'travel':                        'travel',
+    'hotels and motels':             'travel',
+    'lodging':                       'travel',
+    'shops':                         'shopping',
+    'shopping':                      'shopping',
+    'clothing and accessories':      'shopping',
+    'electronics':                   'shopping',
+    'department stores':             'shopping',
+    'arts and entertainment':        'entertainment',
+    'recreation':                    'entertainment',
+    'gyms and fitness centers':      'entertainment',
+    'sport':                         'entertainment',
+    'games':                         'entertainment',
+    'movies and dvds':               'entertainment',
+    'healthcare':                    'health',
+    'pharmacies':                    'health',
+    'hospitals':                     'health',
+    'dentists':                      'health',
+    'doctors':                       'health',
+    'home improvement':              'home',
+    'furniture':                     'home',
+    'utilities':                     'home',
+    'subscription':                  'subscription',
+    'digital purchase':              'subscription',
+    'software':                      'subscription',
+    'cable':                         'subscription',
+    'internet services':             'subscription',
+    'photography':                   'photo',
+    'camera':                        'photo',
 }
 
-def auto_classify(plaid_categories: List[str]) -> Optional[str]:
+def auto_classify(plaid_categories: List[str], merchant_name: str = '') -> Optional[str]:
+    """先用商家名精确匹配（更准），再用 Plaid 类别兜底。"""
+    name_lower = merchant_name.lower()
+
+    # 1. 商家名匹配（按列表顺序，越长越优先）
+    for pattern, cat in MERCHANT_NAME_MAP:
+        if pattern in name_lower:
+            return cat
+
+    # 2. Plaid 类别兜底
     for raw in reversed(plaid_categories):
         key = raw.lower().strip()
         if key in PLAID_CATEGORY_MAP:
@@ -137,7 +358,6 @@ def create_link_token():
             redirect_uri="https://my-finance-app-production-39aa.up.railway.app"
         )
         token = client.link_token_create(req)['link_token']
-        # 保存 token 供 OAuth redirect 回调使用
         with open(os.path.join(DATA_DIR, 'link_token.txt'), 'w') as f:
             f.write(token)
         return jsonify({'link_token': token})
@@ -157,7 +377,7 @@ def get_link_token():
 def exchange_token():
     public_token = request.json['public_token']
     account_name = request.json.get('account_name', '账户')
-    owner        = request.json.get('owner', 'me')   # 'me' | 'partner'
+    owner        = request.json.get('owner', 'me')
     try:
         resp = client.item_public_token_exchange(
             ItemPublicTokenExchangeRequest(public_token=public_token)
@@ -195,6 +415,7 @@ def sync_transactions():
                         if amount <= 0:
                             continue
                         plaid_cats = txn.get('category') or []
+                        merchant_name = txn['name']
                         if not db.execute("SELECT id FROM transactions WHERE id=?",
                                           (txn['transaction_id'],)).fetchone():
                             db.execute(
@@ -202,9 +423,10 @@ def sync_transactions():
                                    (id,date,name,amount,account,payer,plaid_category,auto_category,
                                     category,split,categorized)
                                    VALUES (?,?,?,?,?,?,?,?,NULL,NULL,0)""",
-                                (txn['transaction_id'], str(txn['date']), txn['name'],
+                                (txn['transaction_id'], str(txn['date']), merchant_name,
                                  amount, account['name'], account['owner'],
-                                 json.dumps(plaid_cats), auto_classify(plaid_cats))
+                                 json.dumps(plaid_cats),
+                                 auto_classify(plaid_cats, merchant_name))
                             )
                             new_count += 1
                     has_more = resp['has_more']
@@ -214,6 +436,25 @@ def sync_transactions():
             except plaid.ApiException as e:
                 errors.append(str(e))
     return jsonify({'new_transactions': new_count, 'errors': errors})
+
+@app.route('/api/reclassify', methods=['POST'])
+def reclassify_all():
+    """重新对所有未分类交易运行智能分类（在商家名匹配升级后调用一次）。"""
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT id, name, plaid_category FROM transactions WHERE categorized=0"
+        ).fetchall()
+        count = 0
+        for row in rows:
+            plaid_cats = json.loads(row['plaid_category'] or '[]')
+            new_cat = auto_classify(plaid_cats, row['name'])
+            db.execute(
+                "UPDATE transactions SET auto_category=? WHERE id=?",
+                (new_cat, row['id'])
+            )
+            if new_cat:
+                count += 1
+    return jsonify({'updated': count})
 
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
@@ -233,6 +474,52 @@ def categorize():
         ).rowcount
     return jsonify({'success': True}) if updated else (jsonify({'error': 'Not found'}), 404)
 
+@app.route('/api/months', methods=['GET'])
+def get_months():
+    """返回有交易记录的月份列表（降序），用于报告页默认跳转到最新月份。"""
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT DISTINCT substr(date,1,7) as month FROM transactions ORDER BY month DESC"
+        ).fetchall()
+    return jsonify([r['month'] for r in rows])
+
+@app.route('/api/progress', methods=['GET'])
+def progress():
+    """返回指定月份每人的记账进度，用于报告页显示进度条和"两清"状态。"""
+    month = request.args.get('month', datetime.now().strftime('%Y-%m'))
+    with get_db() as db:
+        rows = db.execute(
+            """SELECT payer, categorized, COUNT(*) as cnt
+               FROM transactions WHERE date LIKE ?
+               GROUP BY payer, categorized""",
+            (month + '%',)
+        ).fetchall()
+
+    me_done = me_pending = partner_done = partner_pending = 0
+    for row in rows:
+        if row['payer'] == 'me':
+            if row['categorized']:
+                me_done += row['cnt']
+            else:
+                me_pending += row['cnt']
+        else:
+            if row['categorized']:
+                partner_done += row['cnt']
+            else:
+                partner_pending += row['cnt']
+
+    me_total      = me_done + me_pending
+    partner_total = partner_done + partner_pending
+    both_cleared  = (me_pending == 0 and partner_pending == 0
+                     and (me_total + partner_total) > 0)
+
+    return jsonify({
+        'month': month,
+        'me':      {'done': me_done,      'pending': me_pending,      'total': me_total},
+        'partner': {'done': partner_done, 'pending': partner_pending, 'total': partner_total},
+        'both_cleared': both_cleared,
+    })
+
 @app.route('/api/report', methods=['GET'])
 def report():
     month       = request.args.get('month', datetime.now().strftime('%Y-%m'))
@@ -246,17 +533,14 @@ def report():
 
     txns = [row_to_dict(r) for r in rows]
 
-    # ── individual spending ──────────────────────────────
-    me_own             = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='mine')
-    partner_own        = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='mine')
-    me_shared_paid     = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='shared')
-    partner_shared_paid= sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='shared')
-    total_shared       = me_shared_paid + partner_shared_paid
+    me_own              = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='mine')
+    partner_own         = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='mine')
+    me_shared_paid      = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='shared')
+    partner_shared_paid = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='shared')
+    total_shared        = me_shared_paid + partner_shared_paid
 
-    # net balance: positive → partner owes me; negative → I owe partner
     net_balance = (me_shared_paid - partner_shared_paid) * split_ratio
 
-    # ── category breakdown ───────────────────────────────
     by_category: dict = {}
     for t in txns:
         cat = t.get('category') or 'other'
@@ -276,7 +560,7 @@ def report():
         'me_shared_paid':      round(me_shared_paid, 2),
         'partner_shared_paid': round(partner_shared_paid, 2),
         'total_shared':        round(total_shared, 2),
-        'net_balance':         round(net_balance, 2),  # + partner owes me / − I owe partner
+        'net_balance':         round(net_balance, 2),
         'combined_total':      round(me_own + partner_own + total_shared, 2),
         'by_category':         by_category,
         'transaction_count':   len(txns),
