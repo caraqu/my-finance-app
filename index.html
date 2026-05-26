@@ -926,7 +926,7 @@ function setView(v) {
   if (reportData) renderReport(reportData);
 }
 async function loadReport() {
-  const label = new Date(currentMonth + '-01').toLocaleDateString('zh-CN', { year:'numeric', month:'long' });
+  const label = new Date(currentMonth + '-01T12:00:00').toLocaleDateString('zh-CN', { year:'numeric', month:'long' });
   document.getElementById('monthLabel').textContent = label;
   try {
     const [rr, rp] = await Promise.all([
