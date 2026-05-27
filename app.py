@@ -603,13 +603,14 @@ def report():
     for t in txns:
         cat = t.get('category') or 'other'
         if cat not in by_category:
-            by_category[cat] = {'me': 0.0, 'partner': 0.0, 'shared': 0.0, 'me_proxy': 0.0, 'partner_proxy': 0.0}
+            by_category[cat] = {'me': 0.0, 'partner': 0.0, 'me_shared': 0.0, 'partner_shared': 0.0, 'me_proxy': 0.0, 'partner_proxy': 0.0}
         s, p, amt = t['split'], t['payer'], t['amount']
         if   s == 'mine'   and p == 'me':      by_category[cat]['me']            += amt
         elif s == 'mine'   and p == 'partner': by_category[cat]['partner']        += amt
         elif s == 'theirs' and p == 'me':      by_category[cat]['partner_proxy']  += amt
         elif s == 'theirs' and p == 'partner': by_category[cat]['me_proxy']       += amt
-        else:                                  by_category[cat]['shared']         += amt
+        elif s == 'shared' and p == 'me':                                  by_category[cat]['me_shared']       += amt
+        else:                                  by_category[cat]['partner_shared']  += amt
     return jsonify({
         'month': month, 'me_own': round(me_own,2), 'partner_own': round(partner_own,2),
         'me_shared_paid': round(me_shared_paid,2), 'partner_shared_paid': round(partner_shared_paid,2),
