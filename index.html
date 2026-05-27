@@ -428,21 +428,6 @@ body {
     <!-- 每账户月度交易量统计 -->
     <div id="accountStats" style="margin-top:16px"></div>
 
-    <!-- 2年历史修复提示 -->
-    <div style="margin-top:16px;padding:16px;background:#FFF8E1;border-radius:16px;border:1px solid #FFD54F">
-      <div style="font-size:14px;font-weight:700;margin-bottom:6px">⚠️ 2月之前的历史数据缺失？</div>
-      <div style="font-size:12px;color:#795548;line-height:1.6;margin-bottom:12px">
-        Plaid 默认只拉 <b>90天</b>历史（旧代码问题，已修复为2年）。已有账户的历史窗口无法通过补全来扩展，<b>唯一方法是断开重连</b>：<br>
-        1. 记下账户名，先把该账户删掉<br>
-        2. 点「＋ 连接新账户」重新连接<br>
-        3. 这次会自动拉取最多2年的历史<br>
-        ✅ <b>已分类的记录完全不受影响</b>
-      </div>
-      <button onclick="deleteAccountPrompt()" style="width:100%;padding:11px;background:#FF8F00;color:white;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer">
-        🗑️ 删除账户（准备重连获取完整历史）
-      </button>
-    </div>
-
     <!-- 如果交易数量异常少，点这里重新拉取全部历史 -->
     <div style="margin-top:12px;padding:16px;background:var(--card);border-radius:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)">
       <div style="font-size:14px;font-weight:700;margin-bottom:6px">📥 刚连接就同步、数据不全？</div>

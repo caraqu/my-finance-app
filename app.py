@@ -5,6 +5,11 @@ import plaid
 from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+try:
+    from plaid.model.link_token_create_request_transactions import LinkTokenCreateRequestTransactions
+    HAS_TRANSACTIONS_CONFIG = True
+except ImportError:
+    HAS_TRANSACTIONS_CONFIG = False
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from plaid.model.products import Products
@@ -317,16 +322,17 @@ def apple_icon():
 @app.route('/api/create_link_token', methods=['POST'])
 def create_link_token():
     try:
-        req = LinkTokenCreateRequest(
+        req_kwargs = dict(
             products=[Products("transactions")],
             client_name="Finance with Fiancée",
             country_codes=[CountryCode('US')],
             language='en',
             user=LinkTokenCreateRequestUser(client_user_id='user-1'),
             redirect_uri="https://my-finance-app-production-39aa.up.railway.app",
-            # Request maximum 2 years of history (730 days).
-            # Without this, Plaid defaults to only 90 days!
         )
+        if HAS_TRANSACTIONS_CONFIG:
+            req_kwargs['transactions'] = LinkTokenCreateRequestTransactions(days_requested=730)
+        req = LinkTokenCreateRequest(**req_kwargs)
         token = client.link_token_create(req)['link_token']
         with open(os.path.join(DATA_DIR, 'link_token.txt'), 'w') as f:
             f.write(token)
