@@ -1076,9 +1076,7 @@ function renderReport(data) {
   }
   const rows = Object.entries(data.by_category||{}).map(([id,v]) => {
     const c = CAT_MAP[id] || {em:'💳', nm:id};
-    let amount = reportView==='me' ? (v.me||0)+(v.shared||0)*.5
-               : reportView==='partner' ? (v.partner||0)+(v.shared||0)*.5
-               : (v.me||0)+(v.partner||0)+(v.shared||0);
+    let amount = (v.me||0)+(v.partner||0)+(v.shared||0);
     return {...c, amount, me:v.me||0, partner:v.partner||0, shared:v.shared||0};
   }).filter(r=>r.amount>0).sort((a,b)=>b.amount-a.amount);
   const rowsHtml = rows.length
