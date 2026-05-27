@@ -1108,6 +1108,7 @@ function renderProgress(prog) {
     </div>`;
 }
 function renderReport(data) {
+  _debtDetailOpen = null;
   const meProxyPaid = data.me_paid_for_partner || 0;
   const partnerProxyPaid = data.partner_paid_for_me || 0;
   const meSharedHalf = (data.me_shared_paid || 0) * 0.5;
@@ -1145,28 +1146,42 @@ function renderReport(data) {
     }
     summaryCards = `
       ${netCard}
-      <div class="sum-card"><div class="sum-label">${PARTNER.name} 欠 ${ME.name}</div><div class="sum-value">$${partnerOwesMe.toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">${ME.name} 欠 ${PARTNER.name}</div><div class="sum-value">$${iOwePartner.toFixed(2)}</div></div>`;
+      <div class="sum-card" onclick="toggleDebtDetail('partner-owes')" style="cursor:pointer"><div class="sum-label">${PARTNER.name} 欠 ${ME.name}</div><div class="sum-value">${partnerOwesMe.toFixed(2)}</div></div>
+      <div class="sum-card" onclick="toggleDebtDetail('me-owes')" style="cursor:pointer"><div class="sum-label">${ME.name} 欠 ${PARTNER.name}</div><div class="sum-value">${iOwePartner.toFixed(2)}</div></div>
+      <div id="debtDetailSection" style="display:none;width:100%;margin-top:8px"></div>`;
   }
 
   const rows = Object.entries(data.by_category||{}).map(([id,v]) => {
-    const c = CAT_MAP[id] || {em:'💳', nm:id};
+    const c = CAT_MAP[id] || {em:'🦕', nm:id};
     const meAmt = (v.me||0) + (v.me_proxy||0);
     const paAmt = (v.partner||0) + (v.partner_proxy||0);
     const shAmt = v.shared||0;
-    let amount = meAmt + paAmt + shAmt;
+    let amount;
+    if (reportView === 'me') amount = meAmt;
+    else if (reportView === 'partner') amount = paAmt;
+    else amount = meAmt + paAmt + shAmt;
     return {...c, id, amount, me:v.me||0, partner:v.partner||0, shared:shAmt, me_proxy:v.me_proxy||0, partner_proxy:v.partner_proxy||0};
   }).filter(r=>r.amount>0).sort((a,b)=>b.amount-a.amount);
 
   const rowsHtml = rows.length
     ? rows.map(r => {
-        const subItems = [
-          r.me > 0 ? `我自己 $${r.me.toFixed(2)}` : '',
-          r.shared > 0 ? `共享 $${r.shared.toFixed(2)}` : '',
-          r.me_proxy > 0 ? `替对方付 $${r.me_proxy.toFixed(2)}` : '',
-          r.partner > 0 ? `她自己 $${r.partner.toFixed(2)}` : '',
-          r.partner_proxy > 0 ? `她替我付 $${r.partner_proxy.toFixed(2)}` : '',
-        ].filter(Boolean).join(' · ');
+        const subItems = reportView === 'me'
+          ? [
+              r.me > 0 ? `我自己 $${r.me.toFixed(2)}` : '',
+              r.me_proxy > 0 ? `替对方付 $${r.me_proxy.toFixed(2)}` : '',
+            ].filter(Boolean).join(' · ')
+          : reportView === 'partner'
+          ? [
+              r.partner > 0 ? `她自己 $${r.partner.toFixed(2)}` : '',
+              r.partner_proxy > 0 ? `替对方付 $${r.partner_proxy.toFixed(2)}` : '',
+            ].filter(Boolean).join(' · ')
+          : [
+              r.me > 0 ? `我自己 $${r.me.toFixed(2)}` : '',
+              r.shared > 0 ? `共享 $${r.shared.toFixed(2)}` : '',
+              r.me_proxy > 0 ? `替对方付 $${r.me_proxy.toFixed(2)}` : '',
+              r.partner > 0 ? `她自己 $${r.partner.toFixed(2)}` : '',
+              r.partner_proxy > 0 ? `替对方付 $${r.partner_proxy.toFixed(2)}` : '',
+            ].filter(Boolean).join(' · ');
         return `<div class="brow" onclick="openCategoryDetail('${r.id}')" style="cursor:pointer">
         <div class="brow-left"><span class="brow-emoji">${r.em}</span><span class="brow-name">${r.nm}</span></div>
         <div class="brow-right">
@@ -1194,9 +1209,65 @@ function renderReport(data) {
   document.getElementById('reportContent').innerHTML = `
     <div class="summary-grid">${summaryCards}</div>
     ${settlSec}
-    <div class="breakdown-card"><h3>按类别明细</h3>${rowsHtml}</div>
+    ${reportView !== 'combined' ? `<div class="breakdown-card"><h3>按类别明细</h3>${rowsHtml}</div>` : ''}
     <div class="report-footer">共 ${data.transaction_count} 笔已分类</div>`;
   updateSettlementUI();
+}
+
+// ══ Debt Detail Expand ══
+let _debtDetailOpen = null;
+
+async function toggleDebtDetail(type) {
+  const sec = document.getElementById('debtDetailSection');
+  if (!sec) return;
+  if (_debtDetailOpen === type) {
+    sec.style.display = 'none';
+    _debtDetailOpen = null;
+    return;
+  }
+  _debtDetailOpen = type;
+  sec.style.display = 'block';
+  sec.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2)">加载中…</div>';
+  try {
+    const url = getReportUrl();
+    const txUrl = url.replace('/api/report', '/api/transactions') + '&all=true';
+    const resp = await fetch(txUrl);
+    const allTxns = await resp.json();
+    let txns;
+    if (type === 'partner-owes') {
+      txns = allTxns.filter(t => t.payer === 'me' && (t.split === 'shared' || t.split === 'theirs'));
+    } else {
+      txns = allTxns.filter(t => t.payer === 'partner' && (t.split === 'shared' || t.split === 'theirs'));
+    }
+    renderDebtDetail(sec, txns, type);
+  } catch(e) {
+    sec.innerHTML = '<div style="text-align:center;padding:12px;color:var(--danger)">加载出错</div>';
+  }
+}
+
+function renderDebtDetail(sec, txns, type) {
+  if (!txns || !txns.length) {
+    sec.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text2)">暂无相关记录</div>';
+    return;
+  }
+  const effectiveAmount = t => t.split === 'theirs' ? t.amount : t.amount * 0.5;
+  const total = txns.reduce((s,t) => s + effectiveAmount(t), 0);
+  const label = type === 'partner-owes' ? '野猪公主欠恐龙公主' : '恐龙公主欠野猪公主';
+  const header = `<div style="font-size:12px;color:var(--text2);padding:6px 0 8px">${label} 共 ${txns.length} 笔 · 合计 $${total.toFixed(2)}</div>`;
+  const rows = txns.map(t => {
+    const date = new Date(t.date+'T12:00:00').toLocaleDateString('zh-CN',{month:'short',day:'numeric'});
+    const ea = effectiveAmount(t);
+    const catInfo = CAT_MAP[t.category] || {em:'💰', nm:t.category||'其他'};
+    const splitLabel = t.split === 'theirs' ? '全额' : '共享半';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border)">
+      <div style="flex:1;overflow:hidden">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${catInfo.em} ${escHtml(t.name)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${date} · ${splitLabel} · 原价 $${t.amount.toFixed(2)}</div>
+      </div>
+      <div style="font-size:14px;font-weight:700;flex-shrink:0;margin-left:8px">$${ea.toFixed(2)}</div>
+    </div>`;
+  }).join('');
+  sec.innerHTML = `<div style="background:var(--card);border-radius:12px;padding:12px 14px;margin-top:4px">${header}${rows}</div>`;
 }
 
 // ══ ACCOUNTS ══
