@@ -1,4 +1,4 @@
 flask
 flask-cors
-plaid-python==11.0.0
+plaid-python==9.0.0
 gunicorn
