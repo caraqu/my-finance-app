@@ -595,6 +595,26 @@ def report():
         'by_category': by_category, 'transaction_count': len(txns),
     })
 
+@app.route('/api/debug', methods=['GET'])
+def debug():
+    import pkg_resources
+    try:
+        plaid_version = pkg_resources.get_distribution("plaid-python").version
+    except Exception:
+        plaid_version = "unknown"
+    with get_db() as db:
+        count = db.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
+        earliest = db.execute("SELECT MIN(date) FROM transactions").fetchone()[0]
+        latest   = db.execute("SELECT MAX(date) FROM transactions").fetchone()[0]
+    return jsonify({
+        'plaid_version': plaid_version,
+        'has_transactions_config': HAS_TRANSACTIONS_CONFIG,
+        'days_requested': 730 if HAS_TRANSACTIONS_CONFIG else '未启用（只有90天）',
+        'transaction_count': count,
+        'earliest_transaction': earliest,
+        'latest_transaction': latest,
+    })
+
 @app.route('/api/account_stats', methods=['GET'])
 def account_stats():
     """每个账户每月的交易笔数，用于账户页面的月度统计。"""
