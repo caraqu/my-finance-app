@@ -1,4 +1,4 @@
-# Finance with Fiancée — backend
+# Finance with FiancÃ©e â backend
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import plaid
@@ -11,7 +11,7 @@ try:
 except ImportError:
     HAS_TRANSACTIONS_CONFIG = False
 
-# ── 启动诊断日志 ──────────────────────────────────────────
+# ââ å¯å¨è¯æ­æ¥å¿ ââââââââââââââââââââââââââââââââââââââââââ
 try:
     from importlib.metadata import version as _get_version
     _plaid_ver = _get_version("plaid-python")
@@ -32,7 +32,7 @@ from typing import Optional, List
 app = Flask(__name__, static_folder='.')
 CORS(app)
 
-# ── Plaid ──────────────────────────────────────────────────
+# ââ Plaid ââââââââââââââââââââââââââââââââââââââââââââââââââ
 PLAID_CLIENT_ID = "6a139ca06fec6d000d3d83a3"
 PLAID_SECRET    = os.environ.get("PLAID_SECRET", "21d24cef5f1f77e0f83049aaffba65")
 
@@ -43,10 +43,10 @@ configuration = plaid.Configuration(
 api_client = plaid.ApiClient(configuration)
 client      = plaid_api.PlaidApi(api_client)
 
-# ── SQLite ─────────────────────────────────────────────────
-# DATA_DIR 优先使用环境变量（Railway Volume 挂载路径），保证 redeploy 不丢数据
-# 在 Railway 上：Settings → Volumes → Mount Path 设为 /data
-# 然后设环境变量 DATA_DIR=/data
+# ââ SQLite âââââââââââââââââââââââââââââââââââââââââââââââââ
+# DATA_DIR ä¼åä½¿ç¨ç¯å¢åéï¼Railway Volume æè½½è·¯å¾ï¼ï¼ä¿è¯ redeploy ä¸ä¸¢æ°æ®
+# å¨ Railway ä¸ï¼Settings â Volumes â Mount Path è®¾ä¸º /data
+# ç¶åè®¾ç¯å¢åé DATA_DIR=/data
 DATA_DIR = os.environ.get("DATA_DIR", os.path.dirname(os.path.abspath(__file__)))
 DB_PATH  = os.path.join(DATA_DIR, "finance.db")
 
@@ -93,7 +93,7 @@ def init_db():
             except Exception:
                 pass
 
-# ── 商家名 → 分类（长优先匹配，比 Plaid 类别更准） ─────────
+# ââ åå®¶å â åç±»ï¼é¿ä¼åå¹éï¼æ¯ Plaid ç±»å«æ´åï¼ âââââââââ
 MERCHANT_NAME_MAP = [
     ('amazon prime video', 'subscription'),
     ('amazon prime',       'subscription'),
@@ -320,7 +320,7 @@ def row_to_dict(row):
     d['categorized']    = bool(d['categorized'])
     return d
 
-# ── Routes ─────────────────────────────────────────────────
+# ââ Routes âââââââââââââââââââââââââââââââââââââââââââââââââ
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
@@ -334,7 +334,7 @@ def create_link_token():
     try:
         req_kwargs = dict(
             products=[Products("transactions")],
-            client_name="Finance with Fiancée",
+            client_name="Finance with FiancÃ©e",
             country_codes=[CountryCode('US')],
             language='en',
             user=LinkTokenCreateRequestUser(client_user_id='user-1'),
@@ -362,7 +362,7 @@ def get_link_token():
 @app.route('/api/exchange_token', methods=['POST'])
 def exchange_token():
     public_token = request.json['public_token']
-    account_name = request.json.get('account_name', '账户')
+    account_name = request.json.get('account_name', 'è´¦æ·')
     owner        = request.json.get('owner', 'me')
     try:
         resp = client.item_public_token_exchange(
@@ -429,8 +429,8 @@ def sync_transactions():
 
 @app.route('/api/delete_account', methods=['POST'])
 def delete_account():
-    """删除指定账户（及其所有未分类交易），以便重新连接获取完整历史。
-    已分类的交易保留不受影响。"""
+    """å é¤æå®è´¦æ·ï¼åå¶æææªåç±»äº¤æï¼ï¼ä»¥ä¾¿éæ°è¿æ¥è·åå®æ´åå²ã
+    å·²åç±»çäº¤æä¿çä¸åå½±åã"""
     item_id = request.json.get('item_id')
     if not item_id:
         return jsonify({'error': 'item_id required'}), 400
@@ -447,15 +447,15 @@ def delete_account():
 
 @app.route('/api/reset_cursors', methods=['POST'])
 def reset_cursors():
-    """重置所有账户的同步游标，下次同步将重新拉取全部历史交易。
-    如果发现交易数量异常少（只有100多条），执行此操作后再同步即可。"""
+    """éç½®ææè´¦æ·çåæ­¥æ¸¸æ ï¼ä¸æ¬¡åæ­¥å°éæ°æåå¨é¨åå²äº¤æã
+    å¦æåç°äº¤ææ°éå¼å¸¸å°ï¼åªæ100å¤æ¡ï¼ï¼æ§è¡æ­¤æä½åååæ­¥å³å¯ã"""
     with get_db() as db:
         db.execute("UPDATE accounts SET cursor=NULL")
-    return jsonify({'success': True, 'message': '游标已重置，请重新同步以获取完整历史记录'})
+    return jsonify({'success': True, 'message': 'æ¸¸æ å·²éç½®ï¼è¯·éæ°åæ­¥ä»¥è·åå®æ´åå²è®°å½'})
 
 @app.route('/api/reclassify', methods=['POST'])
 def reclassify_all():
-    """对所有未分类交易重新运行自动分类（升级规则后调用）。"""
+    """å¯¹æææªåç±»äº¤æéæ°è¿è¡èªå¨åç±»ï¼åçº§è§ååè°ç¨ï¼ã"""
     with get_db() as db:
         rows = db.execute(
             "SELECT id, name, plaid_category FROM transactions WHERE categorized=0"
@@ -503,7 +503,7 @@ def categorize():
 
 @app.route('/api/uncategorize', methods=['POST'])
 def uncategorize():
-    """撤回上一笔：把已分类的交易恢复为未分类状态。"""
+    """æ¤åä¸ä¸ç¬ï¼æå·²åç±»çäº¤ææ¢å¤ä¸ºæªåç±»ç¶æã"""
     txn_id = request.json.get('id')
     with get_db() as db:
         db.execute(
@@ -514,7 +514,7 @@ def uncategorize():
 
 @app.route('/api/months', methods=['GET'])
 def get_months():
-    """返回有交易记录的月份列表，包含每月的完成/待办统计。"""
+    """è¿åæäº¤æè®°å½çæä»½åè¡¨ï¼åå«æ¯æçå®æ/å¾åç»è®¡ã"""
     with get_db() as db:
         rows = db.execute("""
             SELECT
@@ -526,7 +526,7 @@ def get_months():
             GROUP BY month
             ORDER BY month DESC
         """).fetchall()
-        # 全部待分类数量（用于 recents 行）
+        # å¨é¨å¾åç±»æ°éï¼ç¨äº recents è¡ï¼
         total_pending = db.execute(
             "SELECT COUNT(*) FROM transactions WHERE categorized=0"
         ).fetchone()[0]
@@ -594,7 +594,7 @@ def report():
     me_shared_paid      = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='shared')
     partner_shared_paid = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='shared')
     total_shared        = me_shared_paid + partner_shared_paid
-    # Cross-payments: I paid for partner's expense (or vice versa) → affects net balance
+    # Cross-payments: I paid for partner's expense (or vice versa) â affects net balance
     me_paid_for_partner = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='theirs')
     partner_paid_for_me = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='theirs')
     net_balance = ((me_shared_paid - partner_shared_paid) * split_ratio
@@ -603,18 +603,20 @@ def report():
     for t in txns:
         cat = t.get('category') or 'other'
         if cat not in by_category:
-            by_category[cat] = {'me': 0.0, 'partner': 0.0, 'shared': 0.0}
+            by_category[cat] = {'me': 0.0, 'partner': 0.0, 'shared': 0.0, 'me_proxy': 0.0, 'partner_proxy': 0.0}
         s, p, amt = t['split'], t['payer'], t['amount']
-        if   s == 'mine'   and p == 'me':      by_category[cat]['me']      += amt
-        elif s == 'mine'   and p == 'partner': by_category[cat]['partner'] += amt
-        elif s == 'theirs' and p == 'me':      by_category[cat]['partner'] += amt
-        elif s == 'theirs' and p == 'partner': by_category[cat]['me']      += amt
-        else:                                  by_category[cat]['shared']  += amt
+        if   s == 'mine'   and p == 'me':      by_category[cat]['me']            += amt
+        elif s == 'mine'   and p == 'partner': by_category[cat]['partner']        += amt
+        elif s == 'theirs' and p == 'me':      by_category[cat]['partner_proxy']  += amt
+        elif s == 'theirs' and p == 'partner': by_category[cat]['me_proxy']       += amt
+        else:                                  by_category[cat]['shared']         += amt
     return jsonify({
         'month': month, 'me_own': round(me_own,2), 'partner_own': round(partner_own,2),
         'me_shared_paid': round(me_shared_paid,2), 'partner_shared_paid': round(partner_shared_paid,2),
         'total_shared': round(total_shared,2), 'net_balance': round(net_balance,2),
         'combined_total': round(me_own+partner_own+total_shared,2),
+        'me_paid_for_partner': round(me_paid_for_partner,2),
+        'partner_paid_for_me': round(partner_paid_for_me,2),
         'by_category': by_category, 'transaction_count': len(txns),
     })
 
@@ -632,7 +634,7 @@ def debug():
     return jsonify({
         'plaid_version': plaid_version,
         'has_transactions_config': HAS_TRANSACTIONS_CONFIG,
-        'days_requested': 730 if HAS_TRANSACTIONS_CONFIG else '未启用（只有90天）',
+        'days_requested': 730 if HAS_TRANSACTIONS_CONFIG else 'æªå¯ç¨ï¼åªæ90å¤©ï¼',
         'transaction_count': count,
         'earliest_transaction': earliest,
         'latest_transaction': latest,
@@ -640,7 +642,7 @@ def debug():
 
 @app.route('/api/account_stats', methods=['GET'])
 def account_stats():
-    """每个账户每月的交易笔数，用于账户页面的月度统计。"""
+    """æ¯ä¸ªè´¦æ·æ¯æçäº¤æç¬æ°ï¼ç¨äºè´¦æ·é¡µé¢çæåº¦ç»è®¡ã"""
     with get_db() as db:
         rows = db.execute("""
             SELECT t.account, substr(t.date,1,7) AS month,
@@ -657,6 +659,6 @@ if __name__ == '__main__':
     os.makedirs(DATA_DIR, exist_ok=True)
     init_db()
     port = int(os.environ.get("PORT", 5000))
-    print(f"\n💑  Finance with Fiancée — http://localhost:{port}\n")
-    print(f"    数据库位置: {DB_PATH}\n")
+    print(f"\nð  Finance with FiancÃ©e â http://localhost:{port}\n")
+    print(f"    æ°æ®åºä½ç½®: {DB_PATH}\n")
     app.run(host='0.0.0.0', port=port, debug=False)
