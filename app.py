@@ -5,7 +5,6 @@ import plaid
 from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
-from plaid.model.link_token_create_request_transactions import LinkTokenCreateRequestTransactions
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from plaid.model.products import Products
@@ -327,7 +326,6 @@ def create_link_token():
             redirect_uri="https://my-finance-app-production-39aa.up.railway.app",
             # Request maximum 2 years of history (730 days).
             # Without this, Plaid defaults to only 90 days!
-            transactions=LinkTokenCreateRequestTransactions(days_requested=730),
         )
         token = client.link_token_create(req)['link_token']
         with open(os.path.join(DATA_DIR, 'link_token.txt'), 'w') as f:
