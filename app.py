@@ -6,7 +6,7 @@ from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
 try:
-    from plaid.model.link_token_create_request_transactions import LinkTokenCreateRequestTransactions
+    from plaid.model.link_token_transactions import LinkTokenTransactions
     HAS_TRANSACTIONS_CONFIG = True
 except ImportError:
     HAS_TRANSACTIONS_CONFIG = False
@@ -341,7 +341,7 @@ def create_link_token():
             redirect_uri="https://my-finance-app-production-39aa.up.railway.app",
         )
         if HAS_TRANSACTIONS_CONFIG:
-            req_kwargs['transactions'] = LinkTokenCreateRequestTransactions(days_requested=730)
+            req_kwargs['transactions'] = LinkTokenTransactions(days_requested=730)
         req = LinkTokenCreateRequest(**req_kwargs)
         token = client.link_token_create(req)['link_token']
         with open(os.path.join(DATA_DIR, 'link_token.txt'), 'w') as f:
@@ -607,11 +607,11 @@ def report():
 
 @app.route('/api/debug', methods=['GET'])
 def debug():
-    import pkg_resources
     try:
-        plaid_version = pkg_resources.get_distribution("plaid-python").version
-    except Exception:
-        plaid_version = "unknown"
+        from importlib.metadata import version as _dbg_get_ver
+        plaid_version = _dbg_get_ver("plaid-python")
+    except Exception as e:
+        plaid_version = f"unknown: {e}"
     with get_db() as db:
         count = db.execute("SELECT COUNT(*) FROM transactions").fetchone()[0]
         earliest = db.execute("SELECT MIN(date) FROM transactions").fetchone()[0]
