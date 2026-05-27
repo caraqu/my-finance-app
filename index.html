@@ -336,6 +336,36 @@ body {
   max-width:85vw; text-align:center; word-break:break-word; line-height:1.4;
 }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── SETTLEMENT PERIOD ── */
+.settlement-section {
+  background: var(--card); border-radius: 16px; padding: 16px 18px;
+  margin: 0 16px 12px; box-shadow: var(--shadow);
+}
+.settlement-section h4 {
+  font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.settlement-active-bar {
+  background: linear-gradient(135deg, #6C63FF, #A78BFA);
+  border-radius: 12px; padding: 10px 14px; color: white;
+  font-size: 13px; margin-bottom: 8px; display: flex;
+  justify-content: space-between; align-items: center;
+}
+.settlement-date-row {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.settlement-date-row input[type="date"] {
+  flex: 1; padding: 8px 10px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 13px; color: var(--text);
+  background: var(--bg); min-width: 130px;
+}
+.settlement-btn {
+  padding: 8px 16px; border: none; border-radius: 10px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.settlement-btn.set { background: var(--primary); color: white; }
+.settlement-btn.clear { background: var(--danger); color: white; }
 </style>
 </head>
 <body>
@@ -414,6 +444,21 @@ body {
       <button id="toggleCombined" onclick="setView('combined')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">💑 合计</button>
     </div>
     <div id="progressSection"></div>
+  <div id="settlementSection" style="display:none">
+    <div class="settlement-section">
+      <h4>✨ 结算周期</h4>
+      <div id="settlementActiveBar" style="display:none" class="settlement-active-bar">
+        <span id="settlementActiveLabel"></span>
+        <button class="settlement-btn clear" onclick="clearSettlement()">重置</button>
+      </div>
+      <div class="settlement-date-row">
+        <input type="date" id="settlementStartInput" placeholder="YYYY-MM-DD">
+        <input type="date" id="settlementEndInput" placeholder="YYYY-MM-DD">
+        <button class="settlement-btn set" onclick="applySettlement()">设置周期</button>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">不选结束日则累计到今天</div>
+    </div>
+  </div>
     <div id="reportContent"><p style="text-align:center;color:var(--text2);padding:60px 0">加载中…</p></div>
   </div>
 </div>
@@ -987,13 +1032,60 @@ function setView(v) {
     btn.style.color      = id === v ? 'white' : 'var(--text2)';
   });
   if (reportData) renderReport(reportData);
+  // Show/hide settlement section for combined view
+  const settlEl = document.getElementById('settlementSection');
+  if (settlEl) settlEl.style.display = (v === 'combined') ? '' : 'none';
 }
+// ── Settlement Period Helpers ──
+function getReportUrl() {
+  const sd = localStorage.getItem('settlementStart');
+  const ed = localStorage.getItem('settlementEnd');
+  if (sd) {
+    const endPart = ed ? `&end_date=${ed}` : '';
+    return `/api/report?month=${currentMonth}&start_date=${sd}${endPart}`;
+  }
+  return `/api/report?month=${currentMonth}`;
+}
+function applySettlement() {
+  const start = document.getElementById('settlementStartInput').value;
+  const end = document.getElementById('settlementEndInput').value;
+  if (!start) { alert('请选择开始日期'); return; }
+  localStorage.setItem('settlementStart', start);
+  if (end) localStorage.setItem('settlementEnd', end);
+  else localStorage.removeItem('settlementEnd');
+  updateSettlementUI();
+  loadReport();
+}
+function clearSettlement() {
+  localStorage.removeItem('settlementStart');
+  localStorage.removeItem('settlementEnd');
+  updateSettlementUI();
+  loadReport();
+}
+function updateSettlementUI() {
+  const sd = localStorage.getItem('settlementStart');
+  const ed = localStorage.getItem('settlementEnd');
+  const bar = document.getElementById('settlementActiveBar');
+  const label = document.getElementById('settlementActiveLabel');
+  if (!bar) return;
+  if (sd) {
+    bar.style.display = '';
+    label.textContent = '结算周期：' + sd + (ed ? ' → ' + ed : ' → 今天');
+    const si = document.getElementById('settlementStartInput');
+    const ei = document.getElementById('settlementEndInput');
+    if (si) si.value = sd;
+    if (ei) ei.value = ed || '';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
 async function loadReport() {
   const label = new Date(currentMonth + '-01T12:00:00').toLocaleDateString('zh-CN', { year:'numeric', month:'long' });
   document.getElementById('monthLabel').textContent = label;
   try {
     const [rr, rp] = await Promise.all([
-      fetch(`/api/report?month=${currentMonth}`),
+      fetch(getReportUrl()),
       fetch(`/api/progress?month=${currentMonth}`)
     ]);
     reportData   = await rr.json();
@@ -1057,21 +1149,16 @@ function renderReport(data) {
     summaryCards = `${netCard}
       <div class="sum-card"><div class="sum-label">${ME.em} ${ME.name}自己的</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
       <div class="sum-card"><div class="sum-label">💑 共享（我的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
-      <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
-        <div class="sum-label" style="color:rgba(255,255,255,.8)">${ME.name}本月应付总计</div>
-        <div class="sum-value" style="color:white;font-size:32px">$${(Math.abs(net)).toFixed(2)}</div></div>`;
+
   } else if (reportView === 'partner') {
     summaryCards = `${netCard}
       <div class="sum-card"><div class="sum-label">${PARTNER.em} ${PARTNER.name}自己的</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">💑 共享（Ta的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
-      <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
-        <div class="sum-label" style="color:rgba(255,255,255,.8)">${PARTNER.name}本月应付总计</div>
-        <div class="sum-value" style="color:white;font-size:32px">$${(Math.abs(net)).toFixed(2)}</div></div>`;
+      <div class="sum-card"><div class="sum-label">💑 共享（她的一半）</div><div class="sum-value">${((data.total_shared||0)*.5).toFixed(2)}</div></div>
+
   } else {
     summaryCards = `${netCard}
       <div class="sum-card"><div class="sum-label">${ME.em} ${ME.name}的花费</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
       <div class="sum-card"><div class="sum-label">${PARTNER.em} ${PARTNER.name}的花费</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">👩‍❤️‍👩 共享总额</div><div class="sum-value">$${(data.total_shared||0).toFixed(2)}</div></div>
       <div class="sum-card" style="background:var(--primary)"><div class="sum-label" style="color:rgba(255,255,255,.8)">两人合计</div><div class="sum-value" style="color:white">$${(data.combined_total||0).toFixed(2)}</div></div>`;
   }
   const rows = Object.entries(data.by_category||{}).map(([id,v]) => {
@@ -1084,7 +1171,7 @@ function renderReport(data) {
         <div class="brow-left"><span class="brow-emoji">${r.em}</span><span class="brow-name">${r.nm}</span></div>
         <div class="brow-right">
           <div class="brow-amount">$${r.amount.toFixed(2)} <span style="font-size:11px;color:var(--text2)">›</span></div>
-          <div class="brow-sub">${[r.me?`我 $${r.me.toFixed(2)}`:'',r.partner?`Ta $${r.partner.toFixed(2)}`:'',r.shared?`共 $${r.shared.toFixed(2)}`:''].filter(Boolean).join(' · ')}</div>
+          <div class="brow-sub">${[r.me?`我 ${r.me.toFixed(2)}`:'',r.partner?`她 ${r.partner.toFixed(2)}`:'',r.shared?`共 ${r.shared.toFixed(2)}`:''].filter(Boolean).join(' · ')}</div>
         </div></div>`).join('')
     : '<p style="text-align:center;color:var(--text2);padding:20px">本月暂无已分类记录</p>';
   document.getElementById('reportContent').innerHTML = `
@@ -1341,40 +1428,54 @@ async function loadAccountStats() {
 }
 
 function renderAccountStats(stats) {
-  const el = document.getElementById('accountStats');
-  if (!stats.length) { el.innerHTML = ''; return; }
-  const byAccount = {};
+  const byOwner = { me: {}, partner: {} };
   stats.forEach(s => {
-    if (!byAccount[s.account]) byAccount[s.account] = [];
-    byAccount[s.account].push(s);
+    const owner = s.owner || 'me';
+    if (!byOwner[owner][s.account]) byOwner[owner][s.account] = [];
+    byOwner[owner][s.account].push(s);
   });
-  let html = `<div style="background:var(--card);border-radius:16px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)">
-    <div style="font-size:14px;font-weight:700;margin-bottom:12px">📊 各账户月度交易量</div>`;
-  for (const [acc, months] of Object.entries(byAccount)) {
-    html += `<div style="margin-bottom:14px">
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">${escHtml(acc)}</div>`;
-    months.slice(0,6).forEach(m => {
-      const done = m.done||0, total = m.total||0, pending = total-done;
-      const label = formatMonthLabel(m.month);
-      const badge = pending===0 && total>0
-        ? `<span style="font-size:11px;background:rgba(52,199,89,.12);color:var(--mine);padding:1px 7px;border-radius:7px;font-weight:700">✓</span>`
-        : pending>0
-          ? `<span style="font-size:11px;background:rgba(255,59,48,.08);color:var(--danger);padding:1px 7px;border-radius:7px;font-weight:700">${pending}待</span>`
+
+  let html = `<div class="card" style="padding:16px 18px 10px">
+    <h3 style="font-size:15px;font-weight:700;margin-bottom:14px">各账户月度交易量</h3>`;
+
+  const ownerConfig = [
+    { key: 'me', label: ME.em + ' ' + ME.name },
+    { key: 'partner', label: PARTNER.em + ' ' + PARTNER.name }
+  ];
+
+  for (const { key, label } of ownerConfig) {
+    const accounts = byOwner[key];
+    if (Object.keys(accounts).length === 0) continue;
+    html += `<div style="margin-bottom:10px;font-size:13px;font-weight:700;color:var(--text2)">${label}</div>`;
+    for (const [acc, months] of Object.entries(accounts)) {
+      html += `<div style="margin-bottom:14px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px">${acc}</div>`;
+      months.slice(0,6).forEach(m => {
+        const pct = m.total > 0 ? Math.round((m.done/m.total)*100) : 0;
+        const pending = m.total - m.done;
+        const badge = m.total > 0 && pct < 100
+          ? `<span style="background:#FF3B30;color:#fff;font-size:11px;padding:1px 7px;border-radius:10px;margin-left:4px">${pending}笔</span>`
+          : pending > 0
+          ? `<span style="background:#FF9F0A;color:#fff;font-size:11px;padding:1px 7px;border-radius:10px;margin-left:4px">${pending}笔</span>`
           : '';
-      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px">
+        const label = m.month;
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">
         <span style="color:var(--text2)">${label}</span>
-        <span style="font-weight:600">${total}笔 ${badge}</span>
+        <span style="font-weight:600">${m.total}条 ${badge}</span>
       </div>`;
-    });
-    html += `</div>`;
+      });
+      html += '</div>';
+    }
+    html += '<div style="height:8px"></div>';
   }
-  html += `</div>`;
-  el.innerHTML = html;
+  html += '</div>';
+  document.getElementById('accountStats').innerHTML = html;
 }
 
 // ══ INIT ══
 document.addEventListener('DOMContentLoaded', async () => {
   handleOAuthRedirect();
+  updateSettlementUI();
   fetch('/api/reclassify', {method:'POST'}).catch(()=>{});
   await loadMonthList();
   const _now = new Date();
