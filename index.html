@@ -531,6 +531,9 @@ const CATEGORIES = [
   { id:'subscription',  em:'📱', nm:'订阅'   },
   { id:'parents',       em:'👨‍👩‍👧', nm:'爸妈'   },
   { id:'photo',         em:'📷', nm:'摄影'   },
+  { id:'fitness',       em:'💪', nm:'健身'   },
+  { id:'study',         em:'📚', nm:'学习'   },
+  { id:'unknown',       em:'❓', nm:'未知'   },
   { id:'other',         em:'💳', nm:'其他'   },
 ];
 const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]));
@@ -1056,14 +1059,14 @@ function renderReport(data) {
       <div class="sum-card"><div class="sum-label">💑 共享（我的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
       <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
         <div class="sum-label" style="color:rgba(255,255,255,.8)">${ME.name}本月应付总计</div>
-        <div class="sum-value" style="color:white;font-size:32px">$${((data.me_own||0)+(data.total_shared||0)*.5).toFixed(2)}</div></div>`;
+        <div class="sum-value" style="color:white;font-size:32px">$${(Math.abs(net)).toFixed(2)}</div></div>`;
   } else if (reportView === 'partner') {
     summaryCards = `${netCard}
       <div class="sum-card"><div class="sum-label">${PARTNER.em} ${PARTNER.name}自己的</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
       <div class="sum-card"><div class="sum-label">💑 共享（Ta的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
       <div class="sum-card" style="grid-column:1/-1;background:var(--primary)">
         <div class="sum-label" style="color:rgba(255,255,255,.8)">${PARTNER.name}本月应付总计</div>
-        <div class="sum-value" style="color:white;font-size:32px">$${((data.partner_own||0)+(data.total_shared||0)*.5).toFixed(2)}</div></div>`;
+        <div class="sum-value" style="color:white;font-size:32px">$${(Math.abs(net)).toFixed(2)}</div></div>`;
   } else {
     summaryCards = `${netCard}
       <div class="sum-card"><div class="sum-label">${ME.em} ${ME.name}的花费</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
