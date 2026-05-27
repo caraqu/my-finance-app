@@ -1148,12 +1148,12 @@ function renderReport(data) {
   if (reportView === 'me') {
     summaryCards = `${netCard}
       <div class="sum-card"><div class="sum-label">${ME.em} ${ME.name}自己的</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">💑 共享（我的一半）</div><div class="sum-value">$${((data.total_shared||0)*.5).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">💑 共享（我的一半）</div><div class="sum-value">${((data.total_shared||0)*.5).toFixed(2)}</div></div>`
 
   } else if (reportView === 'partner') {
     summaryCards = `${netCard}
       <div class="sum-card"><div class="sum-label">${PARTNER.em} ${PARTNER.name}自己的</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">💑 共享（她的一半）</div><div class="sum-value">${((data.total_shared||0)*.5).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">💑 共享（她的一半）</div><div class="sum-value">${((data.total_shared||0)*.5).toFixed(2)}</div></div>`
 
   } else {
     summaryCards = `${netCard}
