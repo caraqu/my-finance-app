@@ -1132,7 +1132,7 @@ function renderReport(data) {
       ${proxyCard}`;
   } else if (reportView === 'partner') {
     summaryCards = `
-      <div class="sum-card"><div class="sum-label">${PARTNER.em} 她自己的</div><div class="sum-value">$${(data.partner_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">${PARTNER.em} 她自己的</div><div class="sum-value">$${((data.partner_own||0) - (data.me_paid_for_partner||0)).toFixed(2)}</div></div>
       <div class="sum-card"><div class="sum-label">💑 共享（她付的那半）</div><div class="sum-value">$${partnerSharedHalf.toFixed(2)}</div></div>
       ${partnerProxyCard}`;
   } else {
@@ -1155,13 +1155,13 @@ function renderReport(data) {
   const rows = Object.entries(data.by_category||{}).map(([id,v]) => {
     const c = CAT_MAP[id] || {em:'🦕', nm:id};
     const meAmt = (v.me||0) + (v.me_shared||0) + (v.partner_proxy||0);
-    const paAmt = (v.partner||0) + (v.partner_shared||0) + (v.me_proxy||0);
+    const paAmt = (v.partner||0) + (v.partner_shared||0);
     const shAmt = (v.me_shared||0) + (v.partner_shared||0);
     let amount;
     if (reportView === 'me') amount = meAmt;
     else if (reportView === 'partner') amount = paAmt;
     else amount = meAmt + paAmt + shAmt;
-    return {...c, id, amount, me:v.me||0, partner:v.partner||0, shared:shAmt, me_proxy:v.me_proxy||0, partner_proxy:v.partner_proxy||0};
+    return {...c, id, amount, me:v.me||0, partner:v.partner||0, shared:shAmt, me_shared:v.me_shared||0, partner_shared:v.partner_shared||0, me_proxy:v.me_proxy||0, partner_proxy:v.partner_proxy||0};
   }).filter(r=>r.amount>0).sort((a,b)=>b.amount-a.amount);
 
   const rowsHtml = rows.length
