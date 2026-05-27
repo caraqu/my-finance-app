@@ -564,12 +564,25 @@ def progress():
 @app.route('/api/report', methods=['GET'])
 def report():
     month       = request.args.get('month', datetime.now().strftime('%Y-%m'))
+    start_date  = request.args.get('start_date', None)
+    end_date    = request.args.get('end_date', None)
     split_ratio = float(request.args.get('ratio', 0.5))
     with get_db() as db:
-        rows = db.execute(
-            "SELECT * FROM transactions WHERE categorized=1 AND date LIKE ?",
-            (month + '%',)
-        ).fetchall()
+        if start_date and end_date:
+            rows = db.execute(
+                "SELECT * FROM transactions WHERE categorized=1 AND date >= ? AND date <= ?",
+                (start_date, end_date)
+            ).fetchall()
+        elif start_date:
+            rows = db.execute(
+                "SELECT * FROM transactions WHERE categorized=1 AND date >= ?",
+                (start_date,)
+            ).fetchall()
+        else:
+            rows = db.execute(
+                "SELECT * FROM transactions WHERE categorized=1 AND date LIKE ?",
+                (month + '%',)
+            ).fetchall()
     txns = [row_to_dict(r) for r in rows]
     # split values: 'mine' = payer's own cost, 'shared' = split equally, 'theirs' = other person's cost
     me_own      = sum(t['amount'] for t in txns if
@@ -630,11 +643,13 @@ def account_stats():
     """每个账户每月的交易笔数，用于账户页面的月度统计。"""
     with get_db() as db:
         rows = db.execute("""
-            SELECT account, substr(date,1,7) AS month,
-                   COUNT(*) AS total, SUM(categorized) AS done
-            FROM transactions
-            GROUP BY account, month
-            ORDER BY account, month DESC
+            SELECT t.account, substr(t.date,1,7) AS month,
+                   COUNT(*) AS total, SUM(t.categorized) AS done,
+                   COALESCE(a.owner, 'me') AS owner
+            FROM transactions t
+            LEFT JOIN accounts a ON a.name = t.account
+            GROUP BY t.account, month
+            ORDER BY COALESCE(a.owner,'me'), t.account, month DESC
         """).fetchall()
     return jsonify([dict(r) for r in rows])
 
