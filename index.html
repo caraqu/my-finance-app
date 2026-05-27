@@ -314,6 +314,18 @@ body {
 .add-btn:active { background:rgba(108,99,255,.05); }
 .plaid-note { text-align:center; font-size:12px; color:var(--text2); margin-top:14px; }
 
+/* ── CATEGORY DETAIL ── */
+.cat-detail-list { overflow-y:auto; max-height:54vh; padding:0 2px 4px; }
+.cat-detail-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+.cat-detail-row:last-child { border-bottom:none; }
+/* ── RECAT SPLIT BUTTONS ── */
+.recat-split-btn {
+  padding:10px 4px; border:2px solid var(--border); background:var(--card);
+  border-radius:12px; font-size:12px; font-weight:700; cursor:pointer;
+  color:var(--text2); transition:all .15s; text-align:center; width:100%;
+}
+.recat-split-btn.sel { border-color:var(--primary); background:rgba(108,99,255,.08); color:var(--primary); }
+
 /* ── TOAST ── */
 .toast {
   position:fixed; bottom:88px; left:50%;
@@ -368,6 +380,14 @@ body {
         <button class="action-btn btn-undo"   onclick="undoLast()"             title="撤回">↩</button>
         <button class="action-btn btn-mine"   onclick="triggerSwipe('mine')"   title="我的">🦕</button>
       </div>
+      <div style="text-align:center;margin-top:10px">
+        <button id="theirsBtn" onclick="triggerSwipe('theirs')"
+          style="background:#FFF0F0;border:1.5px solid #FF9999;color:#AA3333;
+                 border-radius:16px;padding:8px 22px;font-size:13px;font-weight:700;
+                 cursor:pointer;opacity:.9">
+          🐗 野猪公主独享
+        </button>
+      </div>
       <div class="empty-state" id="emptyState">
         <div class="big-emoji">🎉</div>
         <h3>本月全部记完！</h3>
@@ -405,14 +425,62 @@ body {
     <button class="add-btn" onclick="connectAccount()">＋ 连接新账户</button>
     <p class="plaid-note">🔒 由 Plaid 安全连接 👩‍❤️‍👩</p>
 
+    <!-- 每账户月度交易量统计 -->
+    <div id="accountStats" style="margin-top:16px"></div>
+
+    <!-- 2年历史修复提示 -->
+    <div style="margin-top:16px;padding:16px;background:#FFF8E1;border-radius:16px;border:1px solid #FFD54F">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">⚠️ 2月之前的历史数据缺失？</div>
+      <div style="font-size:12px;color:#795548;line-height:1.6;margin-bottom:12px">
+        Plaid 默认只拉 <b>90天</b>历史（旧代码问题，已修复为2年）。已有账户的历史窗口无法通过补全来扩展，<b>唯一方法是断开重连</b>：<br>
+        1. 记下账户名，先把该账户删掉<br>
+        2. 点「＋ 连接新账户」重新连接<br>
+        3. 这次会自动拉取最多2年的历史<br>
+        ✅ <b>已分类的记录完全不受影响</b>
+      </div>
+      <button onclick="deleteAccountPrompt()" style="width:100%;padding:11px;background:#FF8F00;color:white;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer">
+        🗑️ 删除账户（准备重连获取完整历史）
+      </button>
+    </div>
+
     <!-- 如果交易数量异常少，点这里重新拉取全部历史 -->
-    <div style="margin-top:24px;padding:16px;background:var(--card);border-radius:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)">
-      <div style="font-size:14px;font-weight:700;margin-bottom:6px">📥 交易数量比实际少？</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.5">Plaid 首次连接后需要几分钟完成历史数据准备。如果你刚连接就同步，可能只拿到了部分数据。<br><br>✅ <b>已分类的账单不受影响</b>，只会补充之前漏掉的历史交易。</div>
+    <div style="margin-top:12px;padding:16px;background:var(--card);border-radius:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px">📥 刚连接就同步、数据不全？</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.5">Plaid 连接后需要几分钟完成历史数据准备。如果你刚连接就同步，可能只拿到了部分数据。<br><br>✅ <b>已分类的账单不受影响</b>，只会补充漏掉的交易。</div>
       <button onclick="resetAndResync()" style="width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer">
         📥 补全漏掉的历史交易
       </button>
     </div>
+  </div>
+</div>
+
+<!-- CAT DETAIL OVERLAY -->
+<div class="overlay" id="catDetailOverlay">
+  <div class="cat-sheet" style="display:flex;flex-direction:column;max-height:84vh">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="sheet-title" id="catDetailTitle">分类详情</div>
+      <button onclick="closeCatDetail()"
+        style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text2);padding:0 4px;line-height:1">✕</button>
+    </div>
+    <div class="cat-detail-list" id="catDetailList"></div>
+  </div>
+</div>
+
+<!-- RECAT OVERLAY -->
+<div class="overlay" id="recatOverlay">
+  <div class="cat-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">✏️ 修改分类</div>
+    <div class="sheet-subtitle" id="recatSub"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin:10px 0 6px">这笔是谁的？</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <button id="recat-mine"   class="recat-split-btn" onclick="selectRecatSplit('mine')">🦕 我的</button>
+      <button id="recat-shared" class="recat-split-btn" onclick="selectRecatSplit('shared')">💑 共享</button>
+      <button id="recat-theirs" class="recat-split-btn" onclick="selectRecatSplit('theirs')">🐗 TA的</button>
+    </div>
+    <div class="cat-grid" id="recatCatGrid"></div>
+    <button class="confirm-btn" id="recatConfirmBtn" onclick="confirmRecat()" disabled>请先选择</button>
   </div>
 </div>
 
@@ -620,6 +688,13 @@ function renderStack() {
   const autoCount = remaining.filter(t => preCatMap.has(t.id) || t.auto_category).length;
   rem.textContent = `还剩 ${remaining.length} 笔 · 已识别 ${autoCount} 笔`;
 
+  // 动态更新「独享」按钮：根据当前这笔是谁的卡
+  const btn = document.getElementById('theirsBtn');
+  if (btn) {
+    const isPartnerCard = remaining[0]?.payer === 'partner';
+    btn.textContent = isPartnerCard ? `🦕 恐龙公主独享` : `🐗 野猪公主独享`;
+  }
+
   stack.innerHTML = '';
   remaining.slice(0, 3).slice().reverse().forEach((txn, revIdx) => {
     const idx = Math.min(remaining.length,3) - 1 - revIdx;
@@ -766,7 +841,7 @@ async function saveTransaction(txnId, split, category) {
     if (txn) undoStack.push({ ...txn, _split: split, _category: category });
     updateUndoBtn();
     const c = CAT_MAP[category] || { em:'', nm: category };
-    const icon = split === 'mine' ? ME.em : '💑';
+    const icon = split === 'mine' ? ME.em : split === 'theirs' ? PARTNER.em : '💑';
     toast(`${icon} ${c.em} ${c.nm}`);
     preCatMap.delete(txnId);
     cardIndex++;
@@ -1019,10 +1094,10 @@ function renderReport(data) {
     return {...c, amount, me:v.me||0, partner:v.partner||0, shared:v.shared||0};
   }).filter(r=>r.amount>0).sort((a,b)=>b.amount-a.amount);
   const rowsHtml = rows.length
-    ? rows.map(r=>`<div class="brow">
+    ? rows.map(r=>`<div class="brow" onclick="openCategoryDetail('${r.id}')" style="cursor:pointer">
         <div class="brow-left"><span class="brow-emoji">${r.em}</span><span class="brow-name">${r.nm}</span></div>
         <div class="brow-right">
-          <div class="brow-amount">$${r.amount.toFixed(2)}</div>
+          <div class="brow-amount">$${r.amount.toFixed(2)} <span style="font-size:11px;color:var(--text2)">›</span></div>
           <div class="brow-sub">${[r.me?`我 $${r.me.toFixed(2)}`:'',r.partner?`Ta $${r.partner.toFixed(2)}`:'',r.shared?`共 $${r.shared.toFixed(2)}`:''].filter(Boolean).join(' · ')}</div>
         </div></div>`).join('')
     : '<p style="text-align:center;color:var(--text2);padding:20px">本月暂无已分类记录</p>';
@@ -1034,6 +1109,7 @@ function renderReport(data) {
 
 // ══ ACCOUNTS ══
 async function loadAccounts() {
+  loadAccountStats();
   try {
     const acc = await (await fetch('/api/accounts')).json();
     document.getElementById('accountList').innerHTML = acc.length
@@ -1045,6 +1121,33 @@ async function loadAccounts() {
       : '<p style="text-align:center;color:var(--text2);padding:30px 0">还没有连接任何账户</p>';
   } catch(e) { toast('加载账户失败'); }
 }
+async function deleteAccountPrompt() {
+  try {
+    const accounts = await (await fetch('/api/accounts')).json();
+    if (!accounts.length) { toast('没有可删除的账户'); return; }
+    let target;
+    if (accounts.length === 1) {
+      if (!confirm(`删除账户「${accounts[0].name}」？\n\n已分类记录完全保留，未分类待处理的会被清除。\n删除后点「＋ 连接新账户」重新连接即可获取2年历史。`)) return;
+      target = accounts[0];
+    } else {
+      const names = accounts.map((a,i)=>`${i+1}. ${a.name} (${a.owner==='me'?'恐龙公主':'野猪公主'})`).join('\n');
+      const idx = parseInt(prompt(`选择要删除的账户（输入序号）：\n${names}`)) - 1;
+      if (isNaN(idx) || idx < 0 || idx >= accounts.length) return;
+      if (!confirm(`删除「${accounts[idx].name}」？\n已分类记录保留，未分类记录清除。`)) return;
+      target = accounts[idx];
+    }
+    const r = await fetch('/api/delete_account', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({item_id: target.item_id})
+    });
+    const data = await r.json();
+    if (data.success) {
+      toast(`✅ 已删除「${data.account}」，请重新连接`);
+      loadAccounts();
+    } else { toast('❌ 删除失败'); }
+  } catch(e) { toast('❌ 操作失败'); }
+}
+
 function openOwnerModal(public_token, meta) {
   pendingPublicToken = public_token;
   pendingInstName    = meta?.institution?.name || '账户';
@@ -1099,6 +1202,188 @@ async function connectAccount() {
       onExit: (err) => { if(err) toast('❌ ' + (err.error_message||'连接取消')); }
     }).open();
   } catch(e) { toast('❌ 连接失败'); }
+}
+
+// ══ CATEGORY DETAIL ══
+let catDetailTxns = [];
+let currentDetailCat = null;
+
+async function openCategoryDetail(catId) {
+  const cat = CAT_MAP[catId] || {em:'💳', nm:catId};
+  document.getElementById('catDetailTitle').textContent =
+    `${cat.em} ${cat.nm} — ${formatMonthLabel(currentMonth)}`;
+  document.getElementById('catDetailList').innerHTML =
+    '<div style="text-align:center;padding:24px;color:var(--text2)">加载中…</div>';
+  document.getElementById('catDetailOverlay').classList.add('show');
+  try {
+    const r = await fetch(`/api/transactions?month=${currentMonth}&category=${catId}&all=true`);
+    catDetailTxns = await r.json();
+    renderCategoryDetail(catDetailTxns, catId);
+  } catch(e) {
+    document.getElementById('catDetailList').innerHTML =
+      '<div style="text-align:center;padding:20px;color:var(--danger)">加载失败</div>';
+  }
+}
+
+function closeCatDetail() {
+  document.getElementById('catDetailOverlay').classList.remove('show');
+}
+
+function renderCategoryDetail(txns, catId) {
+  currentDetailCat = catId;
+  if (!txns.length) {
+    document.getElementById('catDetailList').innerHTML =
+      '<div style="text-align:center;padding:24px;color:var(--text2)">暂无交易</div>';
+    return;
+  }
+  const total = txns.reduce((s,t)=>s+t.amount,0);
+  const header = `<div style="font-size:12px;color:var(--text2);padding:6px 0 10px">
+    共 ${txns.length} 笔 · 合计 $${total.toFixed(2)}</div>`;
+  const rows = txns.map(t => {
+    const date = new Date(t.date+'T12:00:00').toLocaleDateString('zh-CN',{month:'short',day:'numeric'});
+    const splitIcon  = t.split==='mine' ? ME.em : t.split==='theirs' ? PARTNER.em : '💑';
+    const splitLabel = t.split==='mine' ? '我的' : t.split==='theirs' ? 'TA的' : '共享';
+    const safeId = escHtml(t.id);
+    return `<div class="cat-detail-row">
+      <div style="flex:1;margin-right:8px;overflow:hidden">
+        <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(t.name)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${date} · ${escHtml(t.account)} · ${splitIcon} ${splitLabel}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <div style="font-size:15px;font-weight:700">$${t.amount.toFixed(2)}</div>
+        <button onclick="openRecat('${safeId}')"
+          style="background:var(--primary);color:white;border:none;border-radius:8px;
+                 padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer">改</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('catDetailList').innerHTML = header + rows;
+}
+
+document.getElementById('catDetailOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('catDetailOverlay')) closeCatDetail();
+});
+
+// ══ RECAT ══
+let recatTxnId = null, recatSplit = null, recatCat = null;
+
+function openRecat(txnId) {
+  const txn = catDetailTxns.find(t => t.id === txnId);
+  if (!txn) return;
+  recatTxnId = txnId;
+  recatSplit = txn.split || null;
+  recatCat   = txn.category || null;
+  document.getElementById('recatSub').textContent = `${txn.name} · $${txn.amount.toFixed(2)}`;
+  ['mine','shared','theirs'].forEach(s =>
+    document.getElementById('recat-'+s).classList.toggle('sel', s === recatSplit));
+  document.getElementById('recatCatGrid').innerHTML =
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">` +
+    CATEGORIES.map(c => {
+      const isSel = c.id === recatCat;
+      return `<button class="cat-btn${isSel?' sel':''}" onclick="selectRecatCat('${c.id}',this)">
+        <span class="em">${c.em}</span><span class="nm">${c.nm}</span>
+      </button>`;
+    }).join('') + `</div>`;
+  updateRecatConfirmBtn();
+  document.getElementById('recatOverlay').classList.add('show');
+}
+
+function selectRecatSplit(s) {
+  recatSplit = s;
+  ['mine','shared','theirs'].forEach(id =>
+    document.getElementById('recat-'+id).classList.toggle('sel', id===s));
+  updateRecatConfirmBtn();
+}
+
+function selectRecatCat(id, el) {
+  document.querySelectorAll('#recatCatGrid .cat-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+  recatCat = id;
+  updateRecatConfirmBtn();
+}
+
+function updateRecatConfirmBtn() {
+  const btn = document.getElementById('recatConfirmBtn');
+  const ready = recatSplit && recatCat;
+  btn.disabled = !ready;
+  if (ready) {
+    const c = CAT_MAP[recatCat];
+    const sLabel = recatSplit==='mine'?`🦕 我的`:recatSplit==='theirs'?`🐗 TA的`:`💑 共享`;
+    btn.textContent = `确认 — ${c.em} ${c.nm} · ${sLabel}`;
+  } else {
+    btn.textContent = '请先选择';
+  }
+}
+
+async function confirmRecat() {
+  if (!recatSplit || !recatCat || !recatTxnId) return;
+  document.getElementById('recatOverlay').classList.remove('show');
+  try {
+    await fetch('/api/categorize', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id:recatTxnId, split:recatSplit, category:recatCat})
+    });
+    const c = CAT_MAP[recatCat];
+    toast(`✅ 已更新 ${c.em} ${c.nm}`);
+    // Refresh detail list
+    if (currentDetailCat) {
+      const r = await fetch(`/api/transactions?month=${currentMonth}&category=${currentDetailCat}&all=true`);
+      catDetailTxns = await r.json();
+      if (recatCat !== currentDetailCat) {
+        // Transaction moved to different category — close detail & reload report
+        closeCatDetail();
+        loadReport();
+      } else {
+        renderCategoryDetail(catDetailTxns, currentDetailCat);
+        loadReport(); // refresh totals in background
+      }
+    }
+  } catch(e) { toast('❌ 更新失败'); }
+}
+
+document.getElementById('recatOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('recatOverlay'))
+    document.getElementById('recatOverlay').classList.remove('show');
+});
+
+// ══ ACCOUNT STATS ══
+async function loadAccountStats() {
+  try {
+    const stats = await (await fetch('/api/account_stats')).json();
+    renderAccountStats(stats);
+  } catch(e) {}
+}
+
+function renderAccountStats(stats) {
+  const el = document.getElementById('accountStats');
+  if (!stats.length) { el.innerHTML = ''; return; }
+  const byAccount = {};
+  stats.forEach(s => {
+    if (!byAccount[s.account]) byAccount[s.account] = [];
+    byAccount[s.account].push(s);
+  });
+  let html = `<div style="background:var(--card);border-radius:16px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.06)">
+    <div style="font-size:14px;font-weight:700;margin-bottom:12px">📊 各账户月度交易量</div>`;
+  for (const [acc, months] of Object.entries(byAccount)) {
+    html += `<div style="margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">${escHtml(acc)}</div>`;
+    months.slice(0,6).forEach(m => {
+      const done = m.done||0, total = m.total||0, pending = total-done;
+      const label = formatMonthLabel(m.month);
+      const badge = pending===0 && total>0
+        ? `<span style="font-size:11px;background:rgba(52,199,89,.12);color:var(--mine);padding:1px 7px;border-radius:7px;font-weight:700">✓</span>`
+        : pending>0
+          ? `<span style="font-size:11px;background:rgba(255,59,48,.08);color:var(--danger);padding:1px 7px;border-radius:7px;font-weight:700">${pending}待</span>`
+          : '';
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px">
+        <span style="color:var(--text2)">${label}</span>
+        <span style="font-weight:600">${total}笔 ${badge}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+  el.innerHTML = html;
 }
 
 // ══ INIT ══

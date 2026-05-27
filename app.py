@@ -5,6 +5,7 @@ import plaid
 from plaid.api import plaid_api
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.link_token_create_request_transactions import LinkTokenCreateRequestTransactions
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from plaid.model.products import Products
@@ -323,7 +324,10 @@ def create_link_token():
             country_codes=[CountryCode('US')],
             language='en',
             user=LinkTokenCreateRequestUser(client_user_id='user-1'),
-            redirect_uri="https://my-finance-app-production-39aa.up.railway.app"
+            redirect_uri="https://my-finance-app-production-39aa.up.railway.app",
+            # Request maximum 2 years of history (730 days).
+            # Without this, Plaid defaults to only 90 days!
+            transactions=LinkTokenCreateRequestTransactions(days_requested=730),
         )
         token = client.link_token_create(req)['link_token']
         with open(os.path.join(DATA_DIR, 'link_token.txt'), 'w') as f:
@@ -383,6 +387,10 @@ def sync_transactions():
                         if amount <= 0:
                             continue
                         plaid_cats    = txn.get('category') or []
+                        # Skip credit card bill payments & internal bank transfers
+                        # Plaid labels these ["Transfer","Credit Card"] or ["Payment","Credit Card"]
+                        if 'credit card' in [c.lower() for c in plaid_cats]:
+                            continue
                         merchant_name = txn['name']
                         if not db.execute("SELECT id FROM transactions WHERE id=?",
                                           (txn['transaction_id'],)).fetchone():
@@ -404,6 +412,24 @@ def sync_transactions():
             except plaid.ApiException as e:
                 errors.append(str(e))
     return jsonify({'new_transactions': new_count, 'errors': errors})
+
+@app.route('/api/delete_account', methods=['POST'])
+def delete_account():
+    """删除指定账户（及其所有未分类交易），以便重新连接获取完整历史。
+    已分类的交易保留不受影响。"""
+    item_id = request.json.get('item_id')
+    if not item_id:
+        return jsonify({'error': 'item_id required'}), 400
+    with get_db() as db:
+        account = db.execute("SELECT name FROM accounts WHERE item_id=?", (item_id,)).fetchone()
+        if not account:
+            return jsonify({'error': 'Account not found'}), 404
+        account_name = account['name']
+        deleted = db.execute(
+            "DELETE FROM transactions WHERE account=? AND categorized=0", (account_name,)
+        ).rowcount
+        db.execute("DELETE FROM accounts WHERE item_id=?", (item_id,))
+    return jsonify({'success': True, 'account': account_name, 'deleted_pending': deleted})
 
 @app.route('/api/reset_cursors', methods=['POST'])
 def reset_cursors():
@@ -433,16 +459,21 @@ def reclassify_all():
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
     show_all = request.args.get('all', 'false') == 'true'
-    month    = request.args.get('month')   # e.g. '2026-05'
+    month    = request.args.get('month')
+    category = request.args.get('category')
     with get_db() as db:
-        conditions = []
+        conditions, params = [], []
         if not show_all:
             conditions.append("categorized=0")
         if month:
-            conditions.append(f"date LIKE '{month}%'")
+            conditions.append("date LIKE ?")
+            params.append(month + '%')
+        if category:
+            conditions.append("category=?")
+            params.append(category)
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         rows = db.execute(
-            f"SELECT * FROM transactions {where} ORDER BY date DESC"
+            f"SELECT * FROM transactions {where} ORDER BY date DESC", params
         ).fetchall()
     return jsonify([row_to_dict(r) for r in rows])
 
@@ -526,20 +557,32 @@ def report():
             (month + '%',)
         ).fetchall()
     txns = [row_to_dict(r) for r in rows]
-    me_own              = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='mine')
-    partner_own         = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='mine')
+    # split values: 'mine' = payer's own cost, 'shared' = split equally, 'theirs' = other person's cost
+    me_own      = sum(t['amount'] for t in txns if
+                      (t['payer']=='me'      and t['split']=='mine') or
+                      (t['payer']=='partner' and t['split']=='theirs'))
+    partner_own = sum(t['amount'] for t in txns if
+                      (t['payer']=='partner' and t['split']=='mine') or
+                      (t['payer']=='me'      and t['split']=='theirs'))
     me_shared_paid      = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='shared')
     partner_shared_paid = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='shared')
     total_shared        = me_shared_paid + partner_shared_paid
-    net_balance         = (me_shared_paid - partner_shared_paid) * split_ratio
+    # Cross-payments: I paid for partner's expense (or vice versa) → affects net balance
+    me_paid_for_partner = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='theirs')
+    partner_paid_for_me = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='theirs')
+    net_balance = ((me_shared_paid - partner_shared_paid) * split_ratio
+                   + me_paid_for_partner - partner_paid_for_me)
     by_category: dict = {}
     for t in txns:
         cat = t.get('category') or 'other'
         if cat not in by_category:
             by_category[cat] = {'me': 0.0, 'partner': 0.0, 'shared': 0.0}
-        if   t['split'] == 'mine' and t['payer'] == 'me':      by_category[cat]['me']      += t['amount']
-        elif t['split'] == 'mine' and t['payer'] == 'partner': by_category[cat]['partner'] += t['amount']
-        else:                                                   by_category[cat]['shared']  += t['amount']
+        s, p, amt = t['split'], t['payer'], t['amount']
+        if   s == 'mine'   and p == 'me':      by_category[cat]['me']      += amt
+        elif s == 'mine'   and p == 'partner': by_category[cat]['partner'] += amt
+        elif s == 'theirs' and p == 'me':      by_category[cat]['partner'] += amt
+        elif s == 'theirs' and p == 'partner': by_category[cat]['me']      += amt
+        else:                                  by_category[cat]['shared']  += amt
     return jsonify({
         'month': month, 'me_own': round(me_own,2), 'partner_own': round(partner_own,2),
         'me_shared_paid': round(me_shared_paid,2), 'partner_shared_paid': round(partner_shared_paid,2),
@@ -547,6 +590,19 @@ def report():
         'combined_total': round(me_own+partner_own+total_shared,2),
         'by_category': by_category, 'transaction_count': len(txns),
     })
+
+@app.route('/api/account_stats', methods=['GET'])
+def account_stats():
+    """每个账户每月的交易笔数，用于账户页面的月度统计。"""
+    with get_db() as db:
+        rows = db.execute("""
+            SELECT account, substr(date,1,7) AS month,
+                   COUNT(*) AS total, SUM(categorized) AS done
+            FROM transactions
+            GROUP BY account, month
+            ORDER BY account, month DESC
+        """).fetchall()
+    return jsonify([dict(r) for r in rows])
 
 if __name__ == '__main__':
     os.makedirs(DATA_DIR, exist_ok=True)
