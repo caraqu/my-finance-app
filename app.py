@@ -10,6 +10,16 @@ try:
     HAS_TRANSACTIONS_CONFIG = True
 except ImportError:
     HAS_TRANSACTIONS_CONFIG = False
+
+# ── 启动诊断日志 ──────────────────────────────────────────
+import pkg_resources as _pkg
+try:
+    _plaid_ver = _pkg.get_distribution("plaid-python").version
+except Exception:
+    _plaid_ver = "unknown"
+print(f"[DIAG] plaid-python version  : {_plaid_ver}")
+print(f"[DIAG] HAS_TRANSACTIONS_CONFIG: {HAS_TRANSACTIONS_CONFIG}")
+print(f"[DIAG] days_requested         : {'730' if HAS_TRANSACTIONS_CONFIG else 'NOT ACTIVE - only 90 days'}")
 from plaid.model.item_public_token_exchange_request import ItemPublicTokenExchangeRequest
 from plaid.model.transactions_sync_request import TransactionsSyncRequest
 from plaid.model.products import Products
