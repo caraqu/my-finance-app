@@ -12,9 +12,9 @@ except ImportError:
     HAS_TRANSACTIONS_CONFIG = False
 
 # ── 启动诊断日志 ──────────────────────────────────────────
-import pkg_resources as _pkg
 try:
-    _plaid_ver = _pkg.get_distribution("plaid-python").version
+    from importlib.metadata import version as _get_version
+    _plaid_ver = _get_version("plaid-python")
 except Exception:
     _plaid_ver = "unknown"
 print(f"[DIAG] plaid-python version  : {_plaid_ver}")
