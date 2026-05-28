@@ -1277,10 +1277,10 @@ const debtSrc = settlData || data;
               r.me_proxy > 0 ? `替对方付 $${r.me_proxy.toFixed(2)}` : '',
             ].filter(Boolean).join(' · ')
           : [
-              r.me > 0 ? `我自己 $${r.me.toFixed(2)}` : '',
+              r.me > 0 ? `🦕恐龙公主 $${r.me.toFixed(2)}` : '',
               r.shared > 0 ? `共享 $${r.shared.toFixed(2)}` : '',
               r.me_proxy > 0 ? `替对方付 $${r.me_proxy.toFixed(2)}` : '',
-              r.partner > 0 ? `她自己 $${r.partner.toFixed(2)}` : '',
+              r.partner > 0 ? `🐗野猪公主 ${r.partner.toFixed(2)}` : '',
               r.partner_proxy > 0 ? `替对方付 $${r.partner_proxy.toFixed(2)}` : '',
             ].filter(Boolean).join(' · ');
         return `<div class="brow" onclick="openCategoryDetail('${r.id}')" style="cursor:pointer">
