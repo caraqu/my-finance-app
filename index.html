@@ -1230,8 +1230,8 @@ const debtSrc = settlData || data;
       ${proxyCard}`;
   } else if (reportView === 'partner') {
     summaryCards = `
-      <div class="sum-card"><div class="sum-label">${PARTNER.em} 她自己的</div><div class="sum-value">$${((data.partner_own||0) - (data.me_paid_for_partner||0)).toFixed(2)}</div></div>
-      <div class="sum-card"><div class="sum-label">💑 共享（她付的那半）</div><div class="sum-value">$${partnerSharedHalf.toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">${PARTNER.em} 我自己的</div><div class="sum-value">$${((data.partner_own||0) - (data.me_paid_for_partner||0)).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">💑 共享（我付的那半）</div><div class="sum-value">$${partnerSharedHalf.toFixed(2)}</div></div>
       ${partnerProxyCard}`;
   } else {
     // Combined view: debt cards + net settlement hero
@@ -1272,8 +1272,8 @@ const debtSrc = settlData || data;
             ].filter(Boolean).join(' · ')
           : reportView === 'partner'
           ? [
-              r.partner > 0 ? `她自己 $${r.partner.toFixed(2)}` : '',
-              r.partner_shared > 0 ? `共享（她付） $${r.partner_shared.toFixed(2)}` : '',
+              r.partner > 0 ? `我自己 $${r.partner.toFixed(2)}` : '',
+              r.partner_shared > 0 ? `共享（我付） $${r.partner_shared.toFixed(2)}` : '',
               r.me_proxy > 0 ? `替对方付 $${r.me_proxy.toFixed(2)}` : '',
             ].filter(Boolean).join(' · ')
           : [
