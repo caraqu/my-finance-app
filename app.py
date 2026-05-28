@@ -475,6 +475,7 @@ def get_transactions():
     show_all = request.args.get('all', 'false') == 'true'
     month    = request.args.get('month')
     category = request.args.get('category')
+    payer    = request.args.get('payer')
     with get_db() as db:
         conditions, params = [], []
         if not show_all:
@@ -485,6 +486,9 @@ def get_transactions():
         if category:
             conditions.append("category=?")
             params.append(category)
+        if payer:
+            conditions.append("payer=?")
+            params.append(payer)
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         rows = db.execute(
             f"SELECT * FROM transactions {where} ORDER BY date DESC", params
@@ -515,34 +519,57 @@ def uncategorize():
 @app.route('/api/months', methods=['GET'])
 def get_months():
     """è¿åæäº¤æè®°å½çæä»½åè¡¨ï¼åå«æ¯æçå®æ/å¾åç»è®¡ã"""
+    payer = request.args.get('payer')
     with get_db() as db:
-        rows = db.execute("""
+        payer_filter = ' WHERE payer=?' if payer else ''
+        payer_params = (payer,) if payer else ()
+        rows = db.execute(f"""
             SELECT
                 substr(date,1,7)    AS month,
                 COUNT(*)            AS total,
                 SUM(categorized)    AS done,
                 COUNT(*) - SUM(categorized) AS pending
-            FROM transactions
+            FROM transactions{payer_filter}
             GROUP BY month
             ORDER BY month DESC
-        """).fetchall()
+        """, payer_params).fetchall()
         # å¨é¨å¾åç±»æ°éï¼ç¨äº recents è¡ï¼
+        payer_where = ' AND payer=?' if payer else ''
+        payer_total_params = (payer,) if payer else ()
         total_pending = db.execute(
-            "SELECT COUNT(*) FROM transactions WHERE categorized=0"
+            f"SELECT COUNT(*) FROM transactions WHERE categorized=0{payer_where}",
+            payer_total_params
         ).fetchone()[0]
     months = [dict(r) for r in rows]
     return jsonify({'months': months, 'total_pending': total_pending})
 
 @app.route('/api/progress', methods=['GET'])
 def progress():
-    month = request.args.get('month', datetime.now().strftime('%Y-%m'))
+    month      = request.args.get('month', datetime.now().strftime('%Y-%m'))
+    start_date = request.args.get('start_date')
+    end_date   = request.args.get('end_date')
     with get_db() as db:
-        rows = db.execute(
-            """SELECT payer, categorized, COUNT(*) as cnt
+        if start_date and end_date:
+            rows = db.execute(
+                """SELECT payer, categorized, COUNT(*) as cnt
+               FROM transactions WHERE date >= ? AND date <= ?
+               GROUP BY payer, categorized""",
+                (start_date, end_date)
+            ).fetchall()
+        elif start_date:
+            rows = db.execute(
+                """SELECT payer, categorized, COUNT(*) as cnt
+               FROM transactions WHERE date >= ?
+               GROUP BY payer, categorized""",
+                (start_date,)
+            ).fetchall()
+        else:
+            rows = db.execute(
+                """SELECT payer, categorized, COUNT(*) as cnt
                FROM transactions WHERE date LIKE ?
                GROUP BY payer, categorized""",
-            (month + '%',)
-        ).fetchall()
+                (month + '%',)
+            ).fetchall()
     me_done = me_pending = partner_done = partner_pending = 0
     for row in rows:
         if row['payer'] == 'me':
