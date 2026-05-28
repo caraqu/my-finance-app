@@ -588,6 +588,7 @@ let pendingOwner   = null;
 let pendingPublicToken = null;
 let pendingInstName    = null;
 let dragging = false, startX = 0, startY = 0, deltaX = 0, deltaY = 0;
+  let settlementData = null;
 const preCatMap = new Map();  // txnId → categoryId (点击预选的)
 const undoStack = [];         // [{id, name, amount, split, category, ...full txn}]
 
@@ -1017,18 +1018,19 @@ function setView(v) {
     btn.style.color      = id === v ? 'white' : 'var(--text2)';
   });
   if (progressData) renderProgress(progressData);
-  if (reportData) renderReport(reportData);
+  if (reportData) renderReport(reportData, settlementData);
 }
 // ── Settlement Period Helpers ──
 function getReportUrl() {
-  const sd = localStorage.getItem('settlementStart');
-  const ed = localStorage.getItem('settlementEnd');
-  if (sd) {
-    const endPart = ed ? `&end_date=${ed}` : '';
-    return `/api/report?month=${currentMonth}&start_date=${sd}${endPart}`;
-  }
-  return `/api/report?month=${currentMonth}`;
+    return `/api/report?month=${currentMonth}`;
 }
+  function getSettlementUrl() {
+      const sd = localStorage.getItem('settlementStart');
+      const ed = localStorage.getItem('settlementEnd');
+      if (!sd) return null;
+      const endPart = ed ? `&end_date=${ed}` : '';
+      return `/api/report?start_date=${sd}${endPart}`;
+  }
 function applySettlement() {
   const start = document.getElementById('settlementStartInput').value;
   const end = document.getElementById('settlementEndInput').value;
@@ -1067,14 +1069,18 @@ async function loadReport() {
   const label = new Date(currentMonth + '-01T12:00:00').toLocaleDateString('zh-CN', { year:'numeric', month:'long' });
   document.getElementById('monthLabel').textContent = label;
   try {
-    const [rr, rp] = await Promise.all([
-      fetch(getReportUrl()),
-      fetch(`/api/progress?month=${currentMonth}`)
-    ]);
-    reportData   = await rr.json();
-    progressData = await rp.json();
-    renderProgress(progressData);
-    renderReport(reportData);
+    const settlUrl = getSettlementUrl();
+            const fetches = [
+                        fetch(getReportUrl()),
+                        fetch(`/api/progress?month=${currentMonth}`)
+                      ];
+            if (settlUrl) fetches.push(fetch(settlUrl));
+            const results = await Promise.all(fetches);
+            reportData     = await results[0].json();
+            progressData   = await results[1].json();
+            settlementData = settlUrl ? await results[2].json() : null;
+            renderProgress(progressData);
+            renderReport(reportData, settlementData);
   } catch(e) {
     document.getElementById('reportContent').innerHTML =
       '<p style="text-align:center;color:var(--text2);padding:40px">加载失败</p>';
@@ -1108,12 +1114,13 @@ function renderProgress(prog) {
         : ``}
     </div>`;
 }
-function renderReport(data) {
+function renderReport(data, settlData) {
   _debtDetailOpen = null;
-  const meProxyPaid = data.me_paid_for_partner || 0;
-  const partnerProxyPaid = data.partner_paid_for_me || 0;
-  const meSharedHalf = (data.me_shared_paid || 0) * 0.5;
-  const partnerSharedHalf = (data.partner_shared_paid || 0) * 0.5;
+const debtSrc = settlData || data;
+      const meProxyPaid = debtSrc.me_paid_for_partner || 0;
+      const partnerProxyPaid = debtSrc.partner_paid_for_me || 0;
+      const meSharedHalf = (debtSrc.me_shared_paid || 0) * 0.5;
+      const partnerSharedHalf = (debtSrc.partner_shared_paid || 0) * 0.5;
   // Combined view: debt calculation
   // partnerOwesMe = half of shared I paid + all I paid for partner (proxy)
   const partnerOwesMe = meSharedHalf + meProxyPaid;
