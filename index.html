@@ -388,6 +388,11 @@ body {
 
   <!-- 月份列表 (默认显示) -->
   <div id="monthListView">
+    <div id="swipePersonTabs" style="display:flex;background:var(--border);border-radius:12px;padding:3px;margin:12px 16px 8px">
+      <button id="swipeFilterAll" onclick="setSwipePersonFilter('all')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:white;transition:all .2s">📋 全部</button>
+      <button id="swipeFilterMe" onclick="setSwipePersonFilter('me')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">🦕 恐龙公主</button>
+      <button id="swipeFilterPartner" onclick="setSwipePersonFilter('partner')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">🐗 野猪公主</button>
+    </div>
     <div id="monthListRows"></div>
   </div>
 
@@ -442,6 +447,19 @@ body {
       <button id="toggleMe"       onclick="setView('me')"       style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:white;transition:all .2s">🦕 恐龙公主</button>
       <button id="togglePartner"  onclick="setView('partner')"  style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">🐗 野猪公主</button>
       <button id="toggleCombined" onclick="setView('combined')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">💑 合计</button>
+    </div>
+    
+    <div id="reportModeBar" style="display:flex;background:var(--bg);border-radius:12px;border:1.5px solid var(--border);padding:3px;margin-bottom:12px">
+      <button id="modeMonthly" onclick="setReportMode('monthly')" style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:var(--primary);color:white;transition:all .2s">📅 月度报告</button>
+      <button id="modeCustom"  onclick="setReportMode('custom')"  style="flex:1;padding:8px;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s">📆 自选时间段</button>
+    </div>
+    <div id="customRangeBar" style="display:none;background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 6px rgba(0,0,0,.06)">
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">📆 选择时间段</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <input type="date" id="customStartInput" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px" onchange="applyCustomRange()">
+        <input type="date" id="customEndInput" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px" onchange="applyCustomRange()">
+      </div>
+      <div id="customRangeLabel" style="font-size:12px;color:var(--text2);text-align:center"></div>
     </div>
     <div id="progressSection"></div>
     <div id="reportContent"><p style="text-align:center;color:var(--text2);padding:60px 0">加载中…</p></div>
@@ -582,6 +600,8 @@ let selectedCat    = null;
 let currentSwipeMonth = null; // null = all recents, 'YYYY-MM' = specific month
 let currentMonth   = new Date().toISOString().slice(0,7); // for report tab
 let reportView     = 'me';
+let swipePersonFilter = 'all';
+let reportMode       = 'monthly';
 let reportData     = null;
 let progressData   = null;
 let pendingOwner   = null;
@@ -618,7 +638,8 @@ function formatMonthLabel(monthStr) {
 
 async function loadMonthList() {
   try {
-    const r    = await fetch('/api/months');
+    const payerParam = swipePersonFilter !== 'all' ? '?payer=' + swipePersonFilter : '';
+    const r    = await fetch('/api/months' + payerParam);
     const data = await r.json();
     renderMonthList(data.months || [], data.total_pending || 0);
   } catch(e) { toast('⚠️ 无法连接服务器'); }
@@ -654,6 +675,19 @@ function renderMonthList(months, totalPending) {
   container.innerHTML = html;
 }
 
+// ══ SWIPE PERSON FILTER ══
+function setSwipePersonFilter(filter) {
+  swipePersonFilter = filter;
+  ['All','Me','Partner'].forEach(function(id) {
+    const btn = document.getElementById('swipeFilter' + id);
+    if (!btn) return;
+    const isActive = (filter === id.toLowerCase());
+    btn.style.background = isActive ? 'var(--primary)' : 'transparent';
+    btn.style.color = isActive ? 'white' : 'var(--text2)';
+  });
+  loadMonthList();
+}
+
 // ══ ENTER / EXIT SWIPE MODE ══════════════════════════════════
 async function enterSwipeMode(month) {
   currentSwipeMonth = month;
@@ -674,9 +708,10 @@ function exitSwipeMode() {
 
 async function loadTransactionsForMode() {
   try {
+    const payerSuffix = swipePersonFilter !== 'all' ? '&payer=' + swipePersonFilter : '';
     const url = currentSwipeMonth
-      ? `/api/transactions?month=${currentSwipeMonth}`
-      : '/api/transactions';
+      ? `/api/transactions?month=${currentSwipeMonth}` + payerSuffix
+      : '/api/transactions' + (swipePersonFilter !== 'all' ? '?payer=' + swipePersonFilter : '');
     const r = await fetch(url);
     transactions = await r.json();
     cardIndex = 0;
@@ -1020,10 +1055,56 @@ function setView(v) {
   if (progressData) renderProgress(progressData);
   if (reportData) renderReport(reportData, settlementData);
 }
+// ── Report Mode ──
+function setReportMode(mode) {
+  reportMode = mode;
+  const mBtn = document.getElementById('modeMonthly');
+  const cBtn = document.getElementById('modeCustom');
+  const cBar = document.getElementById('customRangeBar');
+  const mNavEl = document.querySelector('.month-nav');
+  const todayDivEl = mNavEl && mNavEl.nextElementSibling;
+  if (mBtn) {
+    mBtn.style.background = mode === 'monthly' ? 'var(--primary)' : 'transparent';
+    mBtn.style.color = mode === 'monthly' ? 'white' : 'var(--text2)';
+    cBtn.style.background = mode === 'custom' ? 'var(--primary)' : 'transparent';
+    cBtn.style.color = mode === 'custom' ? 'white' : 'var(--text2)';
+  }
+  if (cBar) cBar.style.display = mode === 'custom' ? '' : 'none';
+  if (mNavEl) mNavEl.style.display = mode === 'monthly' ? '' : 'none';
+  if (todayDivEl) todayDivEl.style.display = mode === 'monthly' ? '' : 'none';
+  loadReport();
+}
+function applyCustomRange() {
+  const s = (document.getElementById('customStartInput') || {}).value;
+  const e = (document.getElementById('customEndInput') || {}).value;
+  const lbl = document.getElementById('customRangeLabel');
+  if (lbl) {
+    if (s && e) lbl.textContent = s + ' → ' + e;
+    else if (s) lbl.textContent = s + ' → 今天';
+    else lbl.textContent = '请选择开始日期';
+  }
+  if (s) loadReport();
+}
+
 // ── Settlement Period Helpers ──
 function getReportUrl() {
-    return `/api/report?month=${currentMonth}`;
-}
+    if (reportMode === 'custom') {
+      const s = (document.getElementById('customStartInput') || {}).value;
+      const e = (document.getElementById('customEndInput') || {}).value;
+      if (s && e) return '/api/report?start_date=' + s + '&end_date=' + e;
+      if (s)     return '/api/report?start_date=' + s;
+    }
+    return '/api/report?month=' + currentMonth;
+  }
+  function getProgressUrl() {
+    if (reportMode === 'custom') {
+      const s = (document.getElementById('customStartInput') || {}).value;
+      const e = (document.getElementById('customEndInput') || {}).value;
+      if (s && e) return '/api/progress?start_date=' + s + '&end_date=' + e;
+      if (s)     return '/api/progress?start_date=' + s;
+    }
+    return '/api/progress?month=' + currentMonth;
+  }
   function getSettlementUrl() {
       const sd = localStorage.getItem('settlementStart');
       const ed = localStorage.getItem('settlementEnd');
@@ -1072,7 +1153,7 @@ async function loadReport() {
     const settlUrl = getSettlementUrl();
             const fetches = [
                         fetch(getReportUrl()),
-                        fetch(`/api/progress?month=${currentMonth}`)
+                        fetch(getProgressUrl())
                       ];
             if (settlUrl) fetches.push(fetch(settlUrl));
             const results = await Promise.all(fetches);
@@ -1086,6 +1167,16 @@ async function loadReport() {
       '<p style="text-align:center;color:var(--text2);padding:40px">加载失败</p>';
   }
 }
+function getProgressTitle() {
+    if (reportMode === 'custom') {
+      const s = (document.getElementById('customStartInput') || {}).value;
+      const e = (document.getElementById('customEndInput') || {}).value;
+      if (s && e) return s + ' → ' + e;
+      if (s) return s + ' → 今天';
+      return '自选时间段';
+    }
+    return MONTH_LABELS[Number(currentMonth.split('-')[1])-1] + " '" + currentMonth.slice(2,4);
+  }
 function renderProgress(prog) {
   if (!prog) { document.getElementById('progressSection').innerHTML = ''; return; }
   const me = prog.me, pa = prog.partner;
@@ -1107,7 +1198,7 @@ function renderProgress(prog) {
   const progressRows = reportView === 'me' ? meRow : reportView === 'partner' ? paRow : meRow + paRow;
   document.getElementById('progressSection').innerHTML = `
     <div class="progress-card">
-      <h3>📋 ${MONTH_LABELS[Number(currentMonth.split('-')[1])-1]} '${currentMonth.slice(2,4)} 记账进度</h3>
+      <h3>📋 ${getProgressTitle()} 记账进度</h3>
       ${progressRows}
       ${prog.both_cleared
         ? `<div style="margin-top:12px;text-align:center;font-size:13px;font-weight:700;color:var(--mine)">🎉 两人本月均已记完！</div>`
@@ -1202,7 +1293,7 @@ const debtSrc = settlData || data;
     : '<p style="text-align:center;color:var(--text2);padding:20px">本月暂无已分类记录</p>';
 
   // Settlement section (moved above breakdown, shown for combined view only)
-  const settlSec = reportView === 'combined' ? `<div class="settlement-section" style="margin-bottom:12px">
+  const settlSec = (reportView === 'combined' && reportMode === 'monthly') ? `<div class="settlement-section" style="margin-bottom:12px">
       <h4>✨ 结算周期</h4>
       <div id="settlementActiveBar" style="display:none" class="settlement-active-bar">
         <span id="settlementActiveLabel"></span>
