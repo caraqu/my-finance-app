@@ -286,7 +286,7 @@ body {
 .progress-bar-fill { height:100%; border-radius:4px; transition:width .6s cubic-bezier(.34,1.56,.64,1); }
 
 .summary-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
-.sum-card { background:var(--card); border-radius:18px; padding:16px; box-shadow:0 1px 6px rgba(0,0,0,.06); }
+.sum-card { background:var(--card); border-radius:18px; padding:16px; box-shadow:0 1px 6px rgba(0,0,0,.06); align-self:start; }
 .sum-card.hero { grid-column:1/-1; }
 .sum-label { font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; }
 .sum-card.hero .sum-label { color:rgba(255,255,255,.75); }
@@ -747,6 +747,8 @@ function renderStack() {
   if (btn) {
     const isPartnerCard = remaining[0]?.payer === 'partner';
     btn.textContent = isPartnerCard ? `🦕 恐龙公主独享` : `🐗 野猪公主独享`;
+      const rlbl = document.querySelector('.label-mine');
+      if (rlbl) rlbl.textContent = isPartnerCard ? '🐗野猪公主 →' : '🦕恐龙公主 →';
   }
 
   stack.innerHTML = '';
@@ -1247,7 +1249,7 @@ const debtSrc = settlData || data;
       ${netCard}
       <div class="sum-card" onclick="toggleDebtDetail('partner-owes')" style="cursor:pointer"><div class="sum-label">${PARTNER.name} 欠 ${ME.name}</div><div class="sum-value">${partnerOwesMe.toFixed(2)}</div></div>
       <div class="sum-card" onclick="toggleDebtDetail('me-owes')" style="cursor:pointer"><div class="sum-label">${ME.name} 欠 ${PARTNER.name}</div><div class="sum-value">${iOwePartner.toFixed(2)}</div></div>
-      <div id="debtDetailSection" style="display:none;width:100%;margin-top:8px"></div>`;
+      <div id="debtDetailSection" style="display:none;width:100%;margin-top:8px;grid-column:1/-1"></div>`;
   }
 
   const rows = Object.entries(data.by_category||{}).map(([id,v]) => {
@@ -1292,24 +1294,9 @@ const debtSrc = settlData || data;
       }).join('')
     : '<p style="text-align:center;color:var(--text2);padding:20px">本月暂无已分类记录</p>';
 
-  // Settlement section (moved above breakdown, shown for combined view only)
-  const settlSec = (reportView === 'combined' && reportMode === 'monthly') ? `<div class="settlement-section" style="margin-bottom:12px">
-      <h4>✨ 结算周期</h4>
-      <div id="settlementActiveBar" style="display:none" class="settlement-active-bar">
-        <span id="settlementActiveLabel"></span>
-        <button class="settlement-btn clear" onclick="clearSettlement()">重置</button>
-      </div>
-      <div class="settlement-date-row">
-        <input type="date" id="settlementStartInput" placeholder="YYYY-MM-DD">
-        <input type="date" id="settlementEndInput" placeholder="YYYY-MM-DD">
-        <button class="settlement-btn set" onclick="applySettlement()">设置周期</button>
-      </div>
-      <div style="font-size:11px;color:var(--text2);margin-top:6px">不选结束日则累计到今天</div>
-    </div>` : '';
 
   document.getElementById('reportContent').innerHTML = `
     <div class="summary-grid">${summaryCards}</div>
-    ${settlSec}
     ${reportView !== 'combined' ? `<div class="breakdown-card"><h3>按类别明细</h3>${rowsHtml}</div>` : ''}
     <div class="report-footer">共 ${data.transaction_count} 笔已分类</div>`;
   updateSettlementUI();
