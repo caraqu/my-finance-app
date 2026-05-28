@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Finance with Fiancée">
 <title>💑 Finance with Fiancée</title>
-<style>
+<style
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --primary: #6C63FF; --mine: #34C759; --shared: #FF9F0A;
@@ -1227,7 +1227,7 @@ const debtSrc = settlData || data;
 
   if (reportView === 'me') {
     summaryCards = `
-      <div class="sum-card"><div class="sum-label">${ME.em} 我自己的</div><div class="sum-value">$${(data.me_own||0).toFixed(2)}</div></div>
+      <div class="sum-card"><div class="sum-label">${ME.em} 我自己的</div><div class="sum-value">$${((data.me_own||0) - (data.partner_paid_for_me||0)).toFixed(2)}</div></div>
       <div class="sum-card"><div class="sum-label">💑 共享（我付的那半）</div><div class="sum-value">$${meSharedHalf.toFixed(2)}</div></div>
       ${proxyCard}`;
   } else if (reportView === 'partner') {
@@ -1255,7 +1255,7 @@ const debtSrc = settlData || data;
   const rows = Object.entries(data.by_category||{}).map(([id,v]) => {
     const c = CAT_MAP[id] || {em:'🦕', nm:id};
     const meAmt = (v.me||0) + (v.me_shared||0) + (v.partner_proxy||0);
-    const paAmt = (v.partner||0) + (v.partner_shared||0);
+    const paAmt = (v.partner||0) + (v.partner_shared||0) + (v.me_proxy||0);
     const shAmt = (v.me_shared||0) + (v.partner_shared||0);
     let amount;
     if (reportView === 'me') amount = meAmt;
