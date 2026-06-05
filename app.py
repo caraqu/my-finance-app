@@ -1,4 +1,4 @@
-# Finance with FiancÃ©e â backend
+# Finance with FiancÃÂ©e Ã¢ÂÂ backend
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import plaid
@@ -11,7 +11,7 @@ try:
 except ImportError:
     HAS_TRANSACTIONS_CONFIG = False
 
-# ââ å¯å¨è¯æ­æ¥å¿ ââââââââââââââââââââââââââââââââââââââââââ
+# Ã¢ÂÂÃ¢ÂÂ Ã¥ÂÂ¯Ã¥ÂÂ¨Ã¨Â¯ÂÃ¦ÂÂ­Ã¦ÂÂ¥Ã¥Â¿Â Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 try:
     from importlib.metadata import version as _get_version
     _plaid_ver = _get_version("plaid-python")
@@ -32,7 +32,7 @@ from typing import Optional, List
 app = Flask(__name__, static_folder='.')
 CORS(app)
 
-# ââ Plaid ââââââââââââââââââââââââââââââââââââââââââââââââââ
+# Ã¢ÂÂÃ¢ÂÂ Plaid Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 PLAID_CLIENT_ID = "6a139ca06fec6d000d3d83a3"
 PLAID_SECRET    = os.environ.get("PLAID_SECRET", "21d24cef5f1f77e0f83049aaffba65")
 
@@ -43,10 +43,10 @@ configuration = plaid.Configuration(
 api_client = plaid.ApiClient(configuration)
 client      = plaid_api.PlaidApi(api_client)
 
-# ââ SQLite âââââââââââââââââââââââââââââââââââââââââââââââââ
-# DATA_DIR ä¼åä½¿ç¨ç¯å¢åéï¼Railway Volume æè½½è·¯å¾ï¼ï¼ä¿è¯ redeploy ä¸ä¸¢æ°æ®
-# å¨ Railway ä¸ï¼Settings â Volumes â Mount Path è®¾ä¸º /data
-# ç¶åè®¾ç¯å¢åé DATA_DIR=/data
+# Ã¢ÂÂÃ¢ÂÂ SQLite Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+# DATA_DIR Ã¤Â¼ÂÃ¥ÂÂÃ¤Â½Â¿Ã§ÂÂ¨Ã§ÂÂ¯Ã¥Â¢ÂÃ¥ÂÂÃ©ÂÂÃ¯Â¼ÂRailway Volume Ã¦ÂÂÃ¨Â½Â½Ã¨Â·Â¯Ã¥Â¾ÂÃ¯Â¼ÂÃ¯Â¼ÂÃ¤Â¿ÂÃ¨Â¯Â redeploy Ã¤Â¸ÂÃ¤Â¸Â¢Ã¦ÂÂ°Ã¦ÂÂ®
+# Ã¥ÂÂ¨ Railway Ã¤Â¸ÂÃ¯Â¼ÂSettings Ã¢ÂÂ Volumes Ã¢ÂÂ Mount Path Ã¨Â®Â¾Ã¤Â¸Âº /data
+# Ã§ÂÂ¶Ã¥ÂÂÃ¨Â®Â¾Ã§ÂÂ¯Ã¥Â¢ÂÃ¥ÂÂÃ©ÂÂ DATA_DIR=/data
 DATA_DIR = os.environ.get("DATA_DIR", os.path.dirname(os.path.abspath(__file__)))
 DB_PATH  = os.path.join(DATA_DIR, "finance.db")
 
@@ -68,6 +68,7 @@ def init_db():
                 access_token TEXT NOT NULL,
                 name         TEXT NOT NULL,
                 owner        TEXT NOT NULL DEFAULT 'me',
+                account_type TEXT NOT NULL DEFAULT 'credit',
                 cursor       TEXT
             );
             CREATE TABLE IF NOT EXISTS transactions (
@@ -76,6 +77,9 @@ def init_db():
                 name           TEXT NOT NULL,
                 amount         REAL NOT NULL,
                 account        TEXT NOT NULL,
+                account_id     TEXT,
+                account_type   TEXT,
+                bank_name      TEXT,
                 payer          TEXT NOT NULL DEFAULT 'me',
                 plaid_category TEXT,
                 auto_category  TEXT,
@@ -83,17 +87,38 @@ def init_db():
                 split          TEXT,
                 categorized    INTEGER DEFAULT 0
             );
+            CREATE TABLE IF NOT EXISTS merchant_rules (
+                merchant_key   TEXT PRIMARY KEY,
+                category       TEXT NOT NULL,
+                match_count    INTEGER DEFAULT 0
+            );
         """)
         for col, tbl, default in [
             ('owner', 'accounts', "'me'"),
             ('payer', 'transactions', "'me'"),
+            ('account_id', 'transactions', 'NULL'),
+            ('account_type', 'transactions', 'NULL'),
+            ('bank_name', 'transactions', 'NULL'),
         ]:
             try:
-                db.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} TEXT NOT NULL DEFAULT {default}")
+                db.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} TEXT")
             except Exception:
                 pass
+        try:
+            db.execute("ALTER TABLE accounts ADD COLUMN account_type TEXT NOT NULL DEFAULT 'credit'")
+        except Exception:
+            pass
+        # Ensure merchant_rules table exists (migration)
+        try:
+            db.execute("""CREATE TABLE IF NOT EXISTS merchant_rules (
+                merchant_key TEXT PRIMARY KEY,
+                category     TEXT NOT NULL,
+                match_count  INTEGER DEFAULT 0
+            )""")
+        except Exception:
+            pass
 
-# ââ åå®¶å â åç±»ï¼é¿ä¼åå¹éï¼æ¯ Plaid ç±»å«æ´åï¼ âââââââââ
+# Ã¢ÂÂÃ¢ÂÂ Ã¥ÂÂÃ¥Â®Â¶Ã¥ÂÂ Ã¢ÂÂ Ã¥ÂÂÃ§Â±Â»Ã¯Â¼ÂÃ©ÂÂ¿Ã¤Â¼ÂÃ¥ÂÂÃ¥ÂÂ¹Ã©ÂÂÃ¯Â¼ÂÃ¦Â¯Â Plaid Ã§Â±Â»Ã¥ÂÂ«Ã¦ÂÂ´Ã¥ÂÂÃ¯Â¼Â Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 MERCHANT_NAME_MAP = [
     ('amazon prime video', 'subscription'),
     ('amazon prime',       'subscription'),
@@ -300,6 +325,53 @@ PLAID_CATEGORY_MAP = {
     'camera':                     'photo',
 }
 
+def apply_merchant_rules(db, merchant_name: str) -> Optional[str]:
+    """Check learned merchant rules: if merchant was categorized consistently 3+ times."""
+    key = merchant_name.strip().lower()
+    if not key:
+        return None
+    row = db.execute(
+        "SELECT category FROM merchant_rules WHERE merchant_key=?", (key,)
+    ).fetchone()
+    return row['category'] if row else None
+
+
+def learn_merchant_rules(db) -> dict:
+    """
+    Scan categorized transactions. For each merchant (by exact name) that has been
+    manually categorized 3+ times with the same category, upsert into merchant_rules.
+    Returns stats about what was learned.
+    """
+    rows = db.execute(
+        """SELECT name, category, COUNT(*) as cnt
+           FROM transactions
+           WHERE categorized=1 AND category IS NOT NULL AND category != 'transfer'
+           GROUP BY LOWER(TRIM(name)), category
+           HAVING cnt >= 3
+           ORDER BY cnt DESC"""
+    ).fetchall()
+    added, updated = 0, 0
+    for row in rows:
+        key = row['name'].strip().lower()
+        existing = db.execute(
+            "SELECT category FROM merchant_rules WHERE merchant_key=?", (key,)
+        ).fetchone()
+        if existing:
+            if existing['category'] != row['category']:
+                db.execute(
+                    "UPDATE merchant_rules SET category=?, match_count=? WHERE merchant_key=?",
+                    (row['category'], row['cnt'], key)
+                )
+                updated += 1
+        else:
+            db.execute(
+                "INSERT INTO merchant_rules (merchant_key, category, match_count) VALUES (?,?,?)",
+                (key, row['category'], row['cnt'])
+            )
+            added += 1
+    return {'added': added, 'updated': updated, 'total_rules': added + updated}
+
+
 def auto_classify(plaid_categories: List[str], merchant_name: str = '') -> Optional[str]:
     name_lower = merchant_name.lower()
     for pattern, cat in MERCHANT_NAME_MAP:
@@ -318,9 +390,15 @@ def row_to_dict(row):
     d = dict(row)
     d['plaid_category'] = json.loads(d.get('plaid_category') or '[]')
     d['categorized']    = bool(d['categorized'])
+    # Build human-readable account detail string
+    bank = d.get('bank_name') or d.get('account') or ''
+    acct_type = d.get('account_type') or ''
+    mask = d.get('account_id') or ''
+    parts = [p for p in [bank, acct_type, ('...' + mask) if mask else ''] if p]
+    d['account_detail'] = ' '.join(parts) if parts else bank
     return d
 
-# ââ Routes âââââââââââââââââââââââââââââââââââââââââââââââââ
+# Ã¢ÂÂÃ¢ÂÂ Routes Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
@@ -334,7 +412,7 @@ def create_link_token():
     try:
         req_kwargs = dict(
             products=[Products("transactions")],
-            client_name="Finance with FiancÃ©e",
+            client_name="Finance with FiancÃÂ©e",
             country_codes=[CountryCode('US')],
             language='en',
             user=LinkTokenCreateRequestUser(client_user_id='user-1'),
@@ -362,7 +440,7 @@ def get_link_token():
 @app.route('/api/exchange_token', methods=['POST'])
 def exchange_token():
     public_token = request.json['public_token']
-    account_name = request.json.get('account_name', 'è´¦æ·')
+    account_name = request.json.get('account_name', 'Ã¨Â´Â¦Ã¦ÂÂ·')
     owner        = request.json.get('owner', 'me')
     try:
         resp = client.item_public_token_exchange(
@@ -370,8 +448,8 @@ def exchange_token():
         )
         with get_db() as db:
             db.execute(
-                "INSERT OR REPLACE INTO accounts (item_id, access_token, name, owner, cursor) VALUES (?,?,?,?,?)",
-                (resp['item_id'], resp['access_token'], account_name, owner, None)
+                "INSERT OR REPLACE INTO accounts (item_id, access_token, name, owner, account_type, cursor) VALUES (?,?,?,?,?,?)",
+                (resp['item_id'], resp['access_token'], account_name, owner, request.json.get('account_type', 'credit'), None)
             )
         return jsonify({'success': True})
     except plaid.ApiException as e:
@@ -396,27 +474,73 @@ def sync_transactions():
                     if cursor:
                         kwargs['cursor'] = cursor
                     resp = client.transactions_sync(TransactionsSyncRequest(**kwargs))
+                    # Build a map of sub-account_id -> account details for this item
+                    acct_map = {}
+                    try:
+                        from plaid.model.accounts_get_request import AccountsGetRequest
+                        accts_resp = client.accounts_get(AccountsGetRequest(access_token=account['access_token']))
+                        for a in accts_resp['accounts']:
+                            acct_map[a['account_id']] = {
+                                'mask':  a.get('mask') or '',
+                                'type':  str(a.get('type') or '').lower(),
+                                'subtype': str(a.get('subtype') or '').lower(),
+                                'name': a.get('official_name') or a.get('name') or account['name'],
+                            }
+                    except Exception:
+                        pass
+                    is_debit_account = account.get('account_type', 'credit') in ('depository', 'debit', 'savings', 'checking')
                     for txn in resp['added']:
-                        amount = txn['amount']
-                        if amount <= 0:
-                            continue
-                        plaid_cats    = txn.get('category') or []
-                        # Skip credit card bill payments & internal bank transfers
-                        # Plaid labels these ["Transfer","Credit Card"] or ["Payment","Credit Card"]
-                        if 'credit card' in [c.lower() for c in plaid_cats]:
-                            continue
+                        raw_amount = txn['amount']
+                        plaid_cats = txn.get('category') or []
+                        cats_lower = [c.lower() for c in plaid_cats]
+                        # For credit cards: positive = expense, negative = payment/refund
+                        # For debit/savings: negative = expense (money leaving), positive = deposit
+                        # Plaid always uses positive=debit(money-out-for-credit), negative=credit
+                        # For debit accounts, Plaid positive = money leaving account = expense
+                        # We store amounts as positive = expense always
+                        if is_debit_account:
+                            # For debit: Plaid positive = money leaving = expense
+                            # Skip deposits (negative = money coming in)
+                            if raw_amount < 0:
+                                continue
+                            amount = raw_amount
+                        else:
+                            # Credit card: Plaid positive = charge = expense
+                            # Skip payments/refunds (negative)
+                            if raw_amount <= 0:
+                                continue
+                            amount = raw_amount
+                        # Determine if this is an inter-account transfer (autopay etc.)
+                        is_transfer = ('transfer' in cats_lower or
+                                       ('payment' in cats_lower and 'credit card' in cats_lower) or
+                                       'credit card' in cats_lower)
                         merchant_name = txn['name']
+                        # Get sub-account details
+                        txn_acct_id = txn.get('account_id', '')
+                        acct_info = acct_map.get(txn_acct_id, {})
+                        acct_mask = acct_info.get('mask', '')
+                        acct_subtype = acct_info.get('subtype', '')
+                        acct_bank = acct_info.get('name', account['name'])
+                        # Auto-classify: check merchant_rules first, then MERCHANT_NAME_MAP
+                        auto_cat = apply_merchant_rules(db, merchant_name)
+                        if auto_cat is None:
+                            auto_cat = auto_classify(plaid_cats, merchant_name)
+                        # Mark inter-account transfers with 'transfer' category
+                        if is_transfer and auto_cat is None:
+                            auto_cat = 'transfer'
                         if not db.execute("SELECT id FROM transactions WHERE id=?",
                                           (txn['transaction_id'],)).fetchone():
                             db.execute(
                                 """INSERT INTO transactions
-                                   (id,date,name,amount,account,payer,plaid_category,auto_category,
+                                   (id,date,name,amount,account,account_id,account_type,bank_name,
+                                    payer,plaid_category,auto_category,
                                     category,split,categorized)
-                                   VALUES (?,?,?,?,?,?,?,?,NULL,NULL,0)""",
+                                   VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL,NULL,0)""",
                                 (txn['transaction_id'], str(txn['date']), merchant_name,
-                                 amount, account['name'], account['owner'],
+                                 amount, account['name'], acct_mask, acct_subtype, acct_bank,
+                                 account['owner'],
                                  json.dumps(plaid_cats),
-                                 auto_classify(plaid_cats, merchant_name))
+                                 auto_cat)
                             )
                             new_count += 1
                     has_more = resp['has_more']
@@ -429,8 +553,8 @@ def sync_transactions():
 
 @app.route('/api/delete_account', methods=['POST'])
 def delete_account():
-    """å é¤æå®è´¦æ·ï¼åå¶æææªåç±»äº¤æï¼ï¼ä»¥ä¾¿éæ°è¿æ¥è·åå®æ´åå²ã
-    å·²åç±»çäº¤æä¿çä¸åå½±åã"""
+    """Ã¥ÂÂ Ã©ÂÂ¤Ã¦ÂÂÃ¥Â®ÂÃ¨Â´Â¦Ã¦ÂÂ·Ã¯Â¼ÂÃ¥ÂÂÃ¥ÂÂ¶Ã¦ÂÂÃ¦ÂÂÃ¦ÂÂªÃ¥ÂÂÃ§Â±Â»Ã¤ÂºÂ¤Ã¦ÂÂÃ¯Â¼ÂÃ¯Â¼ÂÃ¤Â»Â¥Ã¤Â¾Â¿Ã©ÂÂÃ¦ÂÂ°Ã¨Â¿ÂÃ¦ÂÂ¥Ã¨ÂÂ·Ã¥ÂÂÃ¥Â®ÂÃ¦ÂÂ´Ã¥ÂÂÃ¥ÂÂ²Ã£ÂÂ
+    Ã¥Â·Â²Ã¥ÂÂÃ§Â±Â»Ã§ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ¤Â¿ÂÃ§ÂÂÃ¤Â¸ÂÃ¥ÂÂÃ¥Â½Â±Ã¥ÂÂÃ£ÂÂ"""
     item_id = request.json.get('item_id')
     if not item_id:
         return jsonify({'error': 'item_id required'}), 400
@@ -447,15 +571,15 @@ def delete_account():
 
 @app.route('/api/reset_cursors', methods=['POST'])
 def reset_cursors():
-    """éç½®ææè´¦æ·çåæ­¥æ¸¸æ ï¼ä¸æ¬¡åæ­¥å°éæ°æåå¨é¨åå²äº¤æã
-    å¦æåç°äº¤ææ°éå¼å¸¸å°ï¼åªæ100å¤æ¡ï¼ï¼æ§è¡æ­¤æä½åååæ­¥å³å¯ã"""
+    """Ã©ÂÂÃ§Â½Â®Ã¦ÂÂÃ¦ÂÂÃ¨Â´Â¦Ã¦ÂÂ·Ã§ÂÂÃ¥ÂÂÃ¦Â­Â¥Ã¦Â¸Â¸Ã¦Â ÂÃ¯Â¼ÂÃ¤Â¸ÂÃ¦Â¬Â¡Ã¥ÂÂÃ¦Â­Â¥Ã¥Â°ÂÃ©ÂÂÃ¦ÂÂ°Ã¦ÂÂÃ¥ÂÂÃ¥ÂÂ¨Ã©ÂÂ¨Ã¥ÂÂÃ¥ÂÂ²Ã¤ÂºÂ¤Ã¦ÂÂÃ£ÂÂ
+    Ã¥Â¦ÂÃ¦ÂÂÃ¥ÂÂÃ§ÂÂ°Ã¤ÂºÂ¤Ã¦ÂÂÃ¦ÂÂ°Ã©ÂÂÃ¥Â¼ÂÃ¥Â¸Â¸Ã¥Â°ÂÃ¯Â¼ÂÃ¥ÂÂªÃ¦ÂÂ100Ã¥Â¤ÂÃ¦ÂÂ¡Ã¯Â¼ÂÃ¯Â¼ÂÃ¦ÂÂ§Ã¨Â¡ÂÃ¦Â­Â¤Ã¦ÂÂÃ¤Â½ÂÃ¥ÂÂÃ¥ÂÂÃ¥ÂÂÃ¦Â­Â¥Ã¥ÂÂ³Ã¥ÂÂ¯Ã£ÂÂ"""
     with get_db() as db:
         db.execute("UPDATE accounts SET cursor=NULL")
-    return jsonify({'success': True, 'message': 'æ¸¸æ å·²éç½®ï¼è¯·éæ°åæ­¥ä»¥è·åå®æ´åå²è®°å½'})
+    return jsonify({'success': True, 'message': 'Ã¦Â¸Â¸Ã¦Â ÂÃ¥Â·Â²Ã©ÂÂÃ§Â½Â®Ã¯Â¼ÂÃ¨Â¯Â·Ã©ÂÂÃ¦ÂÂ°Ã¥ÂÂÃ¦Â­Â¥Ã¤Â»Â¥Ã¨ÂÂ·Ã¥ÂÂÃ¥Â®ÂÃ¦ÂÂ´Ã¥ÂÂÃ¥ÂÂ²Ã¨Â®Â°Ã¥Â½Â'})
 
 @app.route('/api/reclassify', methods=['POST'])
 def reclassify_all():
-    """å¯¹æææªåç±»äº¤æéæ°è¿è¡èªå¨åç±»ï¼åçº§è§ååè°ç¨ï¼ã"""
+    """Ã¥Â¯Â¹Ã¦ÂÂÃ¦ÂÂÃ¦ÂÂªÃ¥ÂÂÃ§Â±Â»Ã¤ÂºÂ¤Ã¦ÂÂÃ©ÂÂÃ¦ÂÂ°Ã¨Â¿ÂÃ¨Â¡ÂÃ¨ÂÂªÃ¥ÂÂ¨Ã¥ÂÂÃ§Â±Â»Ã¯Â¼ÂÃ¥ÂÂÃ§ÂºÂ§Ã¨Â§ÂÃ¥ÂÂÃ¥ÂÂÃ¨Â°ÂÃ§ÂÂ¨Ã¯Â¼ÂÃ£ÂÂ"""
     with get_db() as db:
         rows = db.execute(
             "SELECT id, name, plaid_category FROM transactions WHERE categorized=0"
@@ -463,12 +587,48 @@ def reclassify_all():
         count = 0
         for row in rows:
             plaid_cats = json.loads(row['plaid_category'] or '[]')
-            new_cat = auto_classify(plaid_cats, row['name'])
+            # Check merchant rules first, then fallback to auto_classify
+            new_cat = apply_merchant_rules(db, row['name'])
+            if new_cat is None:
+                new_cat = auto_classify(plaid_cats, row['name'])
             db.execute("UPDATE transactions SET auto_category=? WHERE id=?",
                        (new_cat, row['id']))
             if new_cat:
                 count += 1
     return jsonify({'updated': count})
+
+@app.route('/api/learn_rules', methods=['POST'])
+def learn_rules():
+    """Scan categorized transactions and learn merchant -> category mappings.
+    Any merchant appearing 3+ times with the same category gets saved as a rule.
+    Also applies the learned rules to existing uncategorized transactions."""
+    with get_db() as db:
+        stats = learn_merchant_rules(db)
+        # Apply learned rules to existing uncategorized transactions
+        uncategorized = db.execute(
+            "SELECT id, name FROM transactions WHERE categorized=0"
+        ).fetchall()
+        applied = 0
+        for txn in uncategorized:
+            cat = apply_merchant_rules(db, txn['name'])
+            if cat:
+                db.execute(
+                    "UPDATE transactions SET auto_category=? WHERE id=?",
+                    (cat, txn['id'])
+                )
+                applied += 1
+    return jsonify({**stats, 'applied_to_uncategorized': applied})
+
+
+@app.route('/api/merchant_rules', methods=['GET'])
+def get_merchant_rules():
+    """Return all learned merchant rules."""
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT merchant_key, category, match_count FROM merchant_rules ORDER BY match_count DESC"
+        ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
 
 @app.route('/api/transactions', methods=['GET'])
 def get_transactions():
@@ -507,7 +667,7 @@ def categorize():
 
 @app.route('/api/uncategorize', methods=['POST'])
 def uncategorize():
-    """æ¤åä¸ä¸ç¬ï¼æå·²åç±»çäº¤ææ¢å¤ä¸ºæªåç±»ç¶æã"""
+    """Ã¦ÂÂ¤Ã¥ÂÂÃ¤Â¸ÂÃ¤Â¸ÂÃ§Â¬ÂÃ¯Â¼ÂÃ¦ÂÂÃ¥Â·Â²Ã¥ÂÂÃ§Â±Â»Ã§ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ¦ÂÂ¢Ã¥Â¤ÂÃ¤Â¸ÂºÃ¦ÂÂªÃ¥ÂÂÃ§Â±Â»Ã§ÂÂ¶Ã¦ÂÂÃ£ÂÂ"""
     txn_id = request.json.get('id')
     with get_db() as db:
         db.execute(
@@ -518,7 +678,7 @@ def uncategorize():
 
 @app.route('/api/months', methods=['GET'])
 def get_months():
-    """è¿åæäº¤æè®°å½çæä»½åè¡¨ï¼åå«æ¯æçå®æ/å¾åç»è®¡ã"""
+    """Ã¨Â¿ÂÃ¥ÂÂÃ¦ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ¨Â®Â°Ã¥Â½ÂÃ§ÂÂÃ¦ÂÂÃ¤Â»Â½Ã¥ÂÂÃ¨Â¡Â¨Ã¯Â¼ÂÃ¥ÂÂÃ¥ÂÂ«Ã¦Â¯ÂÃ¦ÂÂÃ§ÂÂÃ¥Â®ÂÃ¦ÂÂ/Ã¥Â¾ÂÃ¥ÂÂÃ§Â»ÂÃ¨Â®Â¡Ã£ÂÂ"""
     payer = request.args.get('payer')
     with get_db() as db:
         payer_filter = ' WHERE payer=?' if payer else ''
@@ -533,7 +693,7 @@ def get_months():
             GROUP BY month
             ORDER BY month DESC
         """, payer_params).fetchall()
-        # å¨é¨å¾åç±»æ°éï¼ç¨äº recents è¡ï¼
+        # Ã¥ÂÂ¨Ã©ÂÂ¨Ã¥Â¾ÂÃ¥ÂÂÃ§Â±Â»Ã¦ÂÂ°Ã©ÂÂÃ¯Â¼ÂÃ§ÂÂ¨Ã¤ÂºÂ recents Ã¨Â¡ÂÃ¯Â¼Â
         payer_where = ' AND payer=?' if payer else ''
         payer_total_params = (payer,) if payer else ()
         total_pending = db.execute(
@@ -597,17 +757,17 @@ def report():
     with get_db() as db:
         if start_date and end_date:
             rows = db.execute(
-                "SELECT * FROM transactions WHERE categorized=1 AND date >= ? AND date <= ?",
+                "SELECT * FROM transactions WHERE categorized=1 AND category != 'transfer' AND date >= ? AND date <= ?",
                 (start_date, end_date)
             ).fetchall()
         elif start_date:
             rows = db.execute(
-                "SELECT * FROM transactions WHERE categorized=1 AND date >= ?",
+                "SELECT * FROM transactions WHERE categorized=1 AND category != 'transfer' AND date >= ?",
                 (start_date,)
             ).fetchall()
         else:
             rows = db.execute(
-                "SELECT * FROM transactions WHERE categorized=1 AND date LIKE ?",
+                "SELECT * FROM transactions WHERE categorized=1 AND category != 'transfer' AND date LIKE ?",
                 (month + '%',)
             ).fetchall()
     txns = [row_to_dict(r) for r in rows]
@@ -621,7 +781,7 @@ def report():
     me_shared_paid      = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='shared')
     partner_shared_paid = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='shared')
     total_shared        = me_shared_paid + partner_shared_paid
-    # Cross-payments: I paid for partner's expense (or vice versa) â affects net balance
+    # Cross-payments: I paid for partner's expense (or vice versa) Ã¢ÂÂ affects net balance
     me_paid_for_partner = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='theirs')
     partner_paid_for_me = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='theirs')
     net_balance = ((me_shared_paid - partner_shared_paid) * split_ratio
@@ -662,7 +822,7 @@ def debug():
     return jsonify({
         'plaid_version': plaid_version,
         'has_transactions_config': HAS_TRANSACTIONS_CONFIG,
-        'days_requested': 730 if HAS_TRANSACTIONS_CONFIG else 'æªå¯ç¨ï¼åªæ90å¤©ï¼',
+        'days_requested': 730 if HAS_TRANSACTIONS_CONFIG else 'Ã¦ÂÂªÃ¥ÂÂ¯Ã§ÂÂ¨Ã¯Â¼ÂÃ¥ÂÂªÃ¦ÂÂ90Ã¥Â¤Â©Ã¯Â¼Â',
         'transaction_count': count,
         'earliest_transaction': earliest,
         'latest_transaction': latest,
@@ -670,7 +830,7 @@ def debug():
 
 @app.route('/api/account_stats', methods=['GET'])
 def account_stats():
-    """æ¯ä¸ªè´¦æ·æ¯æçäº¤æç¬æ°ï¼ç¨äºè´¦æ·é¡µé¢çæåº¦ç»è®¡ã"""
+    """Ã¦Â¯ÂÃ¤Â¸ÂªÃ¨Â´Â¦Ã¦ÂÂ·Ã¦Â¯ÂÃ¦ÂÂÃ§ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ§Â¬ÂÃ¦ÂÂ°Ã¯Â¼ÂÃ§ÂÂ¨Ã¤ÂºÂÃ¨Â´Â¦Ã¦ÂÂ·Ã©Â¡ÂµÃ©ÂÂ¢Ã§ÂÂÃ¦ÂÂÃ¥ÂºÂ¦Ã§Â»ÂÃ¨Â®Â¡Ã£ÂÂ"""
     with get_db() as db:
         rows = db.execute("""
             SELECT t.account, substr(t.date,1,7) AS month,
@@ -687,6 +847,6 @@ if __name__ == '__main__':
     os.makedirs(DATA_DIR, exist_ok=True)
     init_db()
     port = int(os.environ.get("PORT", 5000))
-    print(f"\nð  Finance with FiancÃ©e â http://localhost:{port}\n")
-    print(f"    æ°æ®åºä½ç½®: {DB_PATH}\n")
+    print(f"\nÃ°ÂÂÂ  Finance with FiancÃÂ©e Ã¢ÂÂ http://localhost:{port}\n")
+    print(f"    Ã¦ÂÂ°Ã¦ÂÂ®Ã¥ÂºÂÃ¤Â½ÂÃ§Â½Â®: {DB_PATH}\n")
     app.run(host='0.0.0.0', port=port, debug=False)
