@@ -648,7 +648,7 @@ async function loadMonthList() {
     const r    = await fetch('/api/months' + payerParam);
     const data = await r.json();
     renderMonthList(data.months || [], data.total_pending || 0);
-  } catch(e) { toast('⚠️ 无法连接服务器'); }
+  } catch(e) { console.error('loadMonthList error:', e); toast('⚠️ 无法连接服务器'); }
 }
 
 function renderMonthList(months, totalPending) {
