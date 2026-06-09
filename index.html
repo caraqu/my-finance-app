@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Finance with Fiancée">
 <title>💑 Finance with Fiancée</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; marin: 0; padding: 0; }
 :root {
   --primary: #6C63FF; --mine: #34C759; --shared: #FF9F0A;
   --danger: #FF3B30; --bg: #F2F2F7; --card: #FFFFFF;
@@ -604,9 +604,9 @@ let pendingId      = null;
 let pendingSplit   = null;
 let selectedCat    = null;
 let currentSwipeMonth = null; // null = all recents, 'YYYY-MM' = specific month
-let currentMonth   = new Date().toISOString().slice(0,7); // for report tab
+var currentMonth   = new Date().toISOString().slice(0,7); // for report tab
 let reportView     = 'me';
-let swipePersonFilter = 'all';
+var swipePersonFilter = 'all';
 let reportMode       = 'monthly';
 let reportData     = null;
 let progressData   = null;
