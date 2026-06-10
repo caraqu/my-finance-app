@@ -550,7 +550,7 @@ def sync_transactions():
             except plaid.ApiException as e:
                 errors.append(str(e))
         learned = learn_merchant_rules(db)
-                return jsonify({'new_transactions': new_count, 'errors': errors, 'new_rules': learned.get('added', 0), 'total_rules': learned.get('total_rules', 0)})
+        return jsonify({'new_transactions': new_count, 'errors': errors, 'new_rules': learned.get('added', 0), 'total_rules': learned.get('total_rules', 0)})
 
 @app.route('/api/delete_account', methods=['POST'])
 def delete_account():
