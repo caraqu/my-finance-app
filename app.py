@@ -557,8 +557,8 @@ def delete_account():
     """Ã¥ÂÂ Ã©ÂÂ¤Ã¦ÂÂÃ¥Â®ÂÃ¨Â´Â¦Ã¦ÂÂ·Ã¯Â¼ÂÃ¥ÂÂÃ¥ÂÂ¶Ã¦ÂÂÃ¦ÂÂÃ¦ÂÂªÃ¥ÂÂÃ§Â±Â»Ã¤ÂºÂ¤Ã¦ÂÂÃ¯Â¼ÂÃ¯Â¼ÂÃ¤Â»Â¥Ã¤Â¾Â¿Ã©ÂÂÃ¦ÂÂ°Ã¨Â¿ÂÃ¦ÂÂ¥Ã¨ÂÂ·Ã¥ÂÂÃ¥Â®ÂÃ¦ÂÂ´Ã¥ÂÂÃ¥ÂÂ²Ã£ÂÂ
     Ã¥Â·Â²Ã¥ÂÂÃ§Â±Â»Ã§ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ¤Â¿ÂÃ§ÂÂÃ¤Â¸ÂÃ¥ÂÂÃ¥Â½Â±Ã¥ÂÂÃ£ÂÂ"""
 
-    @app.route('/api/rules', methods=['GET'])
-    def get_rules():
+@app.route('/api/rules', methods=['GET'])
+def get_rules():
             """Return all learned merchant rules."""
             with get_db() as db:
                         rows = db.execute(
@@ -567,7 +567,7 @@ def delete_account():
                     return jsonify([dict(r) for r in rows])
 
     @app.route('/api/rules', methods=['PUT'])
-    def update_rule():
+def update_rule():
             """Update the category for a merchant rule."""
             data = request.json
             key = (data.get('merchant_key') or '').strip().lower()
