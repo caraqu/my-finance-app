@@ -488,7 +488,7 @@ def sync_transactions():
                             }
                     except Exception:
                         pass
-                    is_debit_account = account.get('account_type', 'credit') in ('depository', 'debit', 'savings', 'checking')
+                    is_debit_account = (account['account_type'] or 'credit') in ('depository', 'debit', 'savings', 'checking')
                     for txn in resp['added']:
                         raw_amount = txn['amount']
                         plaid_cats = txn.get('category') or []
