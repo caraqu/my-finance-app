@@ -566,7 +566,7 @@ def get_rules():
                         ).fetchall()
                     return jsonify([dict(r) for r in rows])
 
-    @app.route('/api/rules', methods=['PUT'])
+@app.route('/api/rules', methods=['PUT'])
 def update_rule():
             """Update the category for a merchant rule."""
             data = request.json
