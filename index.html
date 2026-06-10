@@ -1025,14 +1025,12 @@ async function learnRules() {
   const icon = document.getElementById('learnIcon');
   btn.disabled = true; icon.textContent = '⏳';
   try {
-    const res = await fetch('/api/learn_rules', {method:'POST'});
-    const d = await res.json();
+    </script>    const d = await res.json();
     toast('🧠 学习完成！新增'+(d.added||0)+' 条，更新'+(d.updated||0)+' 条，应用'+(d.applied_to_uncategorized||0)+' 笔', 4000);
     loadTransactionsForMode();
   } catch(e) { toast('失败:'+e.message); }
   finally { btn.disabled=false; icon.textContent='🧠'; }
-}
-
+feat: sync calls showSyncResult + add rules manager HTML/JS
 async function syncTransactions() {
   const icon = document.getElementById('syncIcon');
   icon.textContent = '⏳';
@@ -1040,7 +1038,7 @@ async function syncTransactions() {
     const r = await fetch('/api/sync', { method:'POST' });
     const data = await r.json();
     await fetch('/api/reclassify', { method:'POST' });
-    toast(`✅ 同步完成！新增 ${data.new_transactions} 笔`);
+          showSyncResult(data);
     loadMonthList();
     if (document.getElementById('swipeCardView').style.display !== 'none') {
       await loadTransactionsForMode();
@@ -1674,6 +1672,85 @@ document.addEventListener('DOMContentLoaded', async () => {
   handleOAuthRedirect();
   updateSettlementUI();
   fetch('/api/reclassify', {method:'POST'}).catch(()=>{});
+
+        // == RULES MANAGER ==
+        function showSyncResult(data) {
+          const newTxns = data.new_transactions || 0;
+          const newRules = data.new_rules || 0;
+          const totalRules = data.total_rules || 0;
+          let msg = `✅ 同步完成！新增 ${newTxns} 笔`;
+          if (newRules > 0) msg += `，新学 ${newRules} 条规则`;
+          if (totalRules > 0) msg += `（共 ${totalRules} 条）`;
+          toast(msg, 4000);
+          if (newRules > 0 || totalRules > 0) {
+            setTimeout(() => showRulesPanel(), 1500);
+          }
+        }
+
+        async function showRulesPanel() {
+          try {
+            const r = await fetch('/api/rules');
+            const rules = await r.json();
+            renderRulesPanel(rules);
+            document.getElementById('rulesOverlay').classList.add('show');
+          } catch(e) { toast('❌ 无法加载规则'); }
+        }
+
+        function renderRulesPanel(rules) {
+          const list = document.getElementById('rulesList');
+          if (!rules.length) {
+            list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text2)">还没有学习到规则<br><small>对同一商家分类 3 次以上即可自动学习</small></div>div>';
+          return;
+        }
+        const CAT_OPTIONS = Object.entries(CAT_MAP).map(([id, c]) =>
+          `<option value="${id}">${c.em} ${c.nm}</option>option>`
+        ).join('');
+        list.innerHTML = rules.map(r => {
+          const catInfo = CAT_MAP[r.category] || {em:'❓', nm: r.category};
+          return `<div class="rule-row" data-key="${escHtml(r.merchant_key)}">
+                <div class="rule-merchant">${escHtml(r.merchant_key)}</div>div>
+                <div class="rule-controls">
+                        <select class="rule-cat-select" onchange="updateRule('${escHtml(r.merchant_key)}', this.value)">
+                                  ${Object.entries(CAT_MAP).map(([id, c]) =>
+                                    `<option value="${id}" ${id === r.category ? 'selected' : ''}>${c.em} ${c.nm}</option>option>`
+                                  ).join('')}
+                        </select>select>
+                        <span class="rule-count">${r.match_count}次</span>span>
+                        <button class="rule-del-btn" onclick="deleteRule('${escHtml(r.merchant_key)}')">🗑️</button>button>
+                </div>div>
+          </div>div>`;
+        }).join('');
+      }
+      
+      async function updateRule(merchantKey, newCat) {
+        try {
+          await fetch('/api/rules', {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({merchant_key: merchantKey, category: newCat})
+          });
+          toast('✅ 已更新');
+        } catch(e) { toast('❌ 更新失败'); }
+      }
+      
+      async function deleteRule(merchantKey) {
+        try {
+          await fetch('/api/rules', {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({merchant_key: merchantKey})
+          });
+          const row = document.querySelector(`.rule-row[data-key="${merchantKey}"]`);
+          if (row) row.remove();
+          toast('🗑️ 已删除');
+        } catch(e) { toast('❌ 删除失败'); }
+      }
+      
+      function closeRulesPanel() {
+        document.getElementById('rulesOverlay').classList.remove('show');
+      }
+      
+      </small>
   await loadMonthList();
   const _now = new Date();
   currentMonth = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}`;
@@ -1681,5 +1758,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateUndoBtn();
 });
 </script>
+
+        <!-- ══ RULES OVERLAY ══ -->
+        <div id="rulesOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;justify-content:center;align-items:flex-end" onclick="if(event.target===this)closeRulesPanel()">
+            <div style="background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:430px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border)">
+                          <div style="font-weight:700;font-size:16px">📚 学习到的分类规则</div>div>
+                          <button onclick="closeRulesPanel()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text2)">×</button>button>
+                  </div>div>
+                  <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px">
+                          <button onclick="showRulesPanel()" style="flex:1;padding:8px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">🔄 刷新</button>button>
+                          <button onclick="learnRules();setTimeout(showRulesPanel,1500)" style="flex:1;padding:8px;background:var(--mine);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">🧠 重新学习</button>button>
+                  </div>div>
+                  <div id="rulesList" style="overflow-y:auto;flex:1;padding:8px 0"></div>div>
+            </div>div>
+        </div>div>
+        <style>
+          #rulesOverlay { display:none; }
+          #rulesOverlay.show { display:flex; }
+          .rule-row { display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border); }
+          .rule-merchant { font-size:13px;font-weight:600;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px; }
+          .rule-controls { display:flex;align-items:center;gap:6px;flex-shrink:0; }
+          .rule-cat-select { font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);max-width:110px; }
+          .rule-count { font-size:11px;color:var(--text2);white-space:nowrap; }
+          .rule-del-btn { background:none;border:none;font-size:16px;cursor:pointer;padding:2px 4px; }
+          </style>
+        
+        </style>
 </body>
 </html>
