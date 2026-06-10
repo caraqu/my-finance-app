@@ -549,12 +549,54 @@ def sync_transactions():
                            (cursor, account['item_id']))
             except plaid.ApiException as e:
                 errors.append(str(e))
-    return jsonify({'new_transactions': new_count, 'errors': errors})
+        learned = learn_merchant_rules(db)
+                return jsonify({'new_transactions': new_count, 'errors': errors, 'new_rules': learned.get('added', 0), 'total_rules': learned.get('total_rules', 0)})
 
 @app.route('/api/delete_account', methods=['POST'])
 def delete_account():
     """Ã¥ÂÂ Ã©ÂÂ¤Ã¦ÂÂÃ¥Â®ÂÃ¨Â´Â¦Ã¦ÂÂ·Ã¯Â¼ÂÃ¥ÂÂÃ¥ÂÂ¶Ã¦ÂÂÃ¦ÂÂÃ¦ÂÂªÃ¥ÂÂÃ§Â±Â»Ã¤ÂºÂ¤Ã¦ÂÂÃ¯Â¼ÂÃ¯Â¼ÂÃ¤Â»Â¥Ã¤Â¾Â¿Ã©ÂÂÃ¦ÂÂ°Ã¨Â¿ÂÃ¦ÂÂ¥Ã¨ÂÂ·Ã¥ÂÂÃ¥Â®ÂÃ¦ÂÂ´Ã¥ÂÂÃ¥ÂÂ²Ã£ÂÂ
     Ã¥Â·Â²Ã¥ÂÂÃ§Â±Â»Ã§ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ¤Â¿ÂÃ§ÂÂÃ¤Â¸ÂÃ¥ÂÂÃ¥Â½Â±Ã¥ÂÂÃ£ÂÂ"""
+
+    @app.route('/api/rules', methods=['GET'])
+    def get_rules():
+            """Return all learned merchant rules."""
+            with get_db() as db:
+                        rows = db.execute(
+                                        "SELECT merchant_key, category, match_count FROM merchant_rules ORDER BY match_count DESC, merchant_key"
+                        ).fetchall()
+                    return jsonify([dict(r) for r in rows])
+
+    @app.route('/api/rules', methods=['PUT'])
+    def update_rule():
+            """Update the category for a merchant rule."""
+            data = request.json
+            key = (data.get('merchant_key') or '').strip().lower()
+            cat = data.get('category', '').strip()
+            if not key or not cat:
+                        return jsonify({'error': 'merchant_key and category required'}), 400
+                    with get_db() as db:
+                                db.execute(
+                                                "UPDATE merchant_rules SET category=? WHERE merchant_key=?", (cat, key)
+                                )
+                                # Also update existing uncategorized transactions for this merchant
+            db.execute(
+                            "UPDATE transactions SET auto_category=? WHERE LOWER(TRIM(name))=? AND categorized=0",
+                            (cat, key)
+            )
+    return jsonify({'success': True})
+
+@app.route('/api/rules', methods=['DELETE'])
+def delete_rule():
+        """Delete a merchant rule."""
+        data = request.json
+        key = (data.get('merchant_key') or '').strip().lower()
+        if not key:
+                    return jsonify({'error': 'merchant_key required'}), 400
+                with get_db() as db:
+                            db.execute("DELETE FROM merchant_rules WHERE merchant_key=?", (key,))
+                        return jsonify({'success': True})
+
+
     item_id = request.json.get('item_id')
     if not item_id:
         return jsonify({'error': 'item_id required'}), 400
