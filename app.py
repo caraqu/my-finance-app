@@ -564,7 +564,7 @@ def get_rules():
                         rows = db.execute(
                                         "SELECT merchant_key, category, match_count FROM merchant_rules ORDER BY match_count DESC, merchant_key"
                         ).fetchall()
-                    return jsonify([dict(r) for r in rows])
+    return jsonify([dict(r) for r in rows])
 
 @app.route('/api/rules', methods=['PUT'])
 def update_rule():
@@ -573,7 +573,7 @@ def update_rule():
             key = (data.get('merchant_key') or '').strip().lower()
             cat = data.get('category', '').strip()
             if not key or not cat:
-                        return jsonify({'error': 'merchant_key and category required'}), 400
+        return jsonify({'error': 'merchant_key and category required'}), 400
                     with get_db() as db:
                                 db.execute(
                                                 "UPDATE merchant_rules SET category=? WHERE merchant_key=?", (cat, key)
@@ -594,7 +594,7 @@ def delete_rule():
                     return jsonify({'error': 'merchant_key required'}), 400
                 with get_db() as db:
                             db.execute("DELETE FROM merchant_rules WHERE merchant_key=?", (key,))
-                        return jsonify({'success': True})
+        return jsonify({'success': True})
 
 
     item_id = request.json.get('item_id')
