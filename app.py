@@ -1,4 +1,4 @@
-# Finance with FiancÃÂ©e Ã¢ÂÂ backend
+# Finance with FiancÃÂÃÂ©e ÃÂ¢ÃÂÃÂ backend
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import plaid
@@ -11,7 +11,7 @@ try:
 except ImportError:
     HAS_TRANSACTIONS_CONFIG = False
 
-# Ã¢ÂÂÃ¢ÂÂ Ã¥ÂÂ¯Ã¥ÂÂ¨Ã¨Â¯ÂÃ¦ÂÂ­Ã¦ÂÂ¥Ã¥Â¿Â Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+# ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ ÃÂ¥ÃÂÃÂ¯ÃÂ¥ÃÂÃÂ¨ÃÂ¨ÃÂ¯ÃÂÃÂ¦ÃÂÃÂ­ÃÂ¦ÃÂÃÂ¥ÃÂ¥ÃÂ¿ÃÂ ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 try:
     from importlib.metadata import version as _get_version
     _plaid_ver = _get_version("plaid-python")
@@ -32,7 +32,7 @@ from typing import Optional, List
 app = Flask(__name__, static_folder='.')
 CORS(app)
 
-# Ã¢ÂÂÃ¢ÂÂ Plaid Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+# ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Plaid ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 PLAID_CLIENT_ID = "6a139ca06fec6d000d3d83a3"
 PLAID_SECRET    = os.environ.get("PLAID_SECRET", "21d24cef5f1f77e0f83049aaffba65")
 
@@ -43,10 +43,10 @@ configuration = plaid.Configuration(
 api_client = plaid.ApiClient(configuration)
 client      = plaid_api.PlaidApi(api_client)
 
-# Ã¢ÂÂÃ¢ÂÂ SQLite Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-# DATA_DIR Ã¤Â¼ÂÃ¥ÂÂÃ¤Â½Â¿Ã§ÂÂ¨Ã§ÂÂ¯Ã¥Â¢ÂÃ¥ÂÂÃ©ÂÂÃ¯Â¼ÂRailway Volume Ã¦ÂÂÃ¨Â½Â½Ã¨Â·Â¯Ã¥Â¾ÂÃ¯Â¼ÂÃ¯Â¼ÂÃ¤Â¿ÂÃ¨Â¯Â redeploy Ã¤Â¸ÂÃ¤Â¸Â¢Ã¦ÂÂ°Ã¦ÂÂ®
-# Ã¥ÂÂ¨ Railway Ã¤Â¸ÂÃ¯Â¼ÂSettings Ã¢ÂÂ Volumes Ã¢ÂÂ Mount Path Ã¨Â®Â¾Ã¤Â¸Âº /data
-# Ã§ÂÂ¶Ã¥ÂÂÃ¨Â®Â¾Ã§ÂÂ¯Ã¥Â¢ÂÃ¥ÂÂÃ©ÂÂ DATA_DIR=/data
+# ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ SQLite ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+# DATA_DIR ÃÂ¤ÃÂ¼ÃÂÃÂ¥ÃÂÃÂÃÂ¤ÃÂ½ÃÂ¿ÃÂ§ÃÂÃÂ¨ÃÂ§ÃÂÃÂ¯ÃÂ¥ÃÂ¢ÃÂÃÂ¥ÃÂÃÂÃÂ©ÃÂÃÂÃÂ¯ÃÂ¼ÃÂRailway Volume ÃÂ¦ÃÂÃÂÃÂ¨ÃÂ½ÃÂ½ÃÂ¨ÃÂ·ÃÂ¯ÃÂ¥ÃÂ¾ÃÂÃÂ¯ÃÂ¼ÃÂÃÂ¯ÃÂ¼ÃÂÃÂ¤ÃÂ¿ÃÂÃÂ¨ÃÂ¯ÃÂ redeploy ÃÂ¤ÃÂ¸ÃÂÃÂ¤ÃÂ¸ÃÂ¢ÃÂ¦ÃÂÃÂ°ÃÂ¦ÃÂÃÂ®
+# ÃÂ¥ÃÂÃÂ¨ Railway ÃÂ¤ÃÂ¸ÃÂÃÂ¯ÃÂ¼ÃÂSettings ÃÂ¢ÃÂÃÂ Volumes ÃÂ¢ÃÂÃÂ Mount Path ÃÂ¨ÃÂ®ÃÂ¾ÃÂ¤ÃÂ¸ÃÂº /data
+# ÃÂ§ÃÂÃÂ¶ÃÂ¥ÃÂÃÂÃÂ¨ÃÂ®ÃÂ¾ÃÂ§ÃÂÃÂ¯ÃÂ¥ÃÂ¢ÃÂÃÂ¥ÃÂÃÂÃÂ©ÃÂÃÂ DATA_DIR=/data
 DATA_DIR = os.environ.get("DATA_DIR", os.path.dirname(os.path.abspath(__file__)))
 DB_PATH  = os.path.join(DATA_DIR, "finance.db")
 
@@ -118,7 +118,7 @@ def init_db():
         except Exception:
             pass
 
-# Ã¢ÂÂÃ¢ÂÂ Ã¥ÂÂÃ¥Â®Â¶Ã¥ÂÂ Ã¢ÂÂ Ã¥ÂÂÃ§Â±Â»Ã¯Â¼ÂÃ©ÂÂ¿Ã¤Â¼ÂÃ¥ÂÂÃ¥ÂÂ¹Ã©ÂÂÃ¯Â¼ÂÃ¦Â¯Â Plaid Ã§Â±Â»Ã¥ÂÂ«Ã¦ÂÂ´Ã¥ÂÂÃ¯Â¼Â Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+# ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ ÃÂ¥ÃÂÃÂÃÂ¥ÃÂ®ÃÂ¶ÃÂ¥ÃÂÃÂ ÃÂ¢ÃÂÃÂ ÃÂ¥ÃÂÃÂÃÂ§ÃÂ±ÃÂ»ÃÂ¯ÃÂ¼ÃÂÃÂ©ÃÂÃÂ¿ÃÂ¤ÃÂ¼ÃÂÃÂ¥ÃÂÃÂÃÂ¥ÃÂÃÂ¹ÃÂ©ÃÂÃÂÃÂ¯ÃÂ¼ÃÂÃÂ¦ÃÂ¯ÃÂ Plaid ÃÂ§ÃÂ±ÃÂ»ÃÂ¥ÃÂÃÂ«ÃÂ¦ÃÂÃÂ´ÃÂ¥ÃÂÃÂÃÂ¯ÃÂ¼ÃÂ ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 MERCHANT_NAME_MAP = [
     ('amazon prime video', 'subscription'),
     ('amazon prime',       'subscription'),
@@ -398,7 +398,7 @@ def row_to_dict(row):
     d['account_detail'] = ' '.join(parts) if parts else bank
     return d
 
-# Ã¢ÂÂÃ¢ÂÂ Routes Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
+# ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Routes ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
@@ -412,7 +412,7 @@ def create_link_token():
     try:
         req_kwargs = dict(
             products=[Products("transactions")],
-            client_name="Finance with FiancÃÂ©e",
+            client_name="Finance with FiancÃÂÃÂ©e",
             country_codes=[CountryCode('US')],
             language='en',
             user=LinkTokenCreateRequestUser(client_user_id='user-1'),
@@ -440,7 +440,7 @@ def get_link_token():
 @app.route('/api/exchange_token', methods=['POST'])
 def exchange_token():
     public_token = request.json['public_token']
-    account_name = request.json.get('account_name', 'Ã¨Â´Â¦Ã¦ÂÂ·')
+    account_name = request.json.get('account_name', 'ÃÂ¨ÃÂ´ÃÂ¦ÃÂ¦ÃÂÃÂ·')
     owner        = request.json.get('owner', 'me')
     try:
         resp = client.item_public_token_exchange(
@@ -554,49 +554,7 @@ def sync_transactions():
 
 @app.route('/api/delete_account', methods=['POST'])
 def delete_account():
-    """Ã¥ÂÂ Ã©ÂÂ¤Ã¦ÂÂÃ¥Â®ÂÃ¨Â´Â¦Ã¦ÂÂ·Ã¯Â¼ÂÃ¥ÂÂÃ¥ÂÂ¶Ã¦ÂÂÃ¦ÂÂÃ¦ÂÂªÃ¥ÂÂÃ§Â±Â»Ã¤ÂºÂ¤Ã¦ÂÂÃ¯Â¼ÂÃ¯Â¼ÂÃ¤Â»Â¥Ã¤Â¾Â¿Ã©ÂÂÃ¦ÂÂ°Ã¨Â¿ÂÃ¦ÂÂ¥Ã¨ÂÂ·Ã¥ÂÂÃ¥Â®ÂÃ¦ÂÂ´Ã¥ÂÂÃ¥ÂÂ²Ã£ÂÂ
-    Ã¥Â·Â²Ã¥ÂÂÃ§Â±Â»Ã§ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ¤Â¿ÂÃ§ÂÂÃ¤Â¸ÂÃ¥ÂÂÃ¥Â½Â±Ã¥ÂÂÃ£ÂÂ"""
-
-@app.route('/api/rules', methods=['GET'])
-def get_rules():
-            """Return all learned merchant rules."""
-            with get_db() as db:
-                        rows = db.execute(
-                                        "SELECT merchant_key, category, match_count FROM merchant_rules ORDER BY match_count DESC, merchant_key"
-                        ).fetchall()
-    return jsonify([dict(r) for r in rows])
-
-@app.route('/api/rules', methods=['PUT'])
-def update_rule():
-            """Update the category for a merchant rule."""
-            data = request.json
-            key = (data.get('merchant_key') or '').strip().lower()
-            cat = data.get('category', '').strip()
-            if not key or not cat:
-        return jsonify({'error': 'merchant_key and category required'}), 400
-                    with get_db() as db:
-                                db.execute(
-                                                "UPDATE merchant_rules SET category=? WHERE merchant_key=?", (cat, key)
-                                )
-                                # Also update existing uncategorized transactions for this merchant
-            db.execute(
-                            "UPDATE transactions SET auto_category=? WHERE LOWER(TRIM(name))=? AND categorized=0",
-                            (cat, key)
-            )
-    return jsonify({'success': True})
-
-@app.route('/api/rules', methods=['DELETE'])
-def delete_rule():
-        """Delete a merchant rule."""
-        data = request.json
-        key = (data.get('merchant_key') or '').strip().lower()
-        if not key:
-                    return jsonify({'error': 'merchant_key required'}), 400
-                with get_db() as db:
-                            db.execute("DELETE FROM merchant_rules WHERE merchant_key=?", (key,))
-        return jsonify({'success': True})
-
-
+    """Delete an account and its uncategorized transactions."""
     item_id = request.json.get('item_id')
     if not item_id:
         return jsonify({'error': 'item_id required'}), 400
@@ -609,19 +567,60 @@ def delete_rule():
             "DELETE FROM transactions WHERE account=? AND categorized=0", (account_name,)
         ).rowcount
         db.execute("DELETE FROM accounts WHERE item_id=?", (item_id,))
-    return jsonify({'success': True, 'account': account_name, 'deleted_pending': deleted})
+    return jsonify({'success': True, 'account': account_name, 'deleted_transactions': deleted})
+
+@app.route('/api/rules', methods=['GET'])
+def get_rules():
+    """Return all learned merchant rules."""
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT merchant_key, category, match_count FROM merchant_rules ORDER BY match_count DESC"
+        ).fetchall()
+        return jsonify([dict(r) for r in rows])
+
+@app.route('/api/rules', methods=['PUT'])
+def update_rule():
+    """Update the category for a merchant rule."""
+    data = request.json
+    key = (data.get('merchant_key') or '').strip().lower()
+    cat = data.get('category', '').strip()
+    if not key or not cat:
+        return jsonify({'error': 'merchant_key and category required'}), 400
+    with get_db() as db:
+        db.execute(
+            "UPDATE merchant_rules SET category=? WHERE merchant_key=?",
+            (cat, key)
+        )
+        # Also update existing uncategorized transactions
+        db.execute(
+            "UPDATE transactions SET auto_category=? WHERE LOWER(name)=? AND categorized=0",
+            (cat, key)
+        )
+    return jsonify({'success': True})
+
+@app.route('/api/rules', methods=['DELETE'])
+def delete_rule():
+    """Delete a merchant rule."""
+    data = request.json
+    key = (data.get('merchant_key') or '').strip().lower()
+    if not key:
+        return jsonify({'error': 'merchant_key required'}), 400
+    with get_db() as db:
+        db.execute("DELETE FROM merchant_rules WHERE merchant_key=?", (key,))
+    return jsonify({'success': True})
+
 
 @app.route('/api/reset_cursors', methods=['POST'])
 def reset_cursors():
-    """Ã©ÂÂÃ§Â½Â®Ã¦ÂÂÃ¦ÂÂÃ¨Â´Â¦Ã¦ÂÂ·Ã§ÂÂÃ¥ÂÂÃ¦Â­Â¥Ã¦Â¸Â¸Ã¦Â ÂÃ¯Â¼ÂÃ¤Â¸ÂÃ¦Â¬Â¡Ã¥ÂÂÃ¦Â­Â¥Ã¥Â°ÂÃ©ÂÂÃ¦ÂÂ°Ã¦ÂÂÃ¥ÂÂÃ¥ÂÂ¨Ã©ÂÂ¨Ã¥ÂÂÃ¥ÂÂ²Ã¤ÂºÂ¤Ã¦ÂÂÃ£ÂÂ
-    Ã¥Â¦ÂÃ¦ÂÂÃ¥ÂÂÃ§ÂÂ°Ã¤ÂºÂ¤Ã¦ÂÂÃ¦ÂÂ°Ã©ÂÂÃ¥Â¼ÂÃ¥Â¸Â¸Ã¥Â°ÂÃ¯Â¼ÂÃ¥ÂÂªÃ¦ÂÂ100Ã¥Â¤ÂÃ¦ÂÂ¡Ã¯Â¼ÂÃ¯Â¼ÂÃ¦ÂÂ§Ã¨Â¡ÂÃ¦Â­Â¤Ã¦ÂÂÃ¤Â½ÂÃ¥ÂÂÃ¥ÂÂÃ¥ÂÂÃ¦Â­Â¥Ã¥ÂÂ³Ã¥ÂÂ¯Ã£ÂÂ"""
+    """ÃÂ©ÃÂÃÂÃÂ§ÃÂ½ÃÂ®ÃÂ¦ÃÂÃÂÃÂ¦ÃÂÃÂÃÂ¨ÃÂ´ÃÂ¦ÃÂ¦ÃÂÃÂ·ÃÂ§ÃÂÃÂÃÂ¥ÃÂÃÂÃÂ¦ÃÂ­ÃÂ¥ÃÂ¦ÃÂ¸ÃÂ¸ÃÂ¦ÃÂ ÃÂÃÂ¯ÃÂ¼ÃÂÃÂ¤ÃÂ¸ÃÂÃÂ¦ÃÂ¬ÃÂ¡ÃÂ¥ÃÂÃÂÃÂ¦ÃÂ­ÃÂ¥ÃÂ¥ÃÂ°ÃÂÃÂ©ÃÂÃÂÃÂ¦ÃÂÃÂ°ÃÂ¦ÃÂÃÂÃÂ¥ÃÂÃÂÃÂ¥ÃÂÃÂ¨ÃÂ©ÃÂÃÂ¨ÃÂ¥ÃÂÃÂÃÂ¥ÃÂÃÂ²ÃÂ¤ÃÂºÃÂ¤ÃÂ¦ÃÂÃÂÃÂ£ÃÂÃÂ
+    ÃÂ¥ÃÂ¦ÃÂÃÂ¦ÃÂÃÂÃÂ¥ÃÂÃÂÃÂ§ÃÂÃÂ°ÃÂ¤ÃÂºÃÂ¤ÃÂ¦ÃÂÃÂÃÂ¦ÃÂÃÂ°ÃÂ©ÃÂÃÂÃÂ¥ÃÂ¼ÃÂÃÂ¥ÃÂ¸ÃÂ¸ÃÂ¥ÃÂ°ÃÂÃÂ¯ÃÂ¼ÃÂÃÂ¥ÃÂÃÂªÃÂ¦ÃÂÃÂ100ÃÂ¥ÃÂ¤ÃÂÃÂ¦ÃÂÃÂ¡ÃÂ¯ÃÂ¼ÃÂÃÂ¯ÃÂ¼ÃÂÃÂ¦ÃÂÃÂ§ÃÂ¨ÃÂ¡ÃÂÃÂ¦ÃÂ­ÃÂ¤ÃÂ¦ÃÂÃÂÃÂ¤ÃÂ½ÃÂÃÂ¥ÃÂÃÂÃÂ¥ÃÂÃÂÃÂ¥ÃÂÃÂÃÂ¦ÃÂ­ÃÂ¥ÃÂ¥ÃÂÃÂ³ÃÂ¥ÃÂÃÂ¯ÃÂ£ÃÂÃÂ"""
     with get_db() as db:
         db.execute("UPDATE accounts SET cursor=NULL")
-    return jsonify({'success': True, 'message': 'Ã¦Â¸Â¸Ã¦Â ÂÃ¥Â·Â²Ã©ÂÂÃ§Â½Â®Ã¯Â¼ÂÃ¨Â¯Â·Ã©ÂÂÃ¦ÂÂ°Ã¥ÂÂÃ¦Â­Â¥Ã¤Â»Â¥Ã¨ÂÂ·Ã¥ÂÂÃ¥Â®ÂÃ¦ÂÂ´Ã¥ÂÂÃ¥ÂÂ²Ã¨Â®Â°Ã¥Â½Â'})
+    return jsonify({'success': True, 'message': 'ÃÂ¦ÃÂ¸ÃÂ¸ÃÂ¦ÃÂ ÃÂÃÂ¥ÃÂ·ÃÂ²ÃÂ©ÃÂÃÂÃÂ§ÃÂ½ÃÂ®ÃÂ¯ÃÂ¼ÃÂÃÂ¨ÃÂ¯ÃÂ·ÃÂ©ÃÂÃÂÃÂ¦ÃÂÃÂ°ÃÂ¥ÃÂÃÂÃÂ¦ÃÂ­ÃÂ¥ÃÂ¤ÃÂ»ÃÂ¥ÃÂ¨ÃÂÃÂ·ÃÂ¥ÃÂÃÂÃÂ¥ÃÂ®ÃÂÃÂ¦ÃÂÃÂ´ÃÂ¥ÃÂÃÂÃÂ¥ÃÂÃÂ²ÃÂ¨ÃÂ®ÃÂ°ÃÂ¥ÃÂ½ÃÂ'})
 
 @app.route('/api/reclassify', methods=['POST'])
 def reclassify_all():
-    """Ã¥Â¯Â¹Ã¦ÂÂÃ¦ÂÂÃ¦ÂÂªÃ¥ÂÂÃ§Â±Â»Ã¤ÂºÂ¤Ã¦ÂÂÃ©ÂÂÃ¦ÂÂ°Ã¨Â¿ÂÃ¨Â¡ÂÃ¨ÂÂªÃ¥ÂÂ¨Ã¥ÂÂÃ§Â±Â»Ã¯Â¼ÂÃ¥ÂÂÃ§ÂºÂ§Ã¨Â§ÂÃ¥ÂÂÃ¥ÂÂÃ¨Â°ÂÃ§ÂÂ¨Ã¯Â¼ÂÃ£ÂÂ"""
+    """ÃÂ¥ÃÂ¯ÃÂ¹ÃÂ¦ÃÂÃÂÃÂ¦ÃÂÃÂÃÂ¦ÃÂÃÂªÃÂ¥ÃÂÃÂÃÂ§ÃÂ±ÃÂ»ÃÂ¤ÃÂºÃÂ¤ÃÂ¦ÃÂÃÂÃÂ©ÃÂÃÂÃÂ¦ÃÂÃÂ°ÃÂ¨ÃÂ¿ÃÂÃÂ¨ÃÂ¡ÃÂÃÂ¨ÃÂÃÂªÃÂ¥ÃÂÃÂ¨ÃÂ¥ÃÂÃÂÃÂ§ÃÂ±ÃÂ»ÃÂ¯ÃÂ¼ÃÂÃÂ¥ÃÂÃÂÃÂ§ÃÂºÃÂ§ÃÂ¨ÃÂ§ÃÂÃÂ¥ÃÂÃÂÃÂ¥ÃÂÃÂÃÂ¨ÃÂ°ÃÂÃÂ§ÃÂÃÂ¨ÃÂ¯ÃÂ¼ÃÂÃÂ£ÃÂÃÂ"""
     with get_db() as db:
         rows = db.execute(
             "SELECT id, name, plaid_category FROM transactions WHERE categorized=0"
@@ -709,7 +708,7 @@ def categorize():
 
 @app.route('/api/uncategorize', methods=['POST'])
 def uncategorize():
-    """Ã¦ÂÂ¤Ã¥ÂÂÃ¤Â¸ÂÃ¤Â¸ÂÃ§Â¬ÂÃ¯Â¼ÂÃ¦ÂÂÃ¥Â·Â²Ã¥ÂÂÃ§Â±Â»Ã§ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ¦ÂÂ¢Ã¥Â¤ÂÃ¤Â¸ÂºÃ¦ÂÂªÃ¥ÂÂÃ§Â±Â»Ã§ÂÂ¶Ã¦ÂÂÃ£ÂÂ"""
+    """ÃÂ¦ÃÂÃÂ¤ÃÂ¥ÃÂÃÂÃÂ¤ÃÂ¸ÃÂÃÂ¤ÃÂ¸ÃÂÃÂ§ÃÂ¬ÃÂÃÂ¯ÃÂ¼ÃÂÃÂ¦ÃÂÃÂÃÂ¥ÃÂ·ÃÂ²ÃÂ¥ÃÂÃÂÃÂ§ÃÂ±ÃÂ»ÃÂ§ÃÂÃÂÃÂ¤ÃÂºÃÂ¤ÃÂ¦ÃÂÃÂÃÂ¦ÃÂÃÂ¢ÃÂ¥ÃÂ¤ÃÂÃÂ¤ÃÂ¸ÃÂºÃÂ¦ÃÂÃÂªÃÂ¥ÃÂÃÂÃÂ§ÃÂ±ÃÂ»ÃÂ§ÃÂÃÂ¶ÃÂ¦ÃÂÃÂÃÂ£ÃÂÃÂ"""
     txn_id = request.json.get('id')
     with get_db() as db:
         db.execute(
@@ -720,7 +719,7 @@ def uncategorize():
 
 @app.route('/api/months', methods=['GET'])
 def get_months():
-    """Ã¨Â¿ÂÃ¥ÂÂÃ¦ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ¨Â®Â°Ã¥Â½ÂÃ§ÂÂÃ¦ÂÂÃ¤Â»Â½Ã¥ÂÂÃ¨Â¡Â¨Ã¯Â¼ÂÃ¥ÂÂÃ¥ÂÂ«Ã¦Â¯ÂÃ¦ÂÂÃ§ÂÂÃ¥Â®ÂÃ¦ÂÂ/Ã¥Â¾ÂÃ¥ÂÂÃ§Â»ÂÃ¨Â®Â¡Ã£ÂÂ"""
+    """ÃÂ¨ÃÂ¿ÃÂÃÂ¥ÃÂÃÂÃÂ¦ÃÂÃÂÃÂ¤ÃÂºÃÂ¤ÃÂ¦ÃÂÃÂÃÂ¨ÃÂ®ÃÂ°ÃÂ¥ÃÂ½ÃÂÃÂ§ÃÂÃÂÃÂ¦ÃÂÃÂÃÂ¤ÃÂ»ÃÂ½ÃÂ¥ÃÂÃÂÃÂ¨ÃÂ¡ÃÂ¨ÃÂ¯ÃÂ¼ÃÂÃÂ¥ÃÂÃÂÃÂ¥ÃÂÃÂ«ÃÂ¦ÃÂ¯ÃÂÃÂ¦ÃÂÃÂÃÂ§ÃÂÃÂÃÂ¥ÃÂ®ÃÂÃÂ¦ÃÂÃÂ/ÃÂ¥ÃÂ¾ÃÂÃÂ¥ÃÂÃÂÃÂ§ÃÂ»ÃÂÃÂ¨ÃÂ®ÃÂ¡ÃÂ£ÃÂÃÂ"""
     payer = request.args.get('payer')
     with get_db() as db:
         payer_filter = ' WHERE payer=?' if payer else ''
@@ -735,7 +734,7 @@ def get_months():
             GROUP BY month
             ORDER BY month DESC
         """, payer_params).fetchall()
-        # Ã¥ÂÂ¨Ã©ÂÂ¨Ã¥Â¾ÂÃ¥ÂÂÃ§Â±Â»Ã¦ÂÂ°Ã©ÂÂÃ¯Â¼ÂÃ§ÂÂ¨Ã¤ÂºÂ recents Ã¨Â¡ÂÃ¯Â¼Â
+        # ÃÂ¥ÃÂÃÂ¨ÃÂ©ÃÂÃÂ¨ÃÂ¥ÃÂ¾ÃÂÃÂ¥ÃÂÃÂÃÂ§ÃÂ±ÃÂ»ÃÂ¦ÃÂÃÂ°ÃÂ©ÃÂÃÂÃÂ¯ÃÂ¼ÃÂÃÂ§ÃÂÃÂ¨ÃÂ¤ÃÂºÃÂ recents ÃÂ¨ÃÂ¡ÃÂÃÂ¯ÃÂ¼ÃÂ
         payer_where = ' AND payer=?' if payer else ''
         payer_total_params = (payer,) if payer else ()
         total_pending = db.execute(
@@ -823,7 +822,7 @@ def report():
     me_shared_paid      = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='shared')
     partner_shared_paid = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='shared')
     total_shared        = me_shared_paid + partner_shared_paid
-    # Cross-payments: I paid for partner's expense (or vice versa) Ã¢ÂÂ affects net balance
+    # Cross-payments: I paid for partner's expense (or vice versa) ÃÂ¢ÃÂÃÂ affects net balance
     me_paid_for_partner = sum(t['amount'] for t in txns if t['payer']=='me'      and t['split']=='theirs')
     partner_paid_for_me = sum(t['amount'] for t in txns if t['payer']=='partner' and t['split']=='theirs')
     net_balance = ((me_shared_paid - partner_shared_paid) * split_ratio
@@ -864,7 +863,7 @@ def debug():
     return jsonify({
         'plaid_version': plaid_version,
         'has_transactions_config': HAS_TRANSACTIONS_CONFIG,
-        'days_requested': 730 if HAS_TRANSACTIONS_CONFIG else 'Ã¦ÂÂªÃ¥ÂÂ¯Ã§ÂÂ¨Ã¯Â¼ÂÃ¥ÂÂªÃ¦ÂÂ90Ã¥Â¤Â©Ã¯Â¼Â',
+        'days_requested': 730 if HAS_TRANSACTIONS_CONFIG else 'ÃÂ¦ÃÂÃÂªÃÂ¥ÃÂÃÂ¯ÃÂ§ÃÂÃÂ¨ÃÂ¯ÃÂ¼ÃÂÃÂ¥ÃÂÃÂªÃÂ¦ÃÂÃÂ90ÃÂ¥ÃÂ¤ÃÂ©ÃÂ¯ÃÂ¼ÃÂ',
         'transaction_count': count,
         'earliest_transaction': earliest,
         'latest_transaction': latest,
@@ -872,7 +871,7 @@ def debug():
 
 @app.route('/api/account_stats', methods=['GET'])
 def account_stats():
-    """Ã¦Â¯ÂÃ¤Â¸ÂªÃ¨Â´Â¦Ã¦ÂÂ·Ã¦Â¯ÂÃ¦ÂÂÃ§ÂÂÃ¤ÂºÂ¤Ã¦ÂÂÃ§Â¬ÂÃ¦ÂÂ°Ã¯Â¼ÂÃ§ÂÂ¨Ã¤ÂºÂÃ¨Â´Â¦Ã¦ÂÂ·Ã©Â¡ÂµÃ©ÂÂ¢Ã§ÂÂÃ¦ÂÂÃ¥ÂºÂ¦Ã§Â»ÂÃ¨Â®Â¡Ã£ÂÂ"""
+    """ÃÂ¦ÃÂ¯ÃÂÃÂ¤ÃÂ¸ÃÂªÃÂ¨ÃÂ´ÃÂ¦ÃÂ¦ÃÂÃÂ·ÃÂ¦ÃÂ¯ÃÂÃÂ¦ÃÂÃÂÃÂ§ÃÂÃÂÃÂ¤ÃÂºÃÂ¤ÃÂ¦ÃÂÃÂÃÂ§ÃÂ¬ÃÂÃÂ¦ÃÂÃÂ°ÃÂ¯ÃÂ¼ÃÂÃÂ§ÃÂÃÂ¨ÃÂ¤ÃÂºÃÂÃÂ¨ÃÂ´ÃÂ¦ÃÂ¦ÃÂÃÂ·ÃÂ©ÃÂ¡ÃÂµÃÂ©ÃÂÃÂ¢ÃÂ§ÃÂÃÂÃÂ¦ÃÂÃÂÃÂ¥ÃÂºÃÂ¦ÃÂ§ÃÂ»ÃÂÃÂ¨ÃÂ®ÃÂ¡ÃÂ£ÃÂÃÂ"""
     with get_db() as db:
         rows = db.execute("""
             SELECT t.account, substr(t.date,1,7) AS month,
@@ -889,6 +888,6 @@ if __name__ == '__main__':
     os.makedirs(DATA_DIR, exist_ok=True)
     init_db()
     port = int(os.environ.get("PORT", 5000))
-    print(f"\nÃ°ÂÂÂ  Finance with FiancÃÂ©e Ã¢ÂÂ http://localhost:{port}\n")
-    print(f"    Ã¦ÂÂ°Ã¦ÂÂ®Ã¥ÂºÂÃ¤Â½ÂÃ§Â½Â®: {DB_PATH}\n")
+    print(f"\nÃÂ°ÃÂÃÂÃÂ  Finance with FiancÃÂÃÂ©e ÃÂ¢ÃÂÃÂ http://localhost:{port}\n")
+    print(f"    ÃÂ¦ÃÂÃÂ°ÃÂ¦ÃÂÃÂ®ÃÂ¥ÃÂºÃÂÃÂ¤ÃÂ½ÃÂÃÂ§ÃÂ½ÃÂ®: {DB_PATH}\n")
     app.run(host='0.0.0.0', port=port, debug=False)
